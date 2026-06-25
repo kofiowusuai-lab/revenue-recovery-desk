@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Wrapper for RRD post-onboarding welcome/access emails.
+# Sources service env locally; never prints secrets.
+set -euo pipefail
+cd /Users/AIAgenterminal
+# Do not shell-source .env files here: values may contain spaces.
+# The Node sender has its own safe dotenv parser.
+exec node /Users/AIAgenterminal/rrd-welcome-pack.mjs "$@"

@@ -1,0 +1,434 @@
+#!/usr/bin/env node
+/**
+ * rrd-approval — operator approval queue for Revenue Recovery Desk drafts.
+ *
+ * Drafts are persisted as approval packets under ~/.openclaw/rrd-approvals.
+ * Optional Telegram delivery uses a dedicated bot/channel with inline buttons.
+ * Final approval calls rrd-recover send with action.approved=true, so the normal
+ * deterministic guardrail gate still runs immediately before any real send.
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import crypto from 'node:crypto';
+import { execute, channelKind } from './rrd-recover.mjs';
+
+const OPERATOR_HOME = process.env.RRD_OPERATOR_HOME || '/Users/AIAgenterminal';
+const OPENCLAW = process.env.RRD_OPERATOR_OPENCLAW || path.join(OPERATOR_HOME, '.openclaw');
+const ENV_FILE = path.join(OPENCLAW, '.env');
+const ROOT = process.env.RRD_APPROVAL_ROOT || path.join(OPENCLAW, 'rrd-approvals');
+const ITEM_DIR = path.join(ROOT, 'items');
+const ATTACH_DIR = path.join(ROOT, 'attachments');
+const STATE_FILE = path.join(ROOT, 'telegram-state.json');
+const SELF = process.argv[1];
+
+function usage(exit = 1) {
+  console.error(`rrd-approval — Revenue Recovery approval queue
+
+Usage:
+  rrd-approval config
+  rrd-approval config set-chat <telegram-chat-id-or-@channel>
+  rrd-approval queue <profile> '<action-json>' [--send-telegram] [--approval-only]
+  rrd-approval demo <profile> [--send-telegram]
+  rrd-approval list [profile]
+  rrd-approval show <approval-id>
+  rrd-approval send-telegram <approval-id>
+  rrd-approval approve <approval-id> [--record-only]
+  rrd-approval deny <approval-id> [reason]
+  rrd-approval poll [--once]
+
+Env keys (stored in /Users/AIAgenterminal/.openclaw/.env):
+  RRD_APPROVAL_TELEGRAM_BOT_TOKEN   bot token (secret; presence only is reported)
+  RRD_APPROVAL_TELEGRAM_CHAT_ID     dedicated approval channel/chat id or @username
+
+Notes:
+  - The approval packet contains draft text and a .txt attachment.
+  - Approve runs rrd-recover send with approved:true unless --record-only or approvalOnly is set.
+  - rrd-recover still enforces all guardrails again before dispatch.`);
+  process.exit(exit);
+}
+
+function ensureDirs() {
+  for (const d of [ROOT, ITEM_DIR, ATTACH_DIR]) fs.mkdirSync(d, { recursive: true });
+}
+function nowIso() { return new Date().toISOString(); }
+function id() { return 'appr_' + new Date().toISOString().replace(/[-:.TZ]/g, '').slice(0, 14) + '_' + crypto.randomBytes(4).toString('hex'); }
+function validApprovalId(approvalId) {
+  const value = String(approvalId || '').trim();
+  if (!/^appr_[A-Za-z0-9_]+$/.test(value)) throw new Error('invalid approval id');
+  return value;
+}
+function itemPath(approvalId) {
+  const safe = validApprovalId(approvalId);
+  const file = path.resolve(ITEM_DIR, safe + '.json');
+  const root = path.resolve(ITEM_DIR) + path.sep;
+  if (!file.startsWith(root)) throw new Error('invalid approval item path');
+  return file;
+}
+function readJson(file, fallback = null) { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; } }
+function writeJson(file, obj) { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, JSON.stringify(obj, null, 2) + '\n'); }
+function csvEnv(value) {
+  return String(value || '').split(',').map((x) => x.trim()).filter(Boolean);
+}
+function chatMatchesConfigured(chat, configured) {
+  if (!configured) return false;
+  const cfg = String(configured).trim();
+  if (!chat) return false;
+  const candidates = [chat.id, chat.username, chat.type === 'private' ? chat.id : null]
+    .filter((x) => x != null)
+    .map((x) => String(x));
+  if (chat.username) candidates.push('@' + String(chat.username).replace(/^@/, ''));
+  return candidates.includes(cfg) || candidates.includes(cfg.replace(/^@/, ''));
+}
+function userAllowed(from, env) {
+  const allowed = [
+    ...csvEnv(env.RRD_APPROVAL_TELEGRAM_ALLOWED_USER_IDS),
+    ...csvEnv(env.RRD_APPROVAL_TELEGRAM_ADMIN_IDS)
+  ];
+  if (!allowed.length) return false;
+  const id = from?.id == null ? '' : String(from.id);
+  return !!id && allowed.includes(id);
+}
+function validateCallbackOrigin(cb, item, env) {
+  const expectedChat = env.RRD_APPROVAL_TELEGRAM_CHAT_ID;
+  const chat = cb?.message?.chat;
+  if (!expectedChat) return { ok: false, reason: 'approval Telegram chat is not configured' };
+  if (!item?.telegram?.chatId || !item?.telegram?.messageId) return { ok: false, reason: 'approval packet is not bound to a Telegram message' };
+  if (!chatMatchesConfigured(chat, expectedChat)) return { ok: false, reason: 'callback came from an untrusted Telegram chat' };
+  if (!userAllowed(cb?.from, env)) return { ok: false, reason: 'callback came from an untrusted Telegram user' };
+  if (item?.telegram?.messageId) {
+    if (Number(item.telegram.messageId) !== Number(cb?.message?.message_id)) {
+      return { ok: false, reason: 'callback message does not match the approval packet' };
+    }
+  }
+  if (item?.telegram?.chatId && !chatMatchesConfigured(chat, item.telegram.chatId)) {
+    return { ok: false, reason: 'callback chat does not match the approval packet' };
+  }
+  return { ok: true };
+}
+function loadEnv() {
+  const out = { ...process.env };
+  const text = fs.existsSync(ENV_FILE) ? fs.readFileSync(ENV_FILE, 'utf8') : '';
+  for (const line of text.split(/\r?\n/)) {
+    if (!line || line.trim().startsWith('#') || !line.includes('=')) continue;
+    const i = line.indexOf('=');
+    const k = line.slice(0, i).trim();
+    const v = line.slice(i + 1).trim().replace(/^['"]|['"]$/g, '');
+    if (k && out[k] == null) out[k] = v;
+  }
+  return out;
+}
+function setEnvKey(key, value) {
+  fs.mkdirSync(path.dirname(ENV_FILE), { recursive: true });
+  const text = fs.existsSync(ENV_FILE) ? fs.readFileSync(ENV_FILE, 'utf8') : '';
+  const lines = [];
+  let seen = false;
+  for (const line of text.split(/\r?\n/)) {
+    if (!line && lines.length === 0) continue;
+    if (new RegExp('^\\s*' + key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '=').test(line)) {
+      lines.push(`${key}=${value}`); seen = true;
+    } else lines.push(line);
+  }
+  if (!seen) {
+    if (lines.length && lines.at(-1)?.trim()) lines.push('');
+    lines.push(`${key}=${value}`);
+  }
+  fs.writeFileSync(ENV_FILE, lines.join('\n').replace(/\n+$/, '') + '\n');
+  fs.chmodSync(ENV_FILE, 0o600);
+}
+function compactTo(to) {
+  if (!to) return 'unknown recipient';
+  if (typeof to === 'string') return to;
+  return [to.name, to.email || to.phone || to.addressLine1].filter(Boolean).join(' <') + (to.name && (to.email || to.phone) ? '>' : '') || 'unknown recipient';
+}
+function money(v, cur = 'GBP') {
+  if (v == null || v === '') return null;
+  const n = Number(v);
+  if (!Number.isFinite(n)) return String(v);
+  return `${cur} ${n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+function renderPacket(item) {
+  const a = item.action || {};
+  const inv = a.invoice || a.metadata?.invoice || {};
+  const lines = [];
+  lines.push('REVENUE RECOVERY APPROVAL PACKET');
+  lines.push('================================');
+  lines.push(`Approval ID: ${item.id}`);
+  lines.push(`Status: ${item.status}`);
+  lines.push(`Client/profile: ${item.profile}`);
+  if (item.company) lines.push(`Company: ${item.company}`);
+  lines.push(`Channel: ${a.channel || 'unknown'}`);
+  lines.push(`Recipient: ${compactTo(a.to)}`);
+  if (inv.number || a.invoiceNumber) lines.push(`Invoice: ${inv.number || a.invoiceNumber}`);
+  const amount = money(inv.amount ?? a.amount ?? a.amountDue, inv.currency || a.currency || 'GBP');
+  if (amount) lines.push(`Amount: ${amount}`);
+  if (inv.daysOverdue ?? a.daysOverdue) lines.push(`Days overdue: ${inv.daysOverdue ?? a.daysOverdue}`);
+  if (a.paymentLink || inv.paymentLink || a.hostedInvoiceUrl) lines.push(`Payment link: ${a.paymentLink || inv.paymentLink || a.hostedInvoiceUrl}`);
+  lines.push(`Created: ${item.createdAt}`);
+  lines.push('');
+  lines.push('GUARDRAIL STATUS');
+  lines.push('----------------');
+  if (item.gate) {
+    lines.push(`Allowed after approval flag: ${!!item.gate.decision?.allowed}`);
+    const violations = item.gate.decision?.violations || [];
+    lines.push(`Violations: ${violations.length ? violations.map((v) => `${v.code}: ${v.msg}`).join('; ') : 'none'}`);
+  } else lines.push('Not evaluated yet');
+  lines.push('');
+  lines.push('DRAFT');
+  lines.push('-----');
+  if (a.subject) lines.push(`Subject: ${a.subject}`, '');
+  lines.push(a.text || a.body || a.html || a.pdfUrl || '[No text/html body supplied]');
+  lines.push('');
+  lines.push('APPROVAL ACTIONS');
+  lines.push('----------------');
+  lines.push(`Approve: rrd-approval approve ${item.id}`);
+  lines.push(`Deny:    rrd-approval deny ${item.id} "reason"`);
+  return lines.join('\n');
+}
+async function gatePreview(profile, action) {
+  const approvedAction = { ...action, approved: true, tool: action.tool || 'send_via_executor' };
+  try {
+    return await execute(profile, approvedAction, {
+      send: false,
+      deps: { auditWrite: () => {}, usageBump: () => {}, capCheck: () => ({ allowed: true, violations: [] }) }
+    });
+  } catch (e) {
+    return { error: e?.message || String(e) };
+  }
+}
+async function createQueueItem(profile, action, opts = {}) {
+  ensureDirs();
+  const approvalId = id();
+  const item = {
+    id: approvalId,
+    profile,
+    company: action.company || action.metadata?.company || null,
+    status: 'pending',
+    createdAt: nowIso(),
+    updatedAt: nowIso(),
+    approvalOnly: !!opts.approvalOnly,
+    action: { ...action, approved: false, tool: action.tool || 'send_via_executor' },
+    gate: await gatePreview(profile, action),
+    telegram: null,
+    history: [{ at: nowIso(), event: 'queued' }]
+  };
+  const packet = renderPacket(item);
+  const txtPath = path.join(ATTACH_DIR, `${approvalId}.txt`);
+  fs.writeFileSync(txtPath, packet + '\n');
+  item.packetTextPath = txtPath;
+  writeJson(itemPath(approvalId), item);
+  return item;
+}
+function loadItem(approvalId) {
+  const safe = validApprovalId(approvalId);
+  const item = readJson(itemPath(safe));
+  if (!item) throw new Error(`approval item not found: ${safe}`);
+  if (validApprovalId(item.id) !== safe) throw new Error('approval item id mismatch');
+  return item;
+}
+function saveItem(item) { item.updatedAt = nowIso(); writeJson(itemPath(item.id), item); return item; }
+function listItems(profile) {
+  ensureDirs();
+  return fs.readdirSync(ITEM_DIR).filter((f) => f.endsWith('.json')).map((f) => readJson(path.join(ITEM_DIR, f))).filter(Boolean)
+    .filter((x) => !profile || x.profile === profile).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+}
+function packetSummary(item) {
+  const a = item.action || {};
+  const inv = a.invoice || a.metadata?.invoice || {};
+  const L = [];
+  L.push(`RRD approval waiting: ${item.profile}`);
+  L.push(`ID: ${item.id}`);
+  L.push(`Channel: ${a.channel || 'unknown'}`);
+  L.push(`To: ${compactTo(a.to)}`);
+  if (a.subject) L.push(`Subject: ${a.subject}`);
+  if (inv.number || a.invoiceNumber) L.push(`Invoice: ${inv.number || a.invoiceNumber}`);
+  const amount = money(inv.amount ?? a.amount ?? a.amountDue, inv.currency || a.currency || 'GBP');
+  if (amount) L.push(`Amount: ${amount}`);
+  if (inv.daysOverdue ?? a.daysOverdue) L.push(`Days overdue: ${inv.daysOverdue ?? a.daysOverdue}`);
+  L.push('');
+  L.push('Draft is attached as a .txt approval packet. Use the buttons below, or approve/deny from the CLI.');
+  return L.join('\n');
+}
+function tgApi(token, method) { return `https://api.telegram.org/bot${token}/${method}`; }
+async function tgRequest(token, method, body, multipart = false) {
+  const init = { method: 'POST' };
+  if (multipart) init.body = body;
+  else { init.headers = { 'Content-Type': 'application/json' }; init.body = JSON.stringify(body); }
+  const res = await fetch(tgApi(token, method), init);
+  const text = await res.text();
+  let json; try { json = JSON.parse(text); } catch { json = { ok: false, description: text.slice(0, 300) }; }
+  if (!res.ok || !json.ok) throw new Error(json.description || `Telegram ${method} failed (${res.status})`);
+  return json.result;
+}
+async function sendTelegram(approvalId) {
+  const env = loadEnv();
+  const token = env.RRD_APPROVAL_TELEGRAM_BOT_TOKEN;
+  const chatId = env.RRD_APPROVAL_TELEGRAM_CHAT_ID;
+  if (!token) throw new Error('missing RRD_APPROVAL_TELEGRAM_BOT_TOKEN in /Users/AIAgenterminal/.openclaw/.env');
+  if (!chatId) throw new Error('missing RRD_APPROVAL_TELEGRAM_CHAT_ID — run: rrd-approval config set-chat <channel-id-or-@channel>');
+  const item = loadItem(approvalId);
+  if (item.status !== 'pending') throw new Error(`approval item is ${item.status}, not pending`);
+  const keyboard = { inline_keyboard: [[
+    { text: '✅ Approve', callback_data: `rrd:${item.id}:approve` },
+    { text: '❌ Deny', callback_data: `rrd:${item.id}:deny` }
+  ]] };
+  const msg = await tgRequest(token, 'sendMessage', { chat_id: chatId, text: packetSummary(item), reply_markup: keyboard });
+  const form = new FormData();
+  form.append('chat_id', chatId);
+  form.append('caption', `Approval packet ${item.id}`);
+  form.append('document', new Blob([fs.readFileSync(item.packetTextPath)], { type: 'text/plain' }), path.basename(item.packetTextPath));
+  const doc = await tgRequest(token, 'sendDocument', form, true);
+  item.telegram = { chatId, messageId: msg.message_id, documentMessageId: doc.message_id, sentAt: nowIso() };
+  item.history.push({ at: nowIso(), event: 'telegram_sent', chatId, messageId: msg.message_id });
+  saveItem(item);
+  return { ok: true, id: item.id, telegram: item.telegram };
+}
+function applyApproval(item, opts = {}) {
+  if (item.status !== 'pending') return { ok: false, id: item.id, status: item.status, message: 'not pending' };
+  item.status = 'approved';
+  item.approvedAt = nowIso();
+  item.action = { ...item.action, approved: true, tool: item.action.tool || 'send_via_executor' };
+  item.history.push({ at: nowIso(), event: 'approved', recordOnly: !!opts.recordOnly });
+  return item;
+}
+
+async function approveLoadedItem(item, opts = {}) {
+  item = applyApproval(item, opts);
+  if (item.ok === false) return item;
+  let sendResult = null;
+  if (!opts.recordOnly && !item.approvalOnly) {
+    sendResult = await execute(item.profile, item.action, { send: true });
+    item.sendResult = sendResult;
+    item.status = sendResult.sent ? 'sent' : 'approved_blocked';
+    item.history.push({ at: nowIso(), event: item.status, sent: !!sendResult.sent, decision: sendResult.decision || null });
+  }
+  saveItem(item);
+  return { ok: true, id: item.id, status: item.status, sent: !!sendResult?.sent, sendResult };
+}
+
+async function approve(approvalId, opts = {}) {
+  return approveLoadedItem(loadItem(approvalId), opts);
+}
+function applyDeny(item, reason = '') {
+  if (item.status !== 'pending') return { ok: false, id: item.id, status: item.status, message: 'not pending' };
+  item.status = 'denied';
+  item.deniedAt = nowIso();
+  item.denyReason = reason || null;
+  item.history.push({ at: nowIso(), event: 'denied', reason: reason || null });
+  saveItem(item);
+  return { ok: true, id: item.id, status: item.status };
+}
+
+function deny(approvalId, reason = '') {
+  return applyDeny(loadItem(approvalId), reason);
+}
+async function handleCallback(cb) {
+  const env = loadEnv();
+  const token = env.RRD_APPROVAL_TELEGRAM_BOT_TOKEN;
+  const data = String(cb.data || '');
+  const m = data.match(/^rrd:([^:]+):(approve|deny)$/);
+  if (!m) return { ignored: true };
+  const [, approvalId, action] = m;
+  let res;
+  let item;
+  try {
+    item = loadItem(approvalId);
+    const origin = validateCallbackOrigin(cb, item, env);
+    if (!origin.ok) res = { ok: false, unauthorized: true, error: origin.reason };
+    else res = action === 'approve' ? await approveLoadedItem(item) : applyDeny(item, 'denied from Telegram button');
+  }
+  catch (e) { res = { ok: false, error: e?.message || String(e) }; }
+  const text = res.ok ? `${action === 'approve' ? 'Approved' : 'Denied'} ${approvalId}: ${res.status}${res.sent ? ' / sent' : ''}` : `Approval action failed: ${res.error || res.message}`;
+  if (cb.id) await tgRequest(token, 'answerCallbackQuery', { callback_query_id: cb.id, text: text.slice(0, 180), show_alert: !res.ok }).catch(() => null);
+  if (res.ok && cb.message?.chat?.id && cb.message?.message_id) {
+    await tgRequest(token, 'editMessageReplyMarkup', { chat_id: cb.message.chat.id, message_id: cb.message.message_id, reply_markup: { inline_keyboard: [] } }).catch(() => null);
+    await tgRequest(token, 'sendMessage', { chat_id: cb.message.chat.id, text }).catch(() => null);
+  }
+  return res;
+}
+async function poll(once = false) {
+  const env = loadEnv();
+  const token = env.RRD_APPROVAL_TELEGRAM_BOT_TOKEN;
+  if (!token) throw new Error('missing RRD_APPROVAL_TELEGRAM_BOT_TOKEN');
+  ensureDirs();
+  const state = readJson(STATE_FILE, { offset: 0 });
+  let handled = 0;
+  do {
+    const qs = new URLSearchParams({ timeout: once ? '0' : '25', offset: String(state.offset || 0), allowed_updates: JSON.stringify(['callback_query']) });
+    const res = await fetch(`${tgApi(token, 'getUpdates')}?${qs.toString()}`);
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.description || 'getUpdates failed');
+    for (const upd of json.result || []) {
+      state.offset = Math.max(state.offset || 0, upd.update_id + 1);
+      if (upd.callback_query) { await handleCallback(upd.callback_query); handled += 1; }
+    }
+    writeJson(STATE_FILE, state);
+    if (once) break;
+  } while (true);
+  return { ok: true, handled, nextOffset: state.offset || 0 };
+}
+function demoAction() {
+  return {
+    channel: 'Email',
+    to: { email: 'finance@ridgeway-demo.example', name: 'Ridgeway Property Group' },
+    subject: 'Friendly reminder: invoice INV-1018 is overdue',
+    text: 'Hi Ridgeway team,\n\nI hope you are well. I am checking in on invoice INV-1018 for GBP 5,275.00, which is now 34 days overdue. Could you confirm when payment is scheduled, or use the secure payment link below?\n\nPayment link: https://pay.example.test/inv-1018\n\nThanks,\nRevenue Recovery Team',
+    invoice: { number: 'INV-1018', amount: 5275, currency: 'GBP', daysOverdue: 34, paymentLink: 'https://pay.example.test/inv-1018' },
+    metadata: { demo: true, company: 'Demo Client' },
+    atHour: 10,
+    costUsd: 0
+  };
+}
+function print(obj) { console.log(JSON.stringify(obj, null, 2)); }
+async function main() {
+  const [, , cmd, ...args] = process.argv;
+  if (!cmd || ['help', '-h', '--help'].includes(cmd)) usage(cmd ? 0 : 1);
+  ensureDirs();
+  if (cmd === 'config') {
+    if (args[0] === 'set-chat') {
+      if (!args[1]) throw new Error('config set-chat needs a chat id or @channel username');
+      setEnvKey('RRD_APPROVAL_TELEGRAM_CHAT_ID', args[1]);
+      print({ ok: true, RRD_APPROVAL_TELEGRAM_CHAT_ID: 'installed' });
+      return;
+    }
+    const env = loadEnv();
+    print({
+      root: ROOT,
+      tokenPresent: !!env.RRD_APPROVAL_TELEGRAM_BOT_TOKEN,
+      chatIdPresent: !!env.RRD_APPROVAL_TELEGRAM_CHAT_ID,
+      chatId: env.RRD_APPROVAL_TELEGRAM_CHAT_ID ? '(configured)' : null
+    });
+    return;
+  }
+  if (cmd === 'queue') {
+    const [profile, raw, ...flags] = args;
+    if (!profile || !raw) throw new Error('queue needs <profile> and <action-json>');
+    let action; try { action = JSON.parse(raw); } catch (e) { throw new Error('invalid action JSON: ' + e.message); }
+    const item = await createQueueItem(profile, action, { approvalOnly: flags.includes('--approval-only') });
+    if (flags.includes('--send-telegram')) await sendTelegram(item.id);
+    print(loadItem(item.id));
+    return;
+  }
+  if (cmd === 'demo') {
+    const [profile, ...flags] = args;
+    if (!profile) throw new Error('demo needs <profile>');
+    const item = await createQueueItem(profile, demoAction(), { approvalOnly: true });
+    if (flags.includes('--send-telegram')) await sendTelegram(item.id);
+    print(loadItem(item.id));
+    return;
+  }
+  if (cmd === 'list') {
+    print(listItems(args[0]).map((x) => ({ id: x.id, profile: x.profile, status: x.status, channel: x.action?.channel, to: compactTo(x.action?.to), createdAt: x.createdAt, telegramSent: !!x.telegram })));
+    return;
+  }
+  if (cmd === 'show') { print(loadItem(args[0])); return; }
+  if (cmd === 'send-telegram') { print(await sendTelegram(args[0])); return; }
+  if (cmd === 'approve') { print(await approve(args[0], { recordOnly: args.includes('--record-only') })); return; }
+  if (cmd === 'deny') { print(deny(args[0], args.slice(1).join(' '))); return; }
+  if (cmd === 'poll') { print(await poll(args.includes('--once'))); return; }
+  usage();
+}
+
+export { validApprovalId, chatMatchesConfigured, userAllowed, validateCallbackOrigin, handleCallback };
+
+if (import.meta.url === `file://${SELF}`) main().catch((e) => { console.error('Error: ' + (e?.message || e)); process.exit(1); });

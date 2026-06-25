@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Harness wrapper for the Hermes recovery-desk operator.
+# Sources the locked .env.local (Supabase URL + service-role key) and runs the
+# read/query agent against the live Internal Dashboard data.
+set -euo pipefail
+cd /Users/AIAgenterminal
+set -a; . ./.env.local; set +a
+exec node /Users/AIAgenterminal/rrd-agent.mjs "$@"

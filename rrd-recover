@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# rrd-recover — gated recovery executor wrapper. Sources central + per-client env
+# (per-client POSTGRID_API_KEY etc.), then runs the executor.
+set -euo pipefail
+OPERATOR_HOME="${RRD_OPERATOR_HOME:-/Users/AIAgenterminal}"
+[ -f "$OPERATOR_HOME/.openclaw/.env" ] && { set -a; . "$OPERATOR_HOME/.openclaw/.env"; set +a; }
+safe_rr_profile() {
+  case "$1" in
+    rr-[A-Za-z0-9_-]*) ;;
+    *) return 1 ;;
+  esac
+  case "$1" in
+    *..*|*/*|*\\*|*':'*) return 1 ;;
+  esac
+  return 0
+}
+
+# `rrd-recover gate|send <profile> '<json>'` -> profile is the 2nd positional arg
+PROFILE="${2:-}"
+if [ -n "$PROFILE" ]; then
+  if ! safe_rr_profile "$PROFILE"; then
+    echo "Invalid recovery profile name" >&2
+    exit 2
+  fi
+  PENV="${HERMES_PROFILES_DIR:-$OPERATOR_HOME/.hermes/profiles}/$PROFILE/.env"
+  if [ -f "$PENV" ]; then set -a; . "$PENV"; set +a; fi
+fi
+exec node "$OPERATOR_HOME/rrd-recover.mjs" "$@"

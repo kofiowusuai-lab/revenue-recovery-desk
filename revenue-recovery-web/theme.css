@@ -1,0 +1,200 @@
+/* ============================================================================
+   theme.css — FlowAudit house theme for the Revenue Recovery Desk site.
+   Replicated from https://flowaudit.co.uk/ (computed design tokens, 2026-06).
+
+   Drop-in: each page links this AFTER its own inline <style>, so this wins.
+   It re-paints via the shared CSS variables and restyles the shared components
+   (header, buttons, cards, inputs, callouts, headings). It NEVER changes form
+   structure — only look and feel. Edit values here to tune the whole site.
+
+   FlowAudit palette:  warm cream canvas, espresso ink, Instrument Serif display
+   over Inter body, full-pill buttons, hairline warm borders, emerald = positive.
+============================================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap');
+
+:root {
+  /* --- FlowAudit tokens (source of truth) --- */
+  --fa-bg:#F7F5F3; --fa-surface:#F0EDEB; --fa-card:#FFFFFF;
+  --fa-text:#37322F; --fa-muted:#605A57; --fa-faint:#8A827C;
+  --fa-line:#E7E2DD; --fa-line-soft:rgba(55,50,47,.08);
+  --fa-primary:#37322F; --fa-primary-hover:#2B2723; --fa-on-primary:#FFFFFF;
+  --fa-emerald:#10B981; --fa-emerald-bg:#ECFDF5; --fa-emerald-line:#A7F3D0;
+  --fa-danger:#DC2626; --fa-danger-bg:#FEF2F2; --fa-danger-line:#FECACA;
+  --fa-amber-bg:#FFFBEB; --fa-amber-line:#FDE68A; --fa-amber-ink:#92400E;
+  --fa-radius:14px; --fa-radius-sm:10px; --fa-pill:999px;
+  --fa-shadow:0 1px 2px rgba(55,50,47,.06);
+  --fa-shadow-lg:0 1px 2px rgba(55,50,47,.06), 0 12px 32px rgba(55,50,47,.05);
+  --fa-ring:0 0 0 3px rgba(55,50,47,.12);
+  --fa-sans:'Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --fa-serif:'Instrument Serif',ui-serif,Georgia,'Times New Roman',serif;
+
+  /* --- remap the RRD app-page variables onto FlowAudit --- */
+  --bg:var(--fa-bg); --text:var(--fa-text); --muted:var(--fa-muted);
+  --line:var(--fa-line); --white:var(--fa-card);
+  --navy:var(--fa-primary); --navy-soft:#49423D; --navy-line:var(--fa-line);
+  --amber:var(--fa-primary); --amber-dark:var(--fa-primary-hover);
+  --green:var(--fa-emerald); --danger:var(--fa-danger);
+  --radius:var(--fa-radius); --shadow:var(--fa-shadow);
+  --font:var(--fa-sans);
+
+  /* --- remap the index.html landing variables --- */
+  --gray-50:var(--fa-bg); --gray-100:var(--fa-surface); --gray-200:var(--fa-line);
+  --gray-400:var(--fa-faint); --gray-600:var(--fa-muted); --gray-800:var(--fa-text);
+}
+
+/* ---- base ---- */
+body { background:var(--fa-bg) !important; color:var(--fa-text) !important; font-family:var(--fa-sans) !important; -webkit-font-smoothing:antialiased; }
+
+/* ---- display type: Instrument Serif for the big statements ---- */
+h1, .page-title, .hero h1, .hero-title {
+  font-family:var(--fa-serif) !important;
+  font-weight:400 !important;
+  letter-spacing:.2px !important;
+  color:var(--fa-text) !important;
+  line-height:1.05 !important;
+}
+h2, h3, .step-head h2 { font-family:var(--fa-sans) !important; color:var(--fa-text) !important; font-weight:600 !important; letter-spacing:-.01em; }
+.page-lead, .hero-sub, p.lead { color:var(--fa-muted) !important; }
+
+/* eyebrow / small uppercase labels (FlowAudit "LIVE WORKFLOW" style) */
+.hero-label, .eyebrow, .kicker {
+  font-family:var(--fa-sans) !important; text-transform:uppercase !important;
+  letter-spacing:.06em !important; font-size:12px !important; font-weight:500 !important;
+  color:var(--fa-muted) !important;
+}
+
+/* ---- floating pill header (replaces the full-width dark bar) ---- */
+header.app-header {
+  background:var(--fa-card) !important; color:var(--fa-text) !important;
+  border:1px solid var(--fa-line) !important; border-radius:var(--fa-pill) !important;
+  box-shadow:var(--fa-shadow) !important;
+  max-width:min(1100px, calc(100% - 32px)) !important;
+  margin:16px auto 0 !important; padding:10px 22px !important;
+}
+header.app-header .brand-mark {
+  background:var(--fa-primary) !important; color:var(--fa-card) !important;
+  border-radius:9px !important;
+}
+/* ---- FlowAudit logo mark (favicon-style square, kept for any img use) ---- */
+.fa-logo { background:#37322F !important; padding:0 !important; overflow:hidden; }
+.fa-logo img { display:block; width:100%; height:100%; }
+/* ---- FlowAudit wordmark: the brand logo in the header (replaces the "R") ---- */
+.fa-wordmark {
+  font-family:var(--fa-serif) !important; font-weight:400 !important;
+  font-size:23px !important; line-height:1 !important; letter-spacing:.2px !important;
+  color:var(--fa-text) !important; white-space:nowrap; text-decoration:none;
+}
+.brand-divider { width:1px; height:24px; background:var(--fa-line); display:inline-block; flex:none; margin:0 2px; }
+/* product descriptor sits in sans so it doesn't compete with the serif wordmark */
+header.app-header .brand-text .title { font-family:var(--fa-sans) !important; font-weight:600 !important; font-size:14px !important; letter-spacing:.1px; }
+header.app-header .brand-text .title { font-family:var(--fa-serif) !important; font-weight:400 !important; font-size:18px !important; color:var(--fa-text) !important; letter-spacing:.3px; }
+header.app-header .brand-text .sub { color:var(--fa-faint) !important; }
+
+/* ---- cards: white, 14px, hairline warm border, near-flat ---- */
+.card, .panel, .cta-inner {
+  background:var(--fa-card) !important;
+  border:1px solid var(--fa-line) !important;
+  border-radius:var(--fa-radius) !important;
+  box-shadow:var(--fa-shadow) !important;
+}
+
+/* ---- buttons: full pill. primary = espresso fill, secondary = white outline ---- */
+.btn, button.btn {
+  font-family:var(--fa-sans) !important; font-weight:500 !important;
+  border-radius:var(--fa-pill) !important; letter-spacing:.1px;
+  transition:background .15s, color .15s, box-shadow .15s, transform .04s;
+}
+.btn:active { transform:translateY(1px); }
+.btn-primary, .btn-dark, .primary {
+  background:var(--fa-primary) !important; color:var(--fa-on-primary) !important;
+  border:1px solid var(--fa-primary) !important;
+  box-shadow:inset 0 0 0 2.5px rgba(255,255,255,.08) !important;
+}
+.btn-primary:hover, .btn-dark:hover, .primary:hover { background:var(--fa-primary-hover) !important; color:var(--fa-on-primary) !important; }
+.btn-secondary, .btn-ghost {
+  background:var(--fa-card) !important; color:var(--fa-text) !important;
+  border:1px solid var(--fa-line-soft) !important; box-shadow:var(--fa-shadow) !important;
+}
+.btn-secondary:hover, .btn-ghost:hover { background:var(--fa-surface) !important; }
+
+/* ---- form controls: white field, hairline border, 10px radius, soft focus ring ---- */
+input[type=text], input[type=email], input[type=tel], input[type=url],
+input[type=number], input[type=password], input[type=date], select, textarea {
+  background:var(--fa-card) !important; color:var(--fa-text) !important;
+  border:1px solid var(--fa-line) !important; border-radius:var(--fa-radius-sm) !important;
+  font-family:var(--fa-sans) !important;
+}
+input:focus, select:focus, textarea:focus {
+  outline:none !important; border-color:var(--fa-primary) !important;
+  box-shadow:var(--fa-ring) !important;
+}
+label, .lbl { color:var(--fa-text) !important; font-family:var(--fa-sans) !important; }
+.hint, .keycode, .perm { color:var(--fa-muted) !important; }
+
+/* checkbox "chip" selections, used by the onboarding check-grids */
+.check.checked, label.check.checked { border-color:var(--fa-primary) !important; background:var(--fa-surface) !important; }
+input[type=checkbox], input[type=radio] { accent-color:var(--fa-primary) !important; }
+
+/* ---- callouts / status messages, recolored to the warm palette ---- */
+.callout-amber { background:var(--fa-amber-bg) !important; border-color:var(--fa-amber-line) !important; color:var(--fa-amber-ink) !important; }
+.callout-slate { background:var(--fa-surface) !important; border-color:var(--fa-line) !important; color:var(--fa-muted) !important; }
+.msg.ok, .ok { background:var(--fa-emerald-bg) !important; border-color:var(--fa-emerald-line) !important; color:#065F46 !important; }
+.msg.err, .err { background:var(--fa-danger-bg) !important; border-color:var(--fa-danger-line) !important; color:#991B1B !important; }
+
+/* ============================================================================
+   index.html (Preact landing) — convert its dark navy/amber marketing theme to
+   the FlowAudit light palette. index injects its own <style> + :root at runtime,
+   so we win on the consuming selectors with !important (stylesheet !important
+   beats runtime normal declarations regardless of injection order).
+============================================================================ */
+a { color:var(--fa-text); }
+
+/* sticky top nav → cream with hairline + serif wordmark, dark pill CTA */
+nav { background:rgba(247,245,243,.9) !important; border-bottom:1px solid var(--fa-line) !important; backdrop-filter:blur(8px); }
+.nav-logo { font-family:var(--fa-serif) !important; font-weight:400 !important; letter-spacing:.3px !important; }
+.nav-logo span { color:var(--fa-text) !important; }
+.nav-links a:not(.nav-cta) { color:var(--fa-muted) !important; }
+.nav-cta, .nav-links a.nav-cta { background:var(--fa-primary) !important; color:var(--fa-on-primary) !important; border-radius:var(--fa-pill) !important; padding:8px 20px !important; }
+
+/* hero: dark → cream, amber → espresso, eyebrow pill */
+.hero { background:var(--fa-bg) !important; color:var(--fa-text) !important; }
+.hero h1 span { color:var(--fa-text) !important; }
+.hero-sub { color:var(--fa-muted) !important; }
+.hero-label { background:var(--fa-surface) !important; color:var(--fa-muted) !important; border:1px solid var(--fa-line) !important; font-weight:500 !important; }
+
+/* sections, accents, cards → light + espresso (FlowAudit is near-monochrome) */
+section.alt { background:var(--fa-surface) !important; }
+section.dark { background:var(--fa-bg) !important; color:var(--fa-text) !important; }
+.section-label { color:var(--fa-muted) !important; }
+.section-title { font-family:var(--fa-serif) !important; font-weight:400 !important; letter-spacing:.2px !important; color:var(--fa-text) !important; }
+.section-body { color:var(--fa-muted) !important; }
+.proof-bar { background:var(--fa-surface) !important; border-color:var(--fa-line) !important; }
+.proof-item h3 { color:var(--fa-text) !important; }
+.bridge { background:var(--fa-surface) !important; border-left-color:var(--fa-primary) !important; color:var(--fa-text) !important; }
+.step { background:var(--fa-card) !important; border-color:var(--fa-line) !important; }
+.step-num { background:var(--fa-primary) !important; color:var(--fa-on-primary) !important; }
+.step h4 { color:var(--fa-text) !important; }
+.niche-card { background:var(--fa-card) !important; border:1px solid var(--fa-line) !important; }
+.niche-card h4 { color:var(--fa-text) !important; }
+.niche-card p { color:var(--fa-muted) !important; }
+.pricing-card { border:1px solid var(--fa-line) !important; }
+.pricing-row .value.highlight { color:var(--fa-emerald) !important; }
+.pricing-compare { background:var(--fa-surface) !important; }
+.faq-q::after { color:var(--fa-text) !important; }
+.faq-item.open { border-color:var(--fa-line) !important; background:var(--fa-surface) !important; }
+
+/* CTA band + lead-capture form (landing only — styling, fields untouched) */
+.cta-inner h2 { font-family:var(--fa-serif) !important; font-weight:400 !important; }
+.form-group label { color:var(--fa-text) !important; }
+.form-submit { background:var(--fa-primary) !important; color:var(--fa-on-primary) !important; border-radius:var(--fa-pill) !important; }
+
+/* footer: dark → cream */
+footer { background:var(--fa-bg) !important; color:var(--fa-muted) !important; border-top:1px solid var(--fa-line) !important; }
+footer span { color:var(--fa-text) !important; }
+
+/* landing buttons share the pill treatment */
+.hero-actions .btn-primary, .form-submit { box-shadow:inset 0 0 0 2.5px rgba(255,255,255,.08) !important; }
+.btn-secondary { border-radius:var(--fa-pill) !important; padding:13px 22px !important; }
+
+/* thin section dividers, FlowAudit-style */
+hr, .divider { border:none !important; border-top:1px solid var(--fa-line) !important; }

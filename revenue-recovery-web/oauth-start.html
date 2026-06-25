@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Revenue Recovery Desk — Connect your CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0F172A;--navy-soft:#1E293B;--amber:#F59E0B;--amber-dark:#D97706;--white:#FFFFFF;--bg:#F8FAFC;--text:#0F172A;--muted:#64748B;--line:#E2E8F0;--green:#16A34A;--radius:12px;--shadow:0 1px 3px rgba(15,23,42,.08),0 8px 24px rgba(15,23,42,.06);--font:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  header.app-header{background:var(--navy);color:var(--white);padding:18px 28px;display:flex;align-items:center;gap:12px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{width:36px;height:36px;border-radius:9px;background:var(--amber);color:var(--navy);display:grid;place-items:center;font-weight:700;font-size:18px;flex:none;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.15;}
+  .brand-text .title{font-weight:700;font-size:16px;letter-spacing:.2px;}
+  .brand-text .sub{font-size:12px;color:#94A3B8;}
+  main{max-width:560px;margin:0 auto;padding:32px 20px 80px;}
+  h1.page-title{font-size:26px;font-weight:700;margin:0 0 4px;}
+  p.page-lead{color:var(--muted);margin:0 0 24px;font-size:15px;}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;}
+  .btn{font-family:var(--font);font-weight:600;font-size:14px;padding:12px 20px;border-radius:9px;cursor:pointer;border:1px solid transparent;transition:background .15s,color .15s,transform .05s;width:100%;text-decoration:none;display:inline-block;text-align:center;}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--amber);color:var(--navy);}.btn-primary:hover{background:var(--amber-dark);color:var(--white);}
+  .btn:disabled{opacity:.55;cursor:not-allowed;}
+  .callout{display:flex;gap:11px;align-items:flex-start;border-radius:10px;padding:14px 16px;font-size:13px;line-height:1.5;margin-bottom:22px;}
+  .callout .ico{flex:none;font-size:16px;line-height:1.3;}
+  .callout-amber{background:#FFFBEB;border:1px solid #FCD34D;color:#92400E;}
+  .callout-amber strong{color:#78350F;}
+  .callout-slate{background:#F1F5F9;border:1px solid var(--line);color:var(--muted);margin-top:22px;margin-bottom:0;}
+  .callout-slate strong{color:#334155;}
+  .msg{padding:14px 16px;border-radius:10px;font-size:14px;}
+  .msg.err{background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;}
+  .hide{display:none;}
+  .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;}
+  .loading{color:var(--muted);padding:24px 0;text-align:center;}
+  ul.perms{margin:6px 0 0;padding-left:18px;color:#334155;font-size:13px;line-height:1.6;}
+</style>
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">
+    <span class="fa-wordmark">FlowAudit</span><span class="brand-divider" aria-hidden="true"></span>
+    <div class="brand-text"><span class="title">Revenue Recovery Desk</span><span class="sub" id="hdr-sub">Connect your CRM</span></div>
+  </div>
+</header>
+
+<main>
+  <h1 class="page-title" id="title">Connect your CRM</h1>
+  <p class="page-lead" id="lead">Checking your link…</p>
+
+  <div class="card">
+    <div id="state-loading" class="loading">Checking your link…</div>
+
+    <div id="state-invalid" class="hide">
+      <div class="msg err" id="invalid-msg">This link is no longer valid. It may have already been used or expired. Ask your contact to send a fresh one.</div>
+    </div>
+
+    <div id="state-ready" class="hide">
+      <div class="callout callout-amber">
+        <span class="ico">🔗</span>
+        <span id="ready-blurb">You're about to securely connect your account. You'll sign in on the provider's own site — we never see your password.</span>
+      </div>
+      <ul class="perms">
+        <li>Read your customer contacts so we can reach the right person.</li>
+        <li>Read your deals / invoices so we know what is outstanding.</li>
+        <li>Read-only — we cannot change or delete anything in your CRM.</li>
+      </ul>
+      <p style="margin:18px 0 14px;color:#334155;font-size:14px;">You can revoke this access at any time from your CRM's connected-apps settings.</p>
+      <a class="btn btn-primary" id="connectBtn" href="#">Connect securely</a>
+      <div class="callout callout-slate">
+        <span class="ico">🛡️</span>
+        <span>You authorize us on <strong id="provider-name">your provider</strong>'s own login screen. This link works only once.</span>
+      </div>
+    </div>
+  </div>
+  <div class="foot">Revenue Recovery Desk · zero-knowledge CRM connection</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module">
+const SUPABASE_URL = "https://stboueshyjvooiftfuxm.supabase.co";
+const SUPABASE_ANON_KEY = "__SUPABASE_ANON_KEY_PLACEHOLDER__";
+
+const $ = (id) => document.getElementById(id);
+const show = (id) => $(id).classList.remove("hide");
+const hide = (id) => $(id).classList.add("hide");
+
+const PROVIDER_LABELS = {
+  hubspot: "HubSpot", salesforce: "Salesforce", zoho: "Zoho CRM",
+  google: "Google Workspace", xero: "Xero", sage: "Sage",
+  freshbooks: "FreshBooks", wave: "Wave", waveinvoicing: "Wave",
+  zohobooks: "Zoho Books", freeagent: "FreeAgent",
+  quickbooks: "QuickBooks",
+  intuit: "QuickBooks", pipedrive: "Pipedrive",
+  microsoft: "Microsoft 365 / Outlook", outlook: "Microsoft 365 / Outlook",
+  office365: "Microsoft 365 / Outlook", azure: "Microsoft 365 / Outlook",
+  gohighlevel: "GoHighLevel", highlevel: "GoHighLevel", ghl: "GoHighLevel",
+  monday: "monday.com", mondaycom: "monday.com", "monday.com": "monday.com",
+};
+
+// Friendly CRM name from a provider id; prettifies unknown ids instead of
+// falling back to the generic "your CRM" so the page always names the system.
+function crmLabel(p) {
+  if (!p) return "your CRM";
+  const key = String(p).toLowerCase().replace(/[^a-z0-9.]/g, "");
+  return PROVIDER_LABELS[key] || String(p).charAt(0).toUpperCase() + String(p).slice(1);
+}
+
+const params = new URLSearchParams(location.search);
+const token = params.get("token") || "";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+function invalid(text) {
+  hide("state-loading");
+  if (text) $("invalid-msg").textContent = text;
+  $("lead").textContent = "This link is unavailable.";
+  show("state-invalid");
+}
+
+async function load() {
+  if (!token) return invalid();
+  let data, error;
+  try { ({ data, error } = await sb.rpc("vault_get", { p_token: token })); }
+  catch (e) { error = e; }
+  if (error) { console.error(error); return invalid("We couldn't load this link. Please try again or ask for a new one."); }
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return invalid();
+  if (row.kind !== "oauth" || !row.authorize_url) {
+    return invalid("This link isn't a CRM connection link. Ask your contact to resend it.");
+  }
+  const label = crmLabel(row.provider);
+  hide("state-loading");
+  $("title").textContent = "Connect " + label;
+  $("hdr-sub").textContent = "Connect " + label;
+  $("lead").textContent = (row.company ? row.company + " — " : "") + "link your " + label + " so we can recover what you're owed.";
+  $("provider-name").textContent = label;
+  $("ready-blurb").textContent = "You're about to securely connect " + label + ". You'll sign in on " + label + "'s own site — we never see your password.";
+  $("connectBtn").setAttribute("href", row.authorize_url);
+  show("state-ready");
+}
+
+load();
+</script>
+</body>
+</html>

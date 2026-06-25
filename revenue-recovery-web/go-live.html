@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">
+  <title>Revenue Recovery Desk — Go-Live Readiness</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700;9..40,800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    :root{--ink:#39332f;--ink-2:#4c4641;--muted:#746d66;--paper:#f7f4ef;--paper-2:#fbfaf7;--card:#fff;--line:#e5dfd6;--charcoal:#342f2b;--amber:#f59e0b;--amber-soft:#fff7df;--green:#05a66b;--green-soft:#eefaf5;--red:#cc3b32;--red-soft:#fff2f0;--radius:22px;--shadow:0 18px 60px rgba(52,47,43,.08);--sans:'DM Sans',system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--serif:Georgia,'Times New Roman',serif}*{box-sizing:border-box}html{background:var(--paper)}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.5}body:before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 0 calc(50% - 520px),rgba(57,51,47,.10) calc(50% - 520px) calc(50% - 519px),transparent calc(50% - 519px) calc(50% + 519px),rgba(57,51,47,.10) calc(50% + 519px) calc(50% + 520px),transparent calc(50% + 520px)),radial-gradient(circle at 50% -10%,rgba(255,255,255,.75),transparent 45%);z-index:-1}header{max-width:1040px;margin:14px auto 0;padding:0 18px}.nav-shell{height:46px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:rgba(255,255,255,.86);border:1px solid var(--line);border-radius:999px;box-shadow:0 10px 30px rgba(52,47,43,.07);backdrop-filter:blur(12px);padding:0 10px 0 18px}.fa-wordmark{font-family:var(--serif);font-size:17px;color:var(--ink);letter-spacing:-.02em}.nav-mid{display:flex;align-items:center;gap:18px;font-size:12px;color:var(--muted)}.nav-mid span{white-space:nowrap}.nav-mid .active{color:#a66100;background:#fff3d2;border:1px solid #ffd891;border-radius:999px;padding:4px 8px}.nav-pill{background:var(--charcoal);color:white;border-radius:999px;padding:9px 14px;font-size:12px;font-weight:700;white-space:nowrap}main{max-width:1040px;margin:0 auto;padding:74px 18px 96px}.intro{text-align:center;margin:0 auto 26px;display:grid;justify-items:center}.hero-grid{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(280px,.82fr);gap:18px;text-align:left}.panel{background:rgba(255,255,255,.84);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px}.hero-panel{padding:42px 38px;background:linear-gradient(180deg,#fff,#fbfaf7)}.eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.02em;text-transform:none;font-weight:700;color:var(--ink-2);background:white;border:1px solid var(--line);border-radius:999px;padding:6px 11px;margin-bottom:22px;box-shadow:0 3px 10px rgba(52,47,43,.04)}.eyebrow:before{content:"◇";font-size:10px;color:var(--amber)}h1{font-family:var(--serif);font-weight:400;letter-spacing:-.055em;font-size:58px;line-height:.98;margin:0 auto 18px;color:var(--ink);max-width:760px}.hero-panel h1{font-size:48px;text-align:left;margin-left:0}.lead{color:var(--muted);margin:0;max-width:62ch;font-size:16px}.intro .lead{margin-left:auto;margin-right:auto}.status{display:flex;align-items:center;gap:12px;margin-top:26px;font-size:24px;font-weight:800;color:var(--ink)}.badge{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:white;font-weight:900;box-shadow:inset 0 -1px 0 rgba(0,0,0,.15)}.done .badge{background:var(--green)}.doing .badge{background:var(--charcoal)}.blocked .badge{background:var(--red)}.progress{height:10px;background:#eee9e2;border-radius:999px;overflow:hidden;margin-top:22px;border:1px solid #e7e0d7}.bar{height:100%;background:linear-gradient(90deg,var(--charcoal),#5a5149);width:0}.secure{display:flex;gap:10px;align-items:flex-start;background:var(--green-soft);border:1px solid #cfeee2;color:#23624d;border-radius:16px;padding:14px 16px;margin-top:20px;font-size:14px}.meta{display:grid;gap:0}.meta-row{border-bottom:1px solid var(--line);padding:0 0 14px;margin-bottom:14px}.meta-row:last-of-type{border-bottom:0;margin-bottom:0}.k{font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.08em}.v{font-weight:700;margin-top:4px;white-space:pre-line;color:var(--ink)}.refresh{border:0;background:var(--charcoal);color:white;border-radius:999px;padding:12px 16px;font-weight:800;cursor:pointer;box-shadow:0 8px 20px rgba(52,47,43,.12)}.refresh:disabled{opacity:.55;cursor:wait}.groups{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}.group-title{font-size:24px;font-weight:800;letter-spacing:-.03em;margin:0 0 14px;color:var(--ink)}.item{display:grid;grid-template-columns:34px 1fr;gap:12px;padding:14px 0;border-top:1px solid var(--line)}.item:first-of-type{border-top:0}.icon{width:28px;height:28px;border-radius:10px;display:grid;place-items:center;color:white;font-size:15px;font-weight:900}.s-done{background:var(--green)}.s-doing{background:var(--charcoal)}.s-waiting{background:var(--amber)}.s-pending{background:#b8afa6;color:#fff}.s-blocked{background:var(--red)}.item-label{font-weight:800;font-size:15px;color:var(--ink)}.detail{color:var(--muted);font-size:13px;margin-top:3px}.notice{max-width:840px;margin:22px auto 0;background:var(--amber-soft);border:1px solid #f4d68c;color:#6d4a09;border-radius:18px;padding:15px 18px;text-align:center}.error{background:var(--red-soft);border:1px solid #f1c2bd;color:#982720;border-radius:18px;padding:18px}.small{display:block;font-size:12px;color:var(--muted);font-weight:600;margin-top:2px}.footer-brand{margin-top:70px;padding-top:28px;border-top:1px solid var(--line);display:flex;justify-content:space-between;color:var(--muted);font-size:12px}.footer-brand .word{font-family:var(--serif);color:var(--ink)}@media(max-width:860px){main{padding-top:42px}.hero-grid,.groups{grid-template-columns:1fr}h1,.hero-panel h1{font-size:42px}.nav-mid{display:none}.panel,.hero-panel{padding:24px}.footer-brand{display:block}.nav-pill{display:none}}
+  </style>
+</head>
+<body>
+<header><nav class="nav-shell" aria-label="FlowAudit"><div class="fa-wordmark">FlowAudit</div><div class="nav-mid"><span>Web Design</span><span>Solutions</span><span>How It Works</span><span>About</span><span class="active">Revenue Recovery</span></div><div class="nav-pill">Private tracker</div></nav></header>
+<main>
+  <section class="intro">
+    <div class="eyebrow">Revenue Recovery Desk</div>
+    <h1>Track your go-live readiness</h1>
+    <p class="lead">A private setup view showing what is complete, what still needs your team, and when recovery can safely go live.</p>
+  </section>
+  <div class="hero-grid">
+    <section class="panel hero-panel">
+      <div class="eyebrow">Client readiness tracker</div>
+      <h1 id="title">Loading go-live readiness…</h1>
+      <p class="lead">This private page shows what has been completed and what we still need before recovery can safely go live.</p>
+      <div id="status" class="status doing"><div class="badge">…</div><div>Checking status</div></div>
+      <div class="progress"><div class="bar" id="bar"></div></div>
+      <div class="secure"><strong>🔒</strong><div>This page is locked to the secure link we sent by email. Do not forward it. We will never ask you to enter API keys, passwords, card details, or private credentials on this page.</div></div>
+    </section>
+    <aside class="panel meta">
+      <div class="meta-row"><div class="k">Company</div><div class="v" id="company">—</div></div>
+      <div class="meta-row"><div class="k">Primary contact</div><div class="v" id="primary">—</div></div>
+      <div class="meta-row"><div class="k">Key contacts</div><div class="v" id="contacts">—</div></div>
+      <div class="meta-row"><div class="k">Last checked</div><div class="v" id="checked">—</div></div>
+      <button class="refresh" id="refresh" type="button">Refresh status</button>
+    </aside>
+  </div>
+  <section class="groups" id="groups"></section>
+  <div class="notice">If something here looks wrong, reply to your welcome email or contact support@flowaudit.co.uk and we’ll update it before anything goes live.</div>
+  <footer class="footer-brand"><div class="word">FlowAudit</div><div>Private Revenue Recovery setup tracker</div></footer>
+</main>
+<script>
+const q = new URLSearchParams(location.search);
+const token = q.get('token') || '';
+const $ = id => document.getElementById(id);
+const apiUrl = () => location.hostname === 'flowaudit.co.uk'
+  ? 'https://revenue-recovery-web-ivory.vercel.app/api/go-live-status?token=' + encodeURIComponent(token)
+  : new URL('api/go-live-status?token=' + encodeURIComponent(token), location.href).toString();
+const icon = { done:'✓', doing:'…', waiting:'↗', pending:'!', blocked:'!' };
+const cls = { done:'s-done', doing:'s-doing', waiting:'s-waiting', pending:'s-pending', blocked:'s-blocked' };
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function contactText(contacts){
+  if(!contacts || !contacts.length) return 'Not confirmed yet';
+  return contacts.map(c => [c.name, c.role, c.email].filter(Boolean).join(' · ')).join('\n');
+}
+function render(data){
+  $('title').textContent = data.title || 'Go-Live Readiness';
+  $('company').textContent = data.company || '—';
+  $('primary').textContent = data.primaryContact || 'Not confirmed yet';
+  $('contacts').textContent = contactText(data.contacts || []);
+  $('checked').textContent = new Date().toLocaleString();
+  const pct = data.counts && data.counts.total ? Math.round((data.counts.done / data.counts.total) * 100) : 0;
+  $('bar').style.width = pct + '%';
+  const ready = (data.status || '').includes('READY');
+  $('status').className = 'status ' + (ready ? 'done' : 'doing');
+  $('status').innerHTML = `<div class="badge">${ready ? '✓' : '…'}</div><div>${esc(data.status || 'IN PROGRESS')} <span class="small">${pct}% complete</span></div>`;
+  $('groups').innerHTML = (data.groups || []).map(g => `<section class="panel"><div class="group-title">${esc(g.group)}</div>${(g.items||[]).map(it => `<div class="item"><div class="icon ${cls[it.status]||'s-pending'}">${icon[it.status]||'!'}</div><div><div class="item-label">${esc(it.label)}</div>${it.detail?`<div class="detail">↳ ${esc(it.detail)}</div>`:''}</div></div>`).join('')}</section>`).join('');
+}
+async function load(){
+  if(!token){ $('groups').innerHTML='<div class="error">This readiness link is missing or invalid. Please use the link from your email or ask support for a fresh one.</div>'; return; }
+  $('refresh').disabled=true;
+  try{
+    const r = await fetch(apiUrl(), { cache:'no-store' });
+    const data = await r.json().catch(()=>({}));
+    if(!r.ok || !data.ok) throw new Error(data.error || `HTTP ${r.status}`);
+    render(data);
+  }catch(e){
+    $('status').className='status blocked'; $('status').innerHTML='<div class="badge">!</div><div>Link unavailable</div>';
+    $('groups').innerHTML='<div class="error">Could not load this private readiness page: '+esc(e.message||e)+'</div>';
+  }finally{ $('refresh').disabled=false; }
+}
+$('refresh').addEventListener('click', load);
+load();
+</script>
+</body>
+</html>

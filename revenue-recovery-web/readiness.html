@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">
+  <title>Revenue Recovery Desk — Readiness Details</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <style>
+    :root{--navy:#0F172A;--amber:#F59E0B;--amber-dark:#D97706;--bg:#F8FAFC;--white:#fff;--text:#0F172A;--muted:#64748B;--line:#E2E8F0;--danger:#DC2626;--green:#16A34A;--radius:14px;--shadow:0 1px 3px rgba(15,23,42,.08),0 12px 30px rgba(15,23,42,.08);--font:'DM Sans',system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.5}header{background:var(--navy);color:white;padding:18px 28px}.brand{display:flex;align-items:center;gap:12px}.fa-wordmark{font-family:Georgia,serif;font-size:22px}.brand-divider{height:24px;width:1px;background:#475569}.title{font-weight:700}.sub{font-size:12px;color:#94A3B8}main{max-width:960px;margin:0 auto;padding:32px 20px 80px}h1{font-size:28px;margin:0 0 6px}.lead{color:var(--muted);margin:0 0 24px}.card{background:white;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.section{grid-column:1/-1;border-top:1px solid var(--line);padding-top:18px;margin-top:4px;font-size:12px;font-weight:800;letter-spacing:.45px;color:#64748B;text-transform:uppercase}label{font-size:13px;font-weight:700;color:#334155}.hint{font-size:12px;color:var(--muted)}input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:14px var(--font)}textarea{min-height:96px;resize:vertical}input:focus,textarea:focus,select:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.16)}.btn{border:0;border-radius:10px;background:var(--amber);color:var(--navy);font-weight:800;font-family:var(--font);padding:12px 18px;cursor:pointer}.btn:hover{background:var(--amber-dark);color:white}.actions{display:flex;justify-content:flex-end;margin-top:24px}.msg{display:none;border-radius:10px;padding:12px 14px;margin-top:14px}.msg.show{display:block}.ok{background:#F0FDF4;border:1px solid #86EFAC;color:#166534}.err{background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B}.warn{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;padding:12px 14px;border-radius:10px;margin-bottom:18px;font-size:13px}@media(max-width:760px){main{padding:24px 14px}.card{padding:20px}.grid{grid-template-columns:1fr}}
+  </style>
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<header><div class="brand"><span class="fa-wordmark">FlowAudit</span><span class="brand-divider"></span><div><div class="title">Revenue Recovery Desk</div><div class="sub">Go-live Readiness</div></div></div></header>
+<main>
+  <h1>Confirm go-live details</h1>
+  <p class="lead" id="lead">Loading your client details…</p>
+  <div class="card">
+    <div class="warn">Please do not enter API keys, passwords, card details, or private credentials here. Use the secure integration/vault link for secrets.</div>
+    <form id="form">
+      <div class="grid">
+        <div class="section">Approvals</div>
+        <div class="field"><label>Who approves recovery drafts/exceptions?</label><input id="approvers" placeholder="Example: Sarah Mitchell, AR Manager, sarah@company.com"></div>
+        <div class="field"><label>Preferred approval channel</label><input id="approvalChannel" placeholder="Email, Slack, Teams, shared inbox, Telegram, CRM task"></div>
+        <div class="field"><label>Approval turnaround/SLA</label><input id="approvalSla" placeholder="Example: Same day, weekly batch review, within 24 hours"></div>
+        <div class="field"><label>Escalation owner</label><input id="escalationOwner" placeholder="Who should get disputes or sensitive replies?"></div>
+        <div class="section">Sending rules</div>
+        <div class="field"><label>Business timezone</label><input id="timezone" placeholder="Example: America/New_York"></div>
+        <div class="field"><label>Approved business hours</label><input id="businessHours" placeholder="Example: Mon–Fri 9am–5pm local time"></div>
+        <div class="field"><label>Email From name</label><input id="fromName" placeholder="Example: A Taste of the West Accounts Team"></div>
+        <div class="field"><label>Sender email/domain owner</label><input id="senderIdentity" placeholder="Example: accounts@company.com; DNS admin is Alex"></div>
+        <div class="field"><label>Reply handling</label><input id="replyHandling" placeholder="Replies to us, your team, or both?"></div>
+        <div class="field"><label>SMS setup, if SMS is approved</label><input id="smsSetup" placeholder="Provider, sending number, or 'not using SMS yet'"></div>
+        <div class="field full"><label>Letter return address, if letters are approved</label><textarea id="letterAddress" placeholder="Company/name, street, city, state, postal code, country"></textarea></div>
+        <div class="section">Guardrails</div>
+        <div class="field full"><label>Do-not-contact / exclusion rules</label><textarea id="doNotContact" placeholder="Example: exclude VIP accounts, active disputes, schools during holidays, customers marked DNC, legal/collections accounts"></textarea></div>
+        <div class="field"><label>Discount/payment-plan rules</label><input id="settlementRules" placeholder="Example: no discounts; payment plans require approval"></div>
+        <div class="field"><label>Escalation triggers</label><input id="escalationTriggers" placeholder="Example: dispute, hardship, promise broken twice, over $50k, 60+ days"></div>
+        <div class="section">Source-of-truth mapping</div>
+        <div class="field full"><label>Spreadsheet mapping</label><textarea id="spreadsheetMapping" placeholder="Tabs, columns, paid/disputed/DNC fields, refresh cadence, owner"></textarea></div>
+        <div class="field full"><label>CRM/API mapping</label><textarea id="crmMapping" placeholder="Where customers, contacts, invoices/balances, payment status, due dates, notes, disputes, and DNC flags live"></textarea></div>
+        <div class="field full"><label>Anything else we must know before go-live?</label><textarea id="notes" placeholder="Constraints, compliance notes, customer segments, tone rules, internal contacts"></textarea></div>
+      </div>
+      <div class="actions"><button class="btn btn-primary" id="submitBtn" type="submit">Submit readiness details</button></div>
+      <div class="msg" id="msg"></div>
+    </form>
+  </div>
+</main>
+<script>
+const q=new URLSearchParams(location.search);
+const token=q.get('token')||'';
+const $=id=>document.getElementById(id);
+const intakeUrl=()=>location.hostname==='flowaudit.co.uk'?'https://revenue-recovery-web-ivory.vercel.app/api/intake':new URL('api/intake', location.href).toString();
+function valid(){return !!token&&token.includes('.')}
+function show(kind,text){const m=$('msg');m.className='msg show '+kind;m.textContent=text;}
+$('lead').textContent=valid()?'Complete the operating details we need before recovery can safely go live.':'This readiness link is invalid. Please ask support for a fresh link.';
+function v(id){return ($(id).value||'').trim();}
+async function postIntake(payload){
+  const r=await fetch(intakeUrl(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:payload.requestType,payload})});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok||!data.ok)throw new Error(data.error||`HTTP ${r.status}`);
+  return data;
+}
+$('form').addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  if(!valid())return show('err','Invalid readiness link.');
+  $('submitBtn').disabled=true;$('submitBtn').textContent='Submitting…';
+  const payload={requestType:'readiness_details',token,approvalRouting:{approvers:v('approvers'),preferredChannel:v('approvalChannel'),sla:v('approvalSla'),escalationOwner:v('escalationOwner')},outreach:{timezone:v('timezone'),businessHours:v('businessHours'),fromName:v('fromName'),senderIdentity:v('senderIdentity'),replyHandling:v('replyHandling'),smsSetup:v('smsSetup'),letterAddress:v('letterAddress')},guardrails:{doNotContact:v('doNotContact'),settlementRules:v('settlementRules'),escalationTriggers:v('escalationTriggers')},mapping:{spreadsheetMapping:v('spreadsheetMapping'),crmMapping:v('crmMapping')},notes:v('notes'),submittedVia:'readiness-page'};
+  try{await postIntake(payload);show('ok','Readiness details received. We will review them before anything goes live.');$('form').reset();}
+  catch(err){show('err','Could not submit details: '+(err.message||err));$('submitBtn').disabled=false;$('submitBtn').textContent='Submit readiness details';}
+});
+</script>
+</body>
+</html>

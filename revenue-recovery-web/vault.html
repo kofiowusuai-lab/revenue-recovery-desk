@@ -1,0 +1,598 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Revenue Recovery Desk — Secure Integration Access</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0F172A;--navy-soft:#1E293B;--navy-line:#334155;--amber:#F59E0B;--amber-dark:#D97706;--white:#FFFFFF;--bg:#F8FAFC;--text:#0F172A;--muted:#64748B;--line:#E2E8F0;--danger:#DC2626;--green:#16A34A;--radius:12px;--shadow:0 1px 3px rgba(15,23,42,.08),0 8px 24px rgba(15,23,42,.06);--font:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  header.app-header{background:var(--navy);color:var(--white);padding:18px 28px;display:flex;align-items:center;gap:12px;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{width:36px;height:36px;border-radius:9px;background:var(--amber);color:var(--navy);display:grid;place-items:center;font-weight:700;font-size:18px;flex:none;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.15;}
+  .brand-text .title{font-weight:700;font-size:16px;letter-spacing:.2px;}
+  .brand-text .sub{font-size:12px;color:#94A3B8;}
+  main{max-width:640px;margin:0 auto;padding:32px 20px 80px;}
+  h1.page-title{font-size:26px;font-weight:700;margin:0 0 4px;}
+  p.page-lead{color:var(--muted);margin:0 0 24px;font-size:15px;}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;}
+  .field{display:flex;flex-direction:column;gap:7px;margin-bottom:18px;}
+  .field-head{position:relative;display:flex;align-items:flex-start;justify-content:flex-start;gap:8px;}
+  .field-title{min-width:0;max-width:calc(100% - 34px);}
+  label.lbl{font-size:13px;font-weight:600;color:#334155;}
+  .keycode{font-size:11.5px;color:var(--muted);font-family:ui-monospace,SFMono-Regular,Menlo,monospace;margin-top:1px;}
+  .info{flex:none;}
+  .info-btn{width:24px;height:24px;border-radius:999px;border:1px solid #CBD5E1;background:#F8FAFC;color:#334155;display:grid;place-items:center;font-size:13px;font-weight:700;cursor:pointer;user-select:none;padding:0;line-height:1;}
+  .info-btn:hover{border-color:#F59E0B;color:#92400E;}
+  .info-btn[aria-expanded="true"]{background:#FFFBEB;border-color:#F59E0B;color:#92400E;}
+  .info-panel{position:absolute;left:0;top:30px;z-index:20;width:100%;background:#F8FAFC;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px;color:#334155;line-height:1.45;box-shadow:0 10px 24px rgba(15,23,42,.12);}
+  .info-panel p{margin:0 0 7px;}.info-panel p:last-child{margin-bottom:0;}
+  .info-panel b{color:#92400E;font-weight:600;}
+  input[type=text],input[type=password],textarea{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;color:var(--text);padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--white);width:100%;transition:border-color .15s,box-shadow .15s;}
+  textarea{min-height:104px;resize:vertical;line-height:1.45;}
+  input:focus,textarea:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.16);}
+  ::placeholder{color:#94A3B8;}
+  .btn{font-family:var(--font);font-weight:600;font-size:14px;padding:12px 20px;border-radius:9px;cursor:pointer;border:1px solid transparent;transition:background .15s,color .15s,transform .05s;width:100%;}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--amber);color:var(--navy);}.btn-primary:hover{background:var(--amber-dark);color:var(--white);}
+  .btn:disabled{opacity:.55;cursor:not-allowed;}
+  .callout{display:flex;gap:11px;align-items:flex-start;border-radius:10px;padding:14px 16px;font-size:13px;line-height:1.5;margin-bottom:22px;}
+  .callout .ico{flex:none;font-size:16px;line-height:1.3;}
+  .callout-amber{background:#FFFBEB;border:1px solid #FCD34D;color:#92400E;}
+  .callout-amber strong{color:#78350F;}
+  .callout-slate{background:#F1F5F9;border:1px solid var(--line);color:var(--muted);margin-top:22px;margin-bottom:0;}
+  .callout-slate strong{color:#334155;}
+  .msg{padding:14px 16px;border-radius:10px;font-size:14px;}
+  .msg.ok{background:#F0FDF4;border:1px solid #86EFAC;color:#166534;}
+  .msg.err{background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B;margin-top:14px;}
+  .center{text-align:center;}
+  .hide{display:none;}
+  .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:24px;}
+  .loading{color:var(--muted);padding:24px 0;text-align:center;}
+  .drop{border:1.5px dashed var(--line);border-radius:10px;padding:16px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer;transition:border-color .15s,background .15s;background:#fff;}
+  .drop:hover{border-color:var(--amber);background:#FFFBEB;}
+  .doc-list{display:flex;flex-direction:column;gap:8px;list-style:none;margin:10px 0 0;padding:0;}
+  .doc-item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:13px;background:#fff;}
+  .doc-item .meta{color:var(--muted);font-size:12px;}
+  .doc-item.uploading{opacity:.6;}
+  .row-del{border:0;background:#FEE2E2;color:var(--danger);border-radius:7px;cursor:pointer;font-weight:700;width:24px;height:24px;}
+  .letter-preview{border:1px solid var(--line);border-radius:10px;background:#fff;margin-top:12px;overflow:hidden;}
+  .letter-preview-page{width:100%;max-width:420px;min-height:545px;margin:12px auto;background:#fff;box-shadow:0 6px 20px rgba(15,23,42,.12);position:relative;padding:92px 44px 44px;font-family:Arial,Helvetica,sans-serif;font-size:11px;line-height:1.45;color:#111827;background-position:top center;background-repeat:no-repeat;background-size:100% auto;overflow:hidden;}
+  .letter-preview-template{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#fff;z-index:0;}
+  .letter-preview-copy{position:relative;z-index:1;}
+  .letter-preview-status{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:28px;color:#475569;background:#fff;z-index:2;font-size:13px;line-height:1.45;}
+  .letter-preview-page.has-template-image{padding:0;background-image:none!important;}
+  .letter-preview-page.has-template-pdf{padding:0;background-image:none!important;}
+  .letter-preview-page.has-clean-reconstruction{padding:0;background-image:none!important;}
+  .letter-preview-page.is-rendering-pdf .letter-preview-status{display:flex;}
+  .letter-preview-page.has-template-image .letter-preview-copy,.letter-preview-page.has-template-pdf .letter-preview-copy{display:block;padding:96px 44px 44px;}
+  .letter-preview-page.has-clean-reconstruction .letter-preview-copy{display:none;}
+  .letter-preview-logo{position:absolute;top:28px;left:44px;max-width:92px;max-height:48px;object-fit:contain;}
+  .preview-note{font-size:12px;color:#475569;margin:8px 0 0;}
+</style>
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">
+    <span class="fa-wordmark">FlowAudit</span><span class="brand-divider" aria-hidden="true"></span>
+    <div class="brand-text"><span class="title">Revenue Recovery Desk</span><span class="sub">Secure Integration Access</span></div>
+  </div>
+</header>
+
+<main>
+  <h1 class="page-title">Securely send integration access</h1>
+  <p class="page-lead" id="lead">Loading your secure form…</p>
+
+  <div class="card">
+    <div id="state-loading" class="loading">Checking your link…</div>
+
+    <div id="state-invalid" class="hide">
+      <div class="msg err" id="invalid-msg">This link is no longer valid. It may have already been used or expired. Ask your contact to send a fresh one.</div>
+    </div>
+
+    <form id="state-form" class="hide" autocomplete="off">
+      <div class="callout callout-amber">
+        <span class="ico">🔑</span>
+        <span>Complete only the fields shown. Click the <strong>ⓘ</strong> next to any field to see why we need it and what access to grant.</span>
+      </div>
+      <div id="fields"></div>
+      <button type="submit" class="btn btn-primary" id="submitBtn">Encrypt &amp; send securely</button>
+      <div id="form-err" class="msg err hide"></div>
+      <div class="callout callout-slate">
+        <span class="ico">🛡️</span>
+        <span>Your sensitive fields are encrypted <strong>inside your browser</strong> before anything is sent. Only the recipient's machine can decrypt them. This link works only once.</span>
+      </div>
+    </form>
+
+    <div id="state-done" class="hide center">
+      <div class="msg ok">Sent securely. Your keys were encrypted in your browser and delivered. This link is now closed.</div>
+      <p class="page-lead" style="margin-top:18px;margin-bottom:0;">You can close this tab.</p>
+    </div>
+  </div>
+  <div class="foot">Revenue Recovery Desk · zero-knowledge secret delivery</div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module">
+import { seal } from "./vault-crypto.js";
+import * as pdfjsLib from "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.min.mjs";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdn.jsdelivr.net/npm/pdfjs-dist@4.10.38/build/pdf.worker.min.mjs";
+
+const SUPABASE_URL = "https://stboueshyjvooiftfuxm.supabase.co";
+const SUPABASE_ANON_KEY = "__SUPABASE_ANON_KEY_PLACEHOLDER__";
+
+const $ = (id) => document.getElementById(id);
+const show = (id) => $(id).classList.remove("hide");
+const hide = (id) => $(id).classList.add("hide");
+const BUCKET = "onboarding-docs";
+
+// Friendly labels for known integration keys.
+const LABELS = {
+  STRIPE_API_KEY: "Stripe restricted secret key (not publishable)", SQUARE_ACCESS_TOKEN: "Square production access token",
+  PAYPAL_CLIENT_ID: "PayPal REST app client ID", PAYPAL_CLIENT_SECRET: "PayPal REST app client secret",
+  BRAINTREE_MERCHANT_ID: "Braintree merchant ID", BRAINTREE_PRIVATE_KEY: "Braintree private key",
+  AUTHNET_API_LOGIN_ID: "Authorize.net API login ID", AUTHNET_TRANSACTION_KEY: "Authorize.net transaction key",
+  GOCARDLESS_ACCESS_TOKEN: "GoCardless access token", BILLCOM_API_KEY: "Bill.com API key",
+  SPREADSHEET_SOURCE_URL: "Spreadsheet source link or export location",
+  SPREADSHEET_ACCESS_INSTRUCTIONS: "Spreadsheet sharing/access instructions",
+  SPREADSHEET_REFRESH_CADENCE: "Spreadsheet refresh cadence",
+  PIPEDRIVE_API_TOKEN: "Pipedrive API token",
+  CUSTOM_CRM_API_BASE_URL: "Custom CRM API base URL",
+  CUSTOM_CRM_API_KEY: "Custom CRM restricted/read-only API key or token",
+  CUSTOM_CRM_API_DOCS_URL: "Custom CRM API documentation URL or notes link",
+  CLOSE_API_KEY: "Close API key",
+  SENDGRID_API_KEY: "SendGrid restricted API key", POSTMARK_SERVER_TOKEN: "Postmark server API token",
+  MAILGUN_API_KEY: "Mailgun sending API key", TWILIO_ACCOUNT_SID: "Twilio account/subaccount SID", TWILIO_AUTH_TOKEN: "Twilio auth token or API secret",
+  POSTGRID_API_KEY: "PostGrid live API key (or test key for sandbox)",
+};
+
+// Per-key least-privilege spec: the exact scopes to grant ("grant") and what we
+// use them for ("use"). Payment processors need write access for payment links /
+// plans; CRMs need read + activity logging; email/SMS need send access.
+const PERMISSIONS = {
+  STRIPE_API_KEY: { grant: "Create a Restricted Secret Key in Stripe — NOT a publishable pk_ key. Minimum launch permissions: Customers read, Invoices read, PaymentIntents read, Charges read. Add Payment Links/Checkout/Invoices write only if you explicitly approve us creating payment links or finalizing/sending invoices.", use: "find unpaid invoices and include the existing hosted invoice link; with approved write scopes, create/finalize payment links or invoices." },
+  SQUARE_ACCESS_TOKEN: { grant: "Production access token for the correct Square app/location. Prefer scoped access: CUSTOMERS_READ, PAYMENTS_READ, ORDERS_READ, INVOICES_READ; add INVOICES_WRITE/ORDERS_WRITE/PAYMENTS_WRITE only if you approve creating payment requests.", use: "read overdue invoices and, with approved write scope, create payment links / invoices." },
+  PAYPAL_CLIENT_ID: { grant: "Live REST app Client ID for the PayPal business account used for invoicing. Pair with the matching client secret; sandbox credentials only for sandbox tests.", use: "identify the PayPal app used to read unpaid transactions and create invoices/payment links when approved." },
+  PAYPAL_CLIENT_SECRET: { grant: "Matching Live REST app Secret for the same PayPal app. Do not paste your PayPal login password.", use: "authenticate the PayPal app for invoice/payment-link workflows." },
+  BRAINTREE_MERCHANT_ID: { grant: "API user that can read transactions/customers and create transactions / payment requests.", use: "detect unpaid balances and request payment." },
+  BRAINTREE_PRIVATE_KEY: { grant: "API user that can read transactions/customers and create transactions / payment requests.", use: "detect unpaid balances and request payment." },
+  AUTHNET_API_LOGIN_ID: { grant: "Account user with Transaction Detail/reporting (read) and Payment/charge access.", use: "read unpaid transactions and send payment requests." },
+  AUTHNET_TRANSACTION_KEY: { grant: "Account user with Transaction Detail/reporting (read) and Payment/charge access.", use: "read unpaid transactions and send payment requests." },
+  GOCARDLESS_ACCESS_TOKEN: { grant: "Read-write access token (read payments/mandates; create payments and subscriptions).", use: "collect overdue amounts and set up payment plans." },
+  BILLCOM_API_KEY: { grant: "User that can read invoices/customers and create payment requests.", use: "detect unpaid invoices and request payment." },
+  SPREADSHEET_SOURCE_URL: { grant: "Share a live sheet link read-only, or describe the secure CSV/export location.", use: "read the current receivables list." },
+  SPREADSHEET_ACCESS_INSTRUCTIONS: { grant: "Give tab names and column meanings. Include paid/disputed/do-not-contact indicators.", use: "map columns correctly before recovery starts." },
+  SPREADSHEET_REFRESH_CADENCE: { grant: "Tell us when this data updates: live, daily, weekly, or before each batch.", use: "avoid stale balances and already-paid invoices." },
+  PIPEDRIVE_API_TOKEN: { grant: "Token from a user that can read persons/deals and write activities/notes.", use: "pull contacts and log outreach." },
+  CUSTOM_CRM_API_BASE_URL: { grant: "Provide the API base URL, not a password or login page.", use: "connect to the correct CRM tenant." },
+  CUSTOM_CRM_API_KEY: { grant: "Restricted/read-only API key or bearer token. Add write/activity-log scope only if explicitly approved.", use: "read overdue account data and customer contact details." },
+  CUSTOM_CRM_API_DOCS_URL: { grant: "Docs URL or short endpoint notes. If there are no docs, write 'no docs'.", use: "map CRM fields safely before recovery runs." },
+  CLOSE_API_KEY: { grant: "Key from a membership that can read leads/contacts and write activities.", use: "pull contacts and log outreach." },
+  SENDGRID_API_KEY: { grant: "Restricted API key with Mail Send permission only. Add suppressions/template read only if we specifically need it. Do not paste SendGrid login credentials.", use: "send recovery emails on your behalf." },
+  POSTMARK_SERVER_TOKEN: { grant: "Server API token for the specific Postmark server/message stream used for recovery mail. Do not use account-owner tokens unless explicitly required.", use: "send recovery emails on your behalf." },
+  MAILGUN_API_KEY: { grant: "Sending API key for the exact Mailgun domain/subdomain used for recovery email. Do not paste your Mailgun login password.", use: "send recovery emails on your behalf." },
+  TWILIO_ACCOUNT_SID: { grant: "Account SID or Subaccount SID for the account that owns the approved SMS number or Messaging Service. This is an identifier, not enough by itself.", use: "identify the Twilio account used for recovery text messages." },
+  TWILIO_AUTH_TOKEN: { grant: "Matching Auth Token for the SID above, or preferably a scoped Twilio API Key/Secret if available. Do not paste a phone-number SID alone.", use: "send recovery text messages on your behalf." },
+  POSTGRID_API_KEY: { grant: "Live API key from your own PostGrid account for real letters, or a test_sk_ key only for sandbox testing. Do not paste your PostGrid login password. If you do not want physical letters sent, use the opt-out checkbox below instead of providing a key.", use: "send approved physical letters from your PostGrid account. If you keep Letters enabled without providing your own PostGrid key and later approve/authorize letters, FlowAudit may send them through an available letter provider and pass through postage, print, processing, certified-mail, and related costs at month-end in addition to your maintenance/retainer fee. Current per-piece estimate: $1.219 per letter + 20p per page, plus any certified-mail or provider pass-through extras." },
+};
+const PERMISSIONS_DEFAULT = { grant: "Grant only the minimum scopes this integration needs for invoice recovery.", use: "find what is owed and request payment." };
+
+const FIELD_CONFIG = {
+  SPREADSHEET_SOURCE_URL: { type: "textarea", placeholder: "Example:\nGoogle Sheet: https://docs.google.com/spreadsheets/d/...\nShared read-only with: revenue-recovery@flowaudit.co.uk\nTab: Overdue Invoices" },
+  SPREADSHEET_ACCESS_INSTRUCTIONS: { type: "textarea", placeholder: "Example:\nAccess: Google Sheet shared read-only\nTabs: Current AR, Paid, Disputes\nColumns: Customer, Contact Name, Email, Phone, Invoice #, Amount Due, Due Date, Status, Notes\nDo-not-contact column: DNC" },
+  SPREADSHEET_REFRESH_CADENCE: { type: "textarea", placeholder: "Example:\nLive sheet updated daily by finance at 5pm ET. Recovery batches should only use rows where Status = Overdue and Disputed = No." },
+  CUSTOM_CRM_API_BASE_URL: { type: "text", placeholder: "Example: https://api.yourcrm.com/v1" },
+  CUSTOM_CRM_API_KEY: { type: "password", placeholder: "Paste restricted/read-only bearer token or API key" },
+  CUSTOM_CRM_API_DOCS_URL: { type: "textarea", placeholder: "Example:\nDocs: https://docs.yourcrm.com/api\nCustomers: GET /customers\nInvoices: GET /invoices?status=overdue\nPayments: GET /payments\nNo docs? Write: no docs — needs mapping call" },
+  STRIPE_API_KEY: { type: "password", placeholder: "Example format: rk_live_... restricted secret key, not pk_live_..." },
+  POSTGRID_API_KEY: { type: "password", placeholder: "Example format: live_sk_... or test_sk_... for sandbox" },
+  TWILIO_ACCOUNT_SID: { type: "text", placeholder: "Example format: ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" },
+  TWILIO_AUTH_TOKEN: { type: "password", placeholder: "Paste matching Auth Token or scoped API secret" },
+  SENDGRID_API_KEY: { type: "password", placeholder: "Example format: SG... restricted to Mail Send" },
+  POSTMARK_SERVER_TOKEN: { type: "password", placeholder: "Paste the Server API token for the recovery mail stream" },
+  MAILGUN_API_KEY: { type: "password", placeholder: "Paste sending API key for the exact Mailgun domain" },
+};
+
+const isMultiline = (cfg) => cfg && cfg.type === "textarea";
+
+const params = new URLSearchParams(location.search);
+const token = params.get("token") || "";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let DROP = null;
+let LETTER_ASSETS = [];
+
+function humanSize(n){ if(n<1024)return n+" B"; if(n<1048576)return (n/1024).toFixed(0)+" KB"; return (n/1048576).toFixed(1)+" MB"; }
+function safeName(name){ return String(name||"file").replace(/[^\w.\-]+/g,"_"); }
+function escapeHtml(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function renderLetterAssets(){
+  const ul = document.getElementById("letter-style-list");
+  if (!ul) return;
+  ul.innerHTML = LETTER_ASSETS.map((d,i) => `<li class="doc-item${d.uploading?' uploading':''}"><span>📎 ${escapeHtml(d.name)} <span class="meta">${d.uploading?'uploading…':humanSize(d.size||0)}</span></span>${d.uploading?'':`<button type="button" class="row-del" data-remove-letter-asset="${i}" aria-label="Remove ${escapeHtml(d.name)}">×</button>`}</li>`).join("");
+  updateLetterPreview();
+}
+function updateLetterPreview(){
+  const page = document.getElementById("letter-preview-page");
+  if (!page) return;
+  const previewAssets = LETTER_ASSETS.filter((d) => d.previewUrl);
+  const logo = previewAssets.find((d) => d.role === "logo_or_brand_asset" || /logo|brand|mark/i.test(d.name));
+  const pdfTemplate = previewAssets.find((d) => d.previewKind === "reconstructed_letter_image" || d.previewKind === "pdf_page_image" || d.previewKind === "pdf" || /^application\/pdf$/i.test(d.type||"") || /\.pdf$/i.test(d.name));
+  const imageTemplate = pdfTemplate || previewAssets.find((d) => (d.previewKind === "image" || d.previewKind === "pdf_page_image" || d.previewKind === "reconstructed_letter_image") && (d.role === "letterhead_or_template" || d.role === "letter_template_or_sample" || /letter\s*head|letterhead|template|background|stationery|sample|notice/i.test(d.name)));
+  const cleanReconstruction = Boolean(imageTemplate && imageTemplate.previewKind === "reconstructed_letter_image");
+  const renderingPdf = LETTER_ASSETS.some((d) => d.previewKind === "pdf" && d.renderingPreview);
+  page.classList.toggle("has-template-image", Boolean(imageTemplate));
+  page.classList.toggle("has-template-pdf", Boolean(pdfTemplate));
+  page.classList.toggle("has-clean-reconstruction", cleanReconstruction);
+  page.classList.toggle("is-rendering-pdf", renderingPdf && !imageTemplate);
+  const templateImg = document.getElementById("letter-preview-template");
+  if (templateImg) {
+    if (imageTemplate) { templateImg.src = imageTemplate.previewUrl; templateImg.style.display = "block"; }
+    else { templateImg.removeAttribute("src"); templateImg.style.display = "none"; }
+  }
+  page.style.backgroundImage = "";
+  const img = document.getElementById("letter-preview-logo");
+  if (img) {
+    if (logo && !imageTemplate && !pdfTemplate) { img.src = logo.previewUrl; img.style.display = "block"; }
+    else { img.removeAttribute("src"); img.style.display = "none"; }
+  }
+  const approval = document.getElementById("f_LETTER_STYLE_PREVIEW_APPROVED");
+  if (approval && !LETTER_ASSETS.length) approval.checked = false;
+}
+function guessLetterAssetRole(file){
+  const n = String(file.name||"").toLowerCase();
+  if (/logo|brand|mark/.test(n)) return "logo_or_brand_asset";
+  if (/letter\s*head|letterhead|template|background|stationery|sample|notice/.test(n) || /^image\//.test(file.type||"") || /^application\/pdf$/i.test(file.type||"") || /\.pdf$/i.test(n)) return "letterhead_or_template";
+  return "letter_template_or_sample";
+}
+function previewKindFor(file){
+  if (/^image\//.test(file.type||"")) return "image";
+  if (/^application\/pdf$/i.test(file.type||"") || /\.pdf$/i.test(file.name||"")) return "pdf";
+  return "";
+}
+function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight){
+  const words = String(text).split(/\s+/);
+  let line = "";
+  for (const word of words) {
+    const test = line ? line + " " + word : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      ctx.fillText(line, x, y);
+      line = word;
+      y += lineHeight;
+    } else {
+      line = test;
+    }
+  }
+  if (line) ctx.fillText(line, x, y);
+  return y + lineHeight;
+}
+function cropRegion(source, sx, sy, sw, sh){
+  const c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(sw));
+  c.height = Math.max(1, Math.round(sh));
+  c.getContext("2d").drawImage(source, sx, sy, sw, sh, 0, 0, c.width, c.height);
+  return c;
+}
+function drawRegion(ctx, source, region, dest, cw, ch, mode="contain"){
+  const [sl, st, sr, sb] = region;
+  const [dl, dt, dw, dh] = dest;
+  const crop = cropRegion(source, sl*source.width, st*source.height, (sr-sl)*source.width, (sb-st)*source.height);
+  const x = dl*cw, y = dt*ch, w = dw*cw, h = dh*ch;
+  if (mode === "cover") {
+    const scale = Math.max(w/crop.width, h/crop.height);
+    const sw = w/scale, sh = h/scale;
+    const sx = (crop.width - sw)/2, sy = (crop.height - sh)/2;
+    ctx.drawImage(crop, sx, sy, sw, sh, x, y, w, h);
+  } else {
+    const scale = Math.min(w/crop.width, h/crop.height);
+    const rw = crop.width*scale, rh = crop.height*scale;
+    ctx.drawImage(crop, x+(w-rw)/2, y+(h-rh)/2, rw, rh);
+  }
+}
+async function renderPdfCleanRecoveryPreviewUrl(file){
+  const data = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data }).promise;
+  const page = await pdf.getPage(1);
+  const baseViewport = page.getViewport({ scale: 1 });
+  const targetWidth = 2200;
+  const scale = Math.min(6, Math.max(2, targetWidth / baseViewport.width));
+  const viewport = page.getViewport({ scale });
+  const source = document.createElement("canvas");
+  const sctx = source.getContext("2d");
+  source.width = Math.ceil(viewport.width);
+  source.height = Math.ceil(viewport.height);
+  await page.render({ canvasContext: sctx, viewport }).promise;
+
+  const out = document.createElement("canvas");
+  out.width = 1700;
+  out.height = 2200;
+  const ctx = out.getContext("2d");
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.fillStyle = "#fff";
+  ctx.fillRect(0, 0, out.width, out.height);
+
+  // Quality-preserving whiteout workflow:
+  // draw the uploaded page once at high resolution, preserving the original
+  // banner/logo/footer exactly, then mask only the old editable text areas.
+  ctx.drawImage(source, 0, 0, source.width, source.height, 0, 0, out.width, out.height);
+  ctx.fillStyle = "#fff";
+  const fullTextLeft = 0.095;
+  const fullTextWidth = 0.835;
+  const whiteouts = [
+    [fullTextLeft, 0.252, 0.45, 0.085], // date: cover the template date completely before redrawing ours
+    [fullTextLeft, 0.338, 0.56, 0.110], // recipient block, including the old left-column address
+    [fullTextLeft, 0.462, fullTextWidth, 0.056], // old subject across the original line width
+    [fullTextLeft, 0.507, fullTextWidth, 0.265], // full old body text, edge-to-edge
+    [fullTextLeft, 0.765, 0.58, 0.158]  // clear old signoff/name; leave blank signature space
+  ];
+  for (const [x0, y0, w0, h0] of whiteouts) ctx.fillRect(x0*out.width, y0*out.height, w0*out.width, h0*out.height);
+
+  ctx.fillStyle = "#111";
+  const textLeft = 0.125*out.width;
+  const textWidth = 0.74*out.width;
+  const dateBaselineY = 0.286*out.height;
+  ctx.font = "30px Georgia, 'Times New Roman', serif";
+  ctx.fillText("20 May 2024", textLeft, dateBaselineY);
+  ctx.font = "32px Georgia, 'Times New Roman', serif"; // recipient block matches main body text size
+  ctx.fillText("Accounts Payable Team", textLeft, 0.365*out.height);
+  ctx.fillText("Customer Account", textLeft, 0.389*out.height);
+  ctx.fillText("Billing Address", textLeft, 0.413*out.height);
+  ctx.font = "bold 40px Georgia, 'Times New Roman', serif";
+  ctx.fillText("Subject: Overdue invoice reminder", textLeft, 0.488*out.height);
+  ctx.font = "32px Georgia, 'Times New Roman', serif";
+  let y = 0.535*out.height;
+  const x = textLeft, mw = textWidth, lh = 44;
+  const paragraphs = [
+    "Dear Customer,",
+    "We are writing about the overdue balance on your account. Our records show the invoice below remains unpaid.",
+    "Invoice: INV-12345",
+    "Amount due: £1,250.00",
+    "Due date: 20 May 2024",
+    "Please arrange payment within 7 days, or contact us if this has already been resolved."
+  ];
+  for (const p of paragraphs) { y = drawWrappedText(ctx, p, x, y, mw, lh) + 16; }
+  ctx.font = "32px Georgia, 'Times New Roman', serif";
+  ctx.fillText("Sincerely,", x, 0.785*out.height);
+  ctx.font = "bold 32px Georgia, 'Times New Roman', serif";
+  ctx.fillText("Accounts Receivable Team", x, 0.875*out.height);
+  ctx.font = "30px Georgia, 'Times New Roman', serif";
+  ctx.fillText("Northern Peak Solutions", x, 0.898*out.height);
+  return out.toDataURL("image/png");
+}
+async function handleLetterAssetFiles(files){
+  if(!DROP) return;
+  for(const file of files){
+    const safe = safeName(file.name);
+    const dropKey = DROP.id || token.slice(0,12) || Date.now();
+    const path = `letter-style/${dropKey}/${Date.now()}_${safe}`;
+    const previewKind = previewKindFor(file);
+    const entry = { name:file.name, path, type:file.type, size:file.size, role: guessLetterAssetRole(file), previewKind, previewUrl: previewKind === "image" ? URL.createObjectURL(file) : "", renderingPreview: previewKind === "pdf", uploading:true };
+    LETTER_ASSETS.push(entry); renderLetterAssets();
+    try{
+      if (previewKind === "pdf") {
+        entry.previewUrl = await renderPdfCleanRecoveryPreviewUrl(file);
+        entry.previewKind = "reconstructed_letter_image";
+        entry.renderingPreview = false;
+        renderLetterAssets();
+      }
+      const { error } = await sb.storage.from(BUCKET).upload(path, file, { upsert:false, contentType:file.type || undefined });
+      if(error) throw error;
+      entry.uploading = false;
+    }catch(err){
+      entry.renderingPreview = false;
+      LETTER_ASSETS = LETTER_ASSETS.filter((d) => d !== entry);
+      formErr("Upload failed for " + file.name + ": " + (err && err.message || err));
+    }
+    renderLetterAssets();
+  }
+}
+
+async function load() {
+  if (!token) return invalid();
+  let data, error;
+  try { ({ data, error } = await sb.rpc("vault_get", { p_token: token })); }
+  catch (e) { error = e; }
+  if (error) { console.error(error); return invalid("We couldn't load this link. Please try again or ask for a new one."); }
+  const row = Array.isArray(data) ? data[0] : data;
+  if (!row) return invalid();
+  DROP = row;
+  render(row);
+}
+
+function invalid(text) {
+  hide("state-loading");
+  if (text) $("invalid-msg").textContent = text;
+  $("lead").textContent = "This link is unavailable.";
+  show("state-invalid");
+}
+
+function render(row) {
+  hide("state-loading");
+  $("lead").textContent = (row.company ? row.company + " — " : "") + "complete only the fields shown below. Sensitive values are encrypted in your browser.";
+  const keys = row.env_keys || [];
+  const box = $("fields");
+  box.innerHTML = "";
+  keys.forEach((k) => {
+    const id = "f_" + k;
+    const field = document.createElement("div");
+    field.className = "field";
+
+    const head = document.createElement("div");
+    head.className = "field-head";
+
+    const title = document.createElement("div");
+    title.className = "field-title";
+
+    const label = document.createElement("label");
+    label.className = "lbl";
+    label.setAttribute("for", id);
+    label.textContent = LABELS[k] || k;
+
+    const code = document.createElement("div");
+    code.className = "keycode";
+    code.textContent = k;
+    title.appendChild(label); title.appendChild(code);
+
+    const spec = PERMISSIONS[k] || PERMISSIONS_DEFAULT;
+    const info = document.createElement("div");
+    info.className = "info";
+    const btnInfo = document.createElement("button");
+    btnInfo.type = "button";
+    btnInfo.className = "info-btn";
+    btnInfo.setAttribute("aria-label", "Why we need " + (LABELS[k] || k));
+    btnInfo.setAttribute("aria-expanded", "false");
+    btnInfo.textContent = "i";
+    const panel = document.createElement("div");
+    panel.className = "info-panel hide";
+    const grant = document.createElement("p");
+    const grantLabel = document.createElement("b"); grantLabel.textContent = "Grant: ";
+    grant.appendChild(grantLabel); grant.appendChild(document.createTextNode(spec.grant));
+    const use = document.createElement("p");
+    const useLabel = document.createElement("b"); useLabel.textContent = "Why: ";
+    use.appendChild(useLabel); use.appendChild(document.createTextNode(spec.use));
+    panel.appendChild(grant); panel.appendChild(use);
+    // Click pins the panel open until an outside click closes it (unchanged behaviour).
+    btnInfo.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      showInfoExclusive(info);
+      info.dataset.pinned = "1";
+    });
+    // Hover reveals the panel while the pointer is over the icon or its panel, and
+    // auto-hides on leave — unless the panel was pinned open by a click.
+    info.addEventListener("mouseenter", () => showInfoExclusive(info));
+    info.addEventListener("mouseleave", () => { if (!info.dataset.pinned) hideInfo(info); });
+    info.appendChild(btnInfo); info.appendChild(panel);
+    head.appendChild(title); head.appendChild(info);
+
+    const cfg = FIELD_CONFIG[k] || { type: "password", placeholder: "Paste the requested value" };
+    const input = document.createElement(isMultiline(cfg) ? "textarea" : "input");
+    if (!isMultiline(cfg)) input.type = cfg.type || "password";
+    input.id = id;
+    input.dataset.key = k;
+    input.placeholder = cfg.placeholder || "Paste the requested value";
+    input.autocomplete = "off"; input.autocapitalize = "off"; input.spellcheck = false;
+
+    field.appendChild(head); field.appendChild(input);
+    box.appendChild(field);
+  });
+  if (keys.includes("POSTGRID_API_KEY")) {
+    const opt = document.createElement("div");
+    opt.className = "field";
+    opt.style.background = "#FFFBEB";
+    opt.style.borderColor = "#FDE68A";
+    opt.innerHTML = `<div class="field-head"><div class="field-title"><label class="lbl" for="f_POSTGRID_LETTERS_OPT_OUT">Physical letter opt-out</label><div class="keycode">OPTIONAL</div></div></div>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#92400E;line-height:1.45;"><input type="checkbox" id="f_POSTGRID_LETTERS_OPT_OUT" style="width:18px;height:18px;flex:none;margin-top:2px;accent-color:#D97706;"> I do not want FlowAudit / Revenue Recovery Desk to send physical letters for this engagement unless I later provide a PostGrid API key or give fresh written authorization.</label>
+      <p style="margin:10px 0 0;color:#92400E;font-size:13px;"><b>Billing notice:</b> If Letters remain enabled, you do not provide your own PostGrid API key, and you later approve/authorize physical letters, postage, print, processing, certified-mail, and related costs we incur will be passed through and billed at month-end in addition to your maintenance/retainer fee. Current per-piece estimate: <b>$1.219 per letter + 20p per page</b> (plus any certified-mail or provider pass-through extras). Tick this box to opt out of physical letters now.</p>`;
+    box.appendChild(opt);
+
+    const style = document.createElement("div");
+    style.className = "field";
+    style.style.background = "#F8FAFC";
+    style.innerHTML = `<div class="field-head"><div class="field-title"><label class="lbl" for="letter-style-input">Letter style template + logos</label><div class="keycode">OPTIONAL — preview and approve before use</div></div></div>
+      <p style="margin:0 0 10px;color:#475569;font-size:13px;">Upload a previous recovery letter, letterhead, PDF/DOCX template, and any logos or brand assets. We use OCR/design reconstruction plus your uploaded images to mimic logo placement, text style, fonts, spacing, and layout for approved recovery letters instead of changing your format.</p>
+      <div class="drop" id="letter-style-drop">Drop files here or click to upload (PDF, DOCX, PNG, JPG, SVG)</div>
+      <input type="file" id="letter-style-input" multiple accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.svg,image/*,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="display:none;">
+      <ul class="doc-list" id="letter-style-list"></ul>
+      <div class="letter-preview" id="letter-preview"><div class="letter-preview-page" id="letter-preview-page"><img class="letter-preview-template" id="letter-preview-template" alt="Uploaded full-page letter or PDF preview" style="display:none;"><img class="letter-preview-logo" id="letter-preview-logo" alt="Uploaded logo preview" style="display:none;"><div class="letter-preview-status" id="letter-preview-status">Rendering your PDF into a styled recovery-letter preview…</div><div class="letter-preview-copy"><p><b>Recovery notice preview</b></p><p>Dear Customer,</p><p>This is a sample recovery letter using your uploaded letter style. Actual letters are still approval-gated before sending.</p><p>Invoice: INV-12345<br>Amount due: £1,250.00</p><p>Please contact us to resolve this balance.</p><p>Accounts Receivable Team</p></div></div></div>
+      <p class="preview-note"><b>Preview approval:</b> Review the sample above after image uploads. PDF/DOCX samples are reconstructed server-side for final sends; if the preview looks wrong, remove/re-upload assets before submitting.</p>
+      <label style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#334155;line-height:1.45;margin-top:10px;"><input type="checkbox" id="f_LETTER_STYLE_PREVIEW_APPROVED" style="width:18px;height:18px;flex:none;margin-top:2px;accent-color:#D97706;"> I approve this letter-style preview for Revenue Recovery Desk to use as the basis for approved recovery letters.</label>`;
+    box.appendChild(style);
+    const dropZone = style.querySelector("#letter-style-drop");
+    const fileInput = style.querySelector("#letter-style-input");
+    dropZone.addEventListener("click", () => fileInput.click());
+    dropZone.addEventListener("dragover", (ev) => { ev.preventDefault(); dropZone.style.borderColor = "#F59E0B"; });
+    dropZone.addEventListener("dragleave", () => { dropZone.style.borderColor = ""; });
+    dropZone.addEventListener("drop", (ev) => { ev.preventDefault(); dropZone.style.borderColor = ""; handleLetterAssetFiles(ev.dataTransfer.files || []); });
+    fileInput.addEventListener("change", (ev) => { handleLetterAssetFiles(ev.target.files || []); ev.target.value = ""; });
+    style.addEventListener("click", (ev) => {
+      const btn = ev.target.closest("[data-remove-letter-asset]");
+      if(!btn) return;
+      LETTER_ASSETS.splice(Number(btn.dataset.removeLetterAsset), 1);
+      renderLetterAssets();
+    });
+  }
+  show("state-form");
+}
+
+function hideInfo(info) {
+  if (!info) return;
+  info.querySelector(".info-panel")?.classList.add("hide");
+  info.querySelector(".info-btn")?.setAttribute("aria-expanded", "false");
+  delete info.dataset.pinned;
+}
+
+function showInfoExclusive(info) {
+  if (!info) return;
+  document.querySelectorAll(".info").forEach((el) => { if (el !== info) hideInfo(el); });
+  info.querySelector(".info-panel")?.classList.remove("hide");
+  info.querySelector(".info-btn")?.setAttribute("aria-expanded", "true");
+}
+
+function closeInfoPanelsExcept(field) {
+  document.querySelectorAll(".info-panel:not(.hide)").forEach((panel) => {
+    if (field && panel.closest(".field") === field) return;
+    hideInfo(panel.closest(".info"));
+  });
+}
+
+document.addEventListener("click", (e) => {
+  const openField = document.querySelector(".info-panel:not(.hide)")?.closest(".field");
+  if (openField && !openField.contains(e.target)) closeInfoPanelsExcept(null);
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeInfoPanelsExcept(null);
+});
+
+$("state-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  hide("form-err");
+  const btn = $("submitBtn");
+  const inputs = [...document.querySelectorAll("#fields input, #fields textarea")].filter((i) => i.dataset.key);
+  const entries = inputs.map((i) => [i.dataset.key, i.value.trim()]).filter(([, v]) => v.length);
+  const postgridOptOut = document.getElementById("f_POSTGRID_LETTERS_OPT_OUT")?.checked;
+  const hasPostgridKey = entries.some(([k]) => k === "POSTGRID_API_KEY");
+  const pendingUploads = LETTER_ASSETS.some((d) => d.uploading);
+  if (pendingUploads) { return formErr("Please wait for the letter template/logo uploads to finish before submitting."); }
+  if (postgridOptOut && hasPostgridKey) { return formErr("Choose one PostGrid option: either provide your PostGrid API key or opt out of physical letters for now."); }
+  if (postgridOptOut && LETTER_ASSETS.length) { return formErr("You uploaded letter style files but also opted out of physical letters. Remove the uploads or untick the opt-out box."); }
+  const previewApproved = document.getElementById("f_LETTER_STYLE_PREVIEW_APPROVED")?.checked;
+  if (LETTER_ASSETS.length && !previewApproved) { return formErr("Please review and approve the recovery-letter preview before submitting your letter template/logo assets."); }
+  if (postgridOptOut) entries.push(["POSTGRID_LETTERS_OPT_OUT", "true"]);
+  if (LETTER_ASSETS.length) {
+    entries.push(["RRD_LETTER_STYLE_ASSETS_JSON", JSON.stringify({ uploadedAt: new Date().toISOString(), bucket: BUCKET, purpose: "replicate_client_letter_layout_for_approved_recovery_letters", previewApproved: true, reconstruction: "ocr_design_reconstruction_required_before_send", assets: LETTER_ASSETS.map(({uploading, previewUrl, ...d}) => d) })]);
+    entries.push(["RRD_LETTER_STYLE_PREVIEW_APPROVED", "true"]);
+  }
+  if (!entries.length) { return formErr("Enter at least one key, upload letter style files, or tick the physical-letter opt-out if you do not want to provide PostGrid access now."); }
+
+  btn.disabled = true; btn.textContent = "Encrypting…";
+  try {
+    const ciphertext = {};
+    for (const [k, v] of entries) ciphertext[k] = await seal(DROP.public_key, v);
+    const { error } = await sb.rpc("vault_deposit", { p_token: token, p_ciphertext: ciphertext });
+    if (error) throw error;
+    hide("state-form");
+    $("lead").textContent = "Done.";
+    show("state-done");
+  } catch (err) {
+    console.error(err);
+    btn.disabled = false; btn.textContent = "Encrypt & send securely";
+    formErr("Something went wrong sending your keys. The link may have just expired — ask for a fresh one.");
+  }
+});
+
+function formErr(t) { const el = $("form-err"); el.textContent = t; el.classList.remove("hide"); }
+
+load();
+</script>
+</body>
+</html>

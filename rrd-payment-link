@@ -1,0 +1,114 @@
+#!/usr/bin/env python3
+"""Create Stripe payment links for Revenue Recovery Desk / Flow Audit sales.
+
+Usage:
+  rrd-payment-link --amount 1500 --name "Revenue Recovery Desk Setup" --description "Setup fee"
+  rrd-payment-link --amount 299 --currency usd --name "Monthly Retainer" --quantity 1
+
+Reads FLOW_AUDIT_STRIPE_SECRET_KEY from the recoverydesk profile .env or process env.
+Prints only the Payment Link URL and non-secret IDs.
+"""
+import argparse
+import json
+import os
+import sys
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+ENV_PATHS = [
+    Path('/Users/AIAgenterminal/.hermes/profiles/recoverydesk/.env'),
+    Path('/Users/AIAgenterminal/.openclaw/.env'),
+]
+
+
+def load_env():
+    for p in ENV_PATHS:
+        if not p.exists():
+            continue
+        for raw in p.read_text().splitlines():
+            line = raw.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+            k, v = line.split('=', 1)
+            k = k.strip()
+            v = v.strip().strip('"').strip("'")
+            os.environ.setdefault(k, v)
+
+
+def stripe_post(path, data, key):
+    encoded = urllib.parse.urlencode(data).encode()
+    req = urllib.request.Request('https://api.stripe.com/v1/' + path.lstrip('/'), data=encoded, method='POST')
+    req.add_header('Authorization', 'Bearer ' + key)
+    req.add_header('Content-Type', 'application/x-www-form-urlencoded')
+    req.add_header('Stripe-Version', '2024-06-20')
+    try:
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            return json.loads(resp.read().decode())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors='replace')
+        try:
+            parsed = json.loads(body)
+            msg = parsed.get('error', {}).get('message') or body
+        except Exception:
+            msg = body
+        raise SystemExit(f'Stripe API error ({e.code}): {msg}')
+
+
+def main():
+    load_env()
+    ap = argparse.ArgumentParser(description='Create Stripe payment links for RRD/Flow Audit sales')
+    ap.add_argument('--amount', required=True, type=float, help='Amount in major currency units, e.g. 1500 or 299.99')
+    ap.add_argument('--currency', default='usd')
+    ap.add_argument('--name', required=True, help='Product/payment name shown to client')
+    ap.add_argument('--description', default='')
+    ap.add_argument('--quantity', type=int, default=1)
+    ap.add_argument('--success-url', default='https://revenue-recovery-web-ivory.vercel.app/thanks')
+    ap.add_argument('--metadata', action='append', default=[], help='key=value metadata; can repeat')
+    args = ap.parse_args()
+
+    key = os.environ.get('FLOW_AUDIT_STRIPE_SECRET_KEY')
+    if not key:
+        raise SystemExit('Missing FLOW_AUDIT_STRIPE_SECRET_KEY in environment')
+    if not key.startswith('sk_live_') and not key.startswith('sk_test_'):
+        raise SystemExit('Configured Stripe secret key does not look valid')
+
+    unit_amount = int(round(args.amount * 100))
+    if unit_amount < 50:
+        raise SystemExit('Amount too small; pass amount in major units, e.g. --amount 1500')
+
+    product_data = {
+        'name': args.name,
+        'description': args.description,
+    }
+    product = stripe_post('/products', product_data, key)
+    price = stripe_post('/prices', {
+        'unit_amount': str(unit_amount),
+        'currency': args.currency.lower(),
+        'product': product['id'],
+    }, key)
+    link_data = {
+        'line_items[0][price]': price['id'],
+        'line_items[0][quantity]': str(args.quantity),
+        'after_completion[type]': 'redirect',
+        'after_completion[redirect][url]': args.success_url,
+        'metadata[source]': 'revenue_recovery_desk',
+    }
+    for item in args.metadata:
+        if '=' not in item:
+            raise SystemExit(f'Invalid metadata {item!r}; use key=value')
+        k, v = item.split('=', 1)
+        link_data[f'metadata[{k}]'] = v
+    link = stripe_post('/payment_links', link_data, key)
+    print(json.dumps({
+        'url': link.get('url'),
+        'payment_link_id': link.get('id'),
+        'product_id': product.get('id'),
+        'price_id': price.get('id'),
+        'amount': args.amount,
+        'currency': args.currency.lower(),
+        'livemode': link.get('livemode'),
+    }, indent=2))
+
+if __name__ == '__main__':
+    main()

@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# rrd-letter — PostGrid print-and-mail letters for the Recovery Desk.
+# Sources the central secrets file (POSTGRID_API_KEY lives there — the single switch
+# point for test -> production). If a profile is given, that profile's .env is sourced
+# FIRST so a per-client live key overrides the central test key.
+set -euo pipefail
+
+OPERATOR_HOME="${RRD_OPERATOR_HOME:-/Users/AIAgenterminal}"
+
+safe_rr_profile() {
+  case "$1" in
+    rr-[A-Za-z0-9_-]*) ;;
+    *) return 1 ;;
+  esac
+  case "$1" in
+    *..*|*/*|*\\*|*':'*) return 1 ;;
+  esac
+  return 0
+}
+
+# Optional per-client profile: `rrd-letter --profile <name> send '{...}'`
+# A profile .env (POSTGRID_API_KEY=...) wins over the central key because it is
+# sourced first and the central source below does NOT clobber an already-set key.
+PROFILE=""
+if [ "${1:-}" = "--profile" ] && [ -n "${2:-}" ]; then
+  PROFILE="$2"; shift 2
+  if ! safe_rr_profile "$PROFILE"; then
+    echo "Invalid recovery profile name" >&2
+    exit 2
+  fi
+  PROFILE_ENV="${HERMES_PROFILES_DIR:-$OPERATOR_HOME/.hermes/profiles}/$PROFILE/.env"
+  if [ -f "$PROFILE_ENV" ]; then set -a; . "$PROFILE_ENV"; set +a; fi
+fi
+
+# Central secrets (POSTGRID_API_KEY). Does not override a profile key already exported.
+if [ -f "$OPERATOR_HOME/.openclaw/.env" ]; then
+  if [ -n "${POSTGRID_API_KEY:-}" ]; then
+    CENTRAL_KEY="$POSTGRID_API_KEY"
+    set -a; . "$OPERATOR_HOME/.openclaw/.env"; set +a
+    POSTGRID_API_KEY="$CENTRAL_KEY"; export POSTGRID_API_KEY
+  else
+    set -a; . "$OPERATOR_HOME/.openclaw/.env"; set +a
+  fi
+fi
+
+exec node "$OPERATOR_HOME/rrd-letter.mjs" "$@"

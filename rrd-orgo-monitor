@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# rrd-orgo-monitor — watches the Orgo account and auto-wires provisioning.
+#
+# Runs on a timer (launchd com.openclaw.rrd-orgo-monitor, every 5 min). Uses the
+# zero-cost `rrd-orgo plan` check (/me + /projects owner_tier — no desktop is ever
+# created). It reacts to TWO things:
+#   1. A DIFFERENT key/account  (ORGO_API_KEY hash or account user_id changes)
+#   2. An UPGRADED plan         (owner_tier flips off "free" -> paid)
+#
+# When the account is on a PAID tier, it auto-provisions an Orgo project for every
+# active client (idempotent) and reconciles the fleet. On a free tier it just
+# records the state and waits. Every meaningful change pings the recoverydesk
+# Telegram. The ORGO_API_KEY itself is never logged or stored (only a hash).
+set -uo pipefail
+cd /Users/AIAgenterminal
+
+set -a
+[ -f ./.env.local ] && . ./.env.local
+[ -f "$HOME/.openclaw/.env" ] && . "$HOME/.openclaw/.env"
+set +a
+
+STATE="$HOME/.openclaw/orgo-monitor-state.json"
+SEND="$HOME/.local/bin/recoverydesk"
+ts() { date -u +%FT%TZ; }
+
+if [ -z "${ORGO_API_KEY:-}" ]; then
+  echo "[$(ts)] ORGO_API_KEY not set — nothing to monitor."
+  exit 0
+fi
+
+KEY_HASH="$(printf '%s' "$ORGO_API_KEY" | shasum -a 256 | cut -d' ' -f1)"
+
+# ORGO_MONITOR_FAKE_PLAN lets ops/tests inject a plan JSON (e.g. to dry-run the
+# upgrade path) instead of the live zero-cost check.
+PLAN_JSON="${ORGO_MONITOR_FAKE_PLAN:-$(./rrd-orgo plan 2>/dev/null || echo '{}')}"
+read -r USER_ID OWNER_TIER PAID EMAIL <<EOF
+$(printf '%s' "$PLAN_JSON" | python3 -c 'import sys,json
+d=json.load(sys.stdin) if sys.stdin else {}
+print(d.get("userId") or "-", (d.get("ownerTier") or "-"), "yes" if d.get("paid") else "no", d.get("email") or "-")' 2>/dev/null || echo "- - no -")
+EOF
+
+SIG="${KEY_HASH}:${USER_ID}:${OWNER_TIER}"
+
+PREV_SIG="$(python3 -c 'import json,sys
+try: print(json.load(open(sys.argv[1])).get("signature",""))
+except Exception: print("")' "$STATE" 2>/dev/null || echo "")"
+PREV_PROVISIONED="$(python3 -c 'import json,sys
+try: print("yes" if json.load(open(sys.argv[1])).get("provisioned") else "no")
+except Exception: print("no")' "$STATE" 2>/dev/null || echo "no")"
+FIRST_RUN="no"; [ ! -f "$STATE" ] && FIRST_RUN="yes"
+
+save_state() {
+  python3 - "$STATE" "$SIG" "$KEY_HASH" "$USER_ID" "$OWNER_TIER" "$PAID" "$1" "$(ts)" <<'PY'
+import json,sys
+_,path,sig,kh,uid,tier,paid,prov,ts=sys.argv
+json.dump({"signature":sig,"keyHash":kh,"userId":uid,"ownerTier":tier,
+           "paid":paid=="yes","provisioned":prov=="yes","checkedAt":ts},
+          open(path,"w"),indent=2)
+PY
+  chmod 600 "$STATE" 2>/dev/null || true
+}
+ping() { [ -x "$SEND" ] && "$SEND" send --to telegram --quiet "$1" >/dev/null 2>&1 || true; }
+
+# Nothing changed and we're already in the right state → quiet no-op.
+if [ "$SIG" = "$PREV_SIG" ] && { [ "$PAID" = "no" ] || [ "$PREV_PROVISIONED" = "yes" ]; }; then
+  echo "[$(ts)] no change (account ${EMAIL}, tier ${OWNER_TIER}, paid ${PAID})."
+  exit 0
+fi
+
+echo "[$(ts)] change detected: account=${EMAIL} tier=${OWNER_TIER} paid=${PAID} (prevSig=${PREV_SIG:-none})"
+
+if [ "$PAID" = "yes" ]; then
+  # Upgraded (or new paid key): provision every active client + reconcile.
+  PROFILES="$(node ./rrd-agent.mjs activeProfiles 2>/dev/null | python3 -c 'import sys,json;print(" ".join(json.load(sys.stdin)))' 2>/dev/null || echo "")"
+  COUNT=0
+  for p in $PROFILES; do
+    ./rrd-orgo provision "$p" >/dev/null 2>&1 && COUNT=$((COUNT+1)) || echo "  warn: provision $p failed"
+  done
+  ./rrd-orgo-reconcile >/dev/null 2>&1 || true
+  save_state "yes"
+  MSG="✅ Orgo upgraded — account ${EMAIL}, tier ${OWNER_TIER}. Auto-provisioned ${COUNT} active client desktop(s). Boot one with: rrd-orgo start <profile>"
+  echo "[$(ts)] $MSG"
+  ping "$MSG"
+else
+  save_state "no"
+  if [ "$FIRST_RUN" = "no" ]; then
+    MSG="ℹ️ Orgo key/account change detected — account ${EMAIL}, tier ${OWNER_TIER} (free). Auto-provisioning will run once you upgrade to a paid plan."
+    echo "[$(ts)] $MSG"
+    ping "$MSG"
+  else
+    echo "[$(ts)] baseline recorded (free tier). Watching for an upgrade or key change."
+  fi
+fi
