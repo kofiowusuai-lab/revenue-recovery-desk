@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Provision wrapper for the Hermes recovery-desk operator.
+# Sources the locked .env.local and turns an onboarding submission into a
+# per-client Hermes recovery profile (SOUL/MEMORY/USER + empty .env placeholders).
+set -euo pipefail
+cd /Users/AIAgenterminal
+set -a; . ./.env.local; set +a
+exec node /Users/AIAgenterminal/hermes-provision.mjs "$@"

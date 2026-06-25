@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revenue Recovery Desk — Client Onboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0F172A;--navy-soft:#1E293B;--navy-line:#334155;--amber:#F59E0B;--amber-dark:#D97706;--white:#FFFFFF;--bg:#F8FAFC;--text:#0F172A;--muted:#64748B;--line:#E2E8F0;--danger:#DC2626;--green:#16A34A;--radius:12px;--shadow:0 1px 3px rgba(15,23,42,.08),0 8px 24px rgba(15,23,42,.06);--font:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  header.app-header{background:var(--navy);color:var(--white);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:50;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{width:36px;height:36px;border-radius:9px;background:var(--amber);color:var(--navy);display:grid;place-items:center;font-weight:700;font-size:18px;flex:none;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.15;}
+  .brand-text .title{font-weight:700;font-size:16px;letter-spacing:.2px;}
+  .brand-text .sub{font-size:12px;color:#94A3B8;}
+  .draft-flag{font-size:12px;color:#94A3B8;}
+  main{max-width:940px;margin:0 auto;padding:32px 20px 80px;}
+  h1.page-title{font-size:26px;font-weight:700;margin:0 0 4px;}
+  p.page-lead{color:var(--muted);margin:0 0 28px;font-size:15px;}
+  .stepper{display:flex;align-items:center;gap:0;margin:0 0 28px;padding:0;list-style:none;flex-wrap:wrap;}
+  .step-dot{display:flex;align-items:center;gap:0;flex:1;min-width:0;}
+  .step-dot .num{width:28px;height:28px;border-radius:50%;background:var(--white);border:2px solid var(--line);color:var(--muted);font-weight:700;font-size:12px;display:grid;place-items:center;flex:none;transition:all .2s;}
+  .step-dot .lbl{font-size:11.5px;color:var(--muted);margin-left:7px;white-space:nowrap;font-weight:500;}
+  .step-dot .bar{height:2px;background:var(--line);flex:1;margin:0 8px;min-width:8px;}
+  .step-dot:last-child{flex:none;}
+  .step-dot.active .num{background:var(--amber);border-color:var(--amber);color:var(--navy);}
+  .step-dot.done .num{background:var(--navy);border-color:var(--navy);color:var(--white);}
+  .step-dot.active .lbl,.step-dot.done .lbl{color:var(--text);font-weight:600;}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;}
+  .step-panel{display:none;}.step-panel.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+  .step-head{margin-bottom:20px;}.step-head h2{font-size:20px;margin:0 0 4px;font-weight:700;}.step-head p{margin:0;color:var(--muted);font-size:14px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px;}
+  .field{display:flex;flex-direction:column;gap:6px;}.field.full{grid-column:1/-1;}
+  label.lbl{font-size:13px;font-weight:600;color:#334155;}label.lbl .req{color:var(--amber-dark);margin-left:2px;}
+  .hint{font-size:12px;color:var(--muted);}
+  input[type=text],input[type=email],input[type=tel],input[type=number],input[type=url],select,textarea{font-family:var(--font);font-size:14px;color:var(--text);padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--white);width:100%;transition:border-color .15s,box-shadow .15s;}
+  textarea{resize:vertical;min-height:78px;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.16);}
+  input.invalid,select.invalid,textarea.invalid{border-color:var(--danger);box-shadow:0 0 0 3px rgba(220,38,38,.12);}
+  .err-msg{color:var(--danger);font-size:12px;display:none;}.err-msg.show{display:block;}
+  .section-sub{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin:8px 0 2px;grid-column:1/-1;border-top:1px solid var(--line);padding-top:16px;}
+  .btn{font-family:var(--font);font-weight:600;font-size:14px;padding:11px 20px;border-radius:9px;cursor:pointer;border:1px solid transparent;transition:background .15s,border-color .15s,color .15s,transform .05s;}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--amber);color:var(--navy);}.btn-primary:hover{background:var(--amber-dark);color:var(--white);}
+  .btn-ghost{background:var(--white);color:var(--navy);border-color:var(--line);}.btn-ghost:hover{border-color:var(--navy-line);}
+  .btn-dark{background:var(--navy);color:var(--white);}.btn-dark:hover{background:var(--navy-soft);}
+  .btn-sm{padding:7px 13px;font-size:13px;}.btn:disabled{opacity:.55;cursor:not-allowed;}
+  .step-nav{display:flex;justify-content:space-between;align-items:center;margin-top:26px;gap:12px;}
+  .check-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 14px;}
+  .check-grid.two{grid-template-columns:1fr 1fr;}
+  .check{display:flex;align-items:center;gap:9px;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;cursor:pointer;transition:border-color .15s,background .15s;}
+  .check:hover{border-color:var(--navy-line);}.check input{width:16px;height:16px;accent-color:var(--amber-dark);flex:none;margin:0;}
+  .check.checked{border-color:var(--amber);background:#FFFBEB;}
+  .dyn-table{width:100%;border-collapse:collapse;margin-bottom:12px;}
+  .dyn-table th{text-align:left;font-size:12px;font-weight:600;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line);}
+  .dyn-table td{padding:6px 8px;vertical-align:middle;}.dyn-table td input,.dyn-table td select{padding:8px 10px;font-size:13px;}
+  .row-del{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;padding:4px 8px;border-radius:6px;}
+  .row-del:hover{background:#FEE2E2;color:var(--danger);}
+  .table-foot{display:flex;align-items:center;justify-content:flex-start;margin:8px 0 4px;}
+  /* uploads */
+  .drop{border:1.5px dashed var(--line);border-radius:10px;padding:18px;text-align:center;color:var(--muted);font-size:14px;cursor:pointer;transition:border-color .15s,background .15s;}
+  .drop:hover{border-color:var(--amber);background:#FFFBEB;}
+  .doc-list{list-style:none;padding:0;margin:12px 0 0;display:flex;flex-direction:column;gap:8px;}
+  .doc-item{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:13px;}
+  .doc-item .meta{color:var(--muted);font-size:12px;}
+  .doc-item.uploading{opacity:.6;}
+  .secure-note{background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;border-radius:9px;padding:10px 14px;font-size:13px;margin-bottom:16px;}
+  .secure-note b{font-weight:700;}
+  .success-screen{display:none;text-align:center;padding:40px 20px;}.success-screen.show{display:block;}
+  .success-screen .ring{width:72px;height:72px;border-radius:50%;margin:0 auto 18px;background:#DCFCE7;color:var(--green);display:grid;place-items:center;font-size:36px;}
+  .success-screen h2{font-size:24px;margin:0 0 8px;}.success-screen p{color:var(--muted);margin:0 0 24px;}
+  .banner{max-width:940px;margin:18px auto 0;padding:0 20px;}
+  .banner-inner{border-radius:10px;padding:12px 16px;font-size:13.5px;display:none;}.banner-inner.show{display:block;}
+  .banner-err{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;}.banner-warn{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;}
+  .consent-row{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:9px;padding:12px 14px;}
+  .consent-row input{width:18px;height:18px;accent-color:var(--amber-dark);margin-top:2px;flex:none;}
+  .submitting{opacity:.6;pointer-events:none;}
+  .step-dot.clickable .num{cursor:pointer;}
+  .step-dot.clickable:hover .num{border-color:var(--text);}
+  @media (max-width:760px){.grid{grid-template-columns:1fr;}.check-grid{grid-template-columns:1fr 1fr;}.step-dot .lbl{display:none;}main{padding:22px 14px 60px;}.card{padding:20px 16px;}}
+  @media (max-width:600px){
+    #contact-table thead{display:none;}
+    #contact-table,#contact-table tbody,#contact-table tr,#contact-table td{display:block;width:100%;}
+    #contact-table tr{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:14px;}
+    #contact-table td{padding:6px 0;}
+    #contact-table td::before{content:attr(data-label);display:block;font-size:11.5px;font-weight:600;color:var(--muted);margin-bottom:4px;}
+    #contact-table td:last-child{text-align:right;padding-top:4px;}
+    #contact-table td:last-child::before{content:none;}
+    #contact-table td input,#contact-table td select{width:100%;}
+  }
+  @media (max-width:480px){.check-grid{grid-template-columns:1fr;}}
+</style>
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<header class="app-header">
+  <div class="brand">
+    <span class="fa-wordmark">FlowAudit</span><span class="brand-divider" aria-hidden="true"></span>
+    <div class="brand-text"><span class="title">Revenue Recovery Desk</span><span class="sub">Client Onboarding</span></div>
+  </div>
+  <span class="draft-flag" id="draft-flag"></span>
+</header>
+
+<div class="banner"><div class="banner-inner" id="config-banner"></div></div>
+
+<main>
+  <h1 class="page-title">Let's map your business so the desk can go to work.</h1>
+  <p class="page-lead">This sets up your dedicated recovery agent. The more we learn about how you run, who owes you, and how you collect, the faster it recovers your money, and the less you have to do. Most fields are optional, your draft saves automatically, and anything you skip we'll fill in together.</p>
+
+  <ol class="stepper" id="stepper"></ol>
+
+  <div class="card" id="form-card">
+    <form id="intake-form" novalidate>
+
+      <!-- STEP 1 — Business Profile -->
+      <section class="step-panel active" data-step="1">
+        <div class="step-head"><h2>Business Profile</h2><p>Who you are and how your revenue works.</p></div>
+        <div class="grid">
+          <div class="field"><label class="lbl" for="f_company">Company name</label><input type="text" id="f_company" autocomplete="organization"></div>
+          <div class="field"><label class="lbl" for="f_contactName">Your full name</label><input type="text" id="f_contactName" autocomplete="name"></div>
+          <div class="field"><label class="lbl" for="f_email">Work email<span class="req">*</span></label><input type="email" id="f_email" autocomplete="email"><div class="err-msg" data-for="f_email"></div></div>
+          <div class="field"><label class="lbl" for="f_phone">Phone</label><input type="tel" id="f_phone" autocomplete="tel"></div>
+          <div class="field"><label class="lbl" for="f_industry">Industry</label>
+            <select id="f_industry"><option value="">Select…</option><option>Staffing/Recruitment</option><option>Commercial Cleaning</option><option>MSP/IT Services</option><option>Security</option><option>Logistics</option><option>Facilities</option><option>Maintenance</option><option>Construction/Trades</option><option>Professional Services</option><option>Healthcare</option><option>Other</option></select>
+            <input type="text" id="f_industryOther" placeholder="Please specify your industry" style="display:none;margin-top:8px;">
+          </div>
+          <div class="field"><label class="lbl" for="f_size">Company size</label>
+            <select id="f_size"><option value="">Select…</option><option>1–10</option><option>11–50</option><option>51–200</option><option>201–500</option><option>501–1000</option><option>1000+</option></select>
+          </div>
+          <div class="field full"><label class="lbl" for="f_website">Website</label><input type="url" id="f_website" placeholder="https://" autocomplete="url"></div>
+
+          <div class="section-sub">How your revenue works</div>
+          <div class="field full"><label class="lbl" for="f_businessModel">What does your business sell, and how do you bill for it?</label><textarea id="f_businessModel" placeholder="e.g. We staff warehouse workers and invoice clients weekly per hours worked."></textarea></div>
+          <div class="field"><label class="lbl" for="f_customerType">Who do you invoice?</label><select id="f_customerType"><option value="">Select…</option><option>Other businesses (B2B)</option><option>Consumers (B2C)</option><option>Both</option></select></div>
+          <div class="field"><label class="lbl" for="f_whoTheyServe">Who are your typical customers?</label><input type="text" id="f_whoTheyServe" placeholder="e.g. mid-size logistics firms"></div>
+          <div class="field"><label class="lbl" for="f_customerCount">Active customers</label><select id="f_customerCount"><option value="">Select…</option><option>1–25</option><option>26–100</option><option>101–500</option><option>501–2000</option><option>2000+</option></select></div>
+          <div class="field"><label class="lbl" for="f_typicalInvoiceSize">Typical invoice size</label><input type="text" id="f_typicalInvoiceSize" placeholder="e.g. $2,500"></div>
+          <div class="field"><label class="lbl" for="f_monthlyVolumeCount">Invoices sent per month</label><input type="number" id="f_monthlyVolumeCount" min="0" placeholder="e.g. 120"></div>
+          <div class="field"><label class="lbl" for="f_monthlyVolumeAmount">Monthly invoiced volume ($)</label><input type="number" id="f_monthlyVolumeAmount" min="0" step="0.01" placeholder="e.g. 300000"></div>
+          <div class="field"><label class="lbl" for="f_paymentTerms">Standard payment terms</label><select id="f_paymentTerms"><option value="">Select…</option><option>Due on receipt</option><option>Net 7</option><option>Net 15</option><option>Net 30</option><option>Net 45</option><option>Net 60</option><option>Net 90</option><option>Varies / custom</option></select></div>
+          <div class="field"><label class="lbl" for="f_currencies">Currencies you invoice in</label><input type="text" id="f_currencies" placeholder="e.g. USD"></div>
+          <div class="field"><label class="lbl" for="f_approxOutstanding">Approx. total overdue right now ($)</label><input type="number" id="f_approxOutstanding" min="0" step="0.01" placeholder="ballpark is fine"><div class="hint">Just a ballpark for triage, the agent finds the exact figure.</div></div>
+        </div>
+      </section>
+
+      <!-- STEP 2 — Payment & Invoicing -->
+      <section class="step-panel" data-step="2">
+        <div class="step-head"><h2>Payment &amp; Invoicing Stack</h2><p>Where money moves and how the agent will connect to send payment links.</p></div>
+        <div class="secure-note"><b>Note:</b> never enter passwords or API keys here. We only need to know which tools you use and who owns access, we connect them securely with you afterward.</div>
+        <div class="field full"><label class="lbl">Payment platforms you use</label><div class="check-grid" id="pay-platforms"></div><input type="text" id="f_payPlatformsOther" placeholder="Please specify your other payment platform(s)" style="display:none;margin-top:10px;"></div>
+        <div class="grid" style="margin-top:18px;">
+          <div class="field"><label class="lbl" for="f_accounting">Accounting / invoicing system</label><select id="f_accounting"><option value="">Select…</option><option>QuickBooks Online</option><option>Xero</option><option>FreshBooks</option><option>Wave</option><option>Zoho Books</option><option>Zoho Invoice</option><option>Sage</option><option>FreeAgent</option><option>NetSuite</option><option>Odoo</option><option>Bill.com</option><option>Chaser</option><option>Clientary</option><option>Moneybird</option><option>Sevdesk</option><option>Lexoffice</option><option>Quaderno</option><option>Elorus</option><option>Coupa</option><option>Spreadsheets</option><option>None</option><option>Other</option></select><input type="text" id="f_accountingOther" placeholder="Please specify your accounting system" style="display:none;margin-top:8px;"></div>
+          <div class="field"><label class="lbl" for="f_paymentLinks">Can you generate payment links?</label><select id="f_paymentLinks"><option value="">Select…</option><option>Yes</option><option>No</option><option>Not sure</option></select></div>
+          <div class="field"><label class="lbl" for="f_payApiAccess">Do you have API / admin access to your payment platform?</label><select id="f_payApiAccess"><option value="">Select…</option><option>Yes</option><option>No</option><option>Not sure</option></select></div>
+          <div class="field"><label class="lbl" for="f_payConnection">Connection method available</label><select id="f_payConnection"><option value="">Select…</option><option>API key</option><option>OAuth login</option><option>CLI</option><option>None</option><option>Not sure</option></select></div>
+          <div class="field"><label class="lbl" for="f_payAccessOwner">Who owns / manages this account?</label><input type="text" id="f_payAccessOwner" placeholder="name or role"></div>
+          <div class="field"><label class="lbl" for="f_payNotes">Anything else about payments</label><input type="text" id="f_payNotes" placeholder="optional"></div>
+        </div>
+      </section>
+
+      <!-- STEP 3 — CRM & Customer Data -->
+      <section class="step-panel" data-step="3">
+        <div class="step-head"><h2>CRM &amp; Customer Data</h2><p>Where your customer contact information lives, so the agent can reach the right person.</p></div>
+        <div class="grid">
+          <div class="field"><label class="lbl" for="f_crm">CRM / where customers are stored</label><select id="f_crm"><option value="">Select…</option><option>HubSpot</option><option>Salesforce</option><option>Pipedrive</option><option>monday.com</option><option>Zoho CRM</option><option>Close</option><option>GoHighLevel</option><option>Capsule CRM</option><option>Attio</option><option>Nutshell</option><option>Salesflare</option><option>Salesmate</option><option>Kommo</option><option>noCRM.io</option><option>ActiveCampaign</option><option>Dynamics 365</option><option>Odoo</option><option>NetSuite</option><option>RepairShopr</option><option>AccuLynx</option><option>ServiceM8</option><option>Spreadsheet</option><option>In our accounting tool</option><option>None</option><option>Other</option></select><input type="text" id="f_crmOther" placeholder="Please specify your CRM / where data lives" style="display:none;margin-top:8px;"></div>
+          <div class="field"><label class="lbl" for="f_crmRecordCount">Roughly how many customer records?</label><select id="f_crmRecordCount"><option value="">Select…</option><option>1–100</option><option>101–500</option><option>501–2000</option><option>2001–10000</option><option>10000+</option></select></div>
+          <div class="field full"><label class="lbl" for="f_crmDataLocation">Where exactly does customer contact data live?</label><input type="text" id="f_crmDataLocation" placeholder="e.g. HubSpot company + contact records; some in QuickBooks"></div>
+          <div class="field full"><label class="lbl">What contact details do you keep per customer?</label><div class="check-grid" id="crm-fields"></div></div>
+          <div class="field"><label class="lbl" for="f_crmDataQuality">How clean is that data?</label><select id="f_crmDataQuality"><option value="">Select…</option><option>Clean and current</option><option>Mostly good</option><option>Patchy</option><option>Messy / scattered</option></select></div>
+          <div class="field"><label class="lbl" for="f_crmApiAccess">API / admin access to the CRM?</label><select id="f_crmApiAccess"><option value="">Select…</option><option>Yes</option><option>No</option><option>Not sure</option></select></div>
+          <div class="field"><label class="lbl" for="f_crmAccessOwner">Who owns / manages the CRM?</label><input type="text" id="f_crmAccessOwner" placeholder="name or role"></div>
+        </div>
+      </section>
+
+      <!-- STEP 4 — Recovery Process & SOPs -->
+      <section class="step-panel" data-step="4">
+        <div class="step-head"><h2>Your Recovery Process &amp; SOPs</h2><p>This is the gold. The agent will follow <i>your</i> proven process and voice, not a generic script.</p></div>
+        <div class="grid">
+          <div class="field"><label class="lbl" for="f_hasSop">Do you have a documented collections process?</label><select id="f_hasSop"><option value="">Select…</option><option>Yes</option><option>No</option><option>Somewhat</option></select></div>
+          <div class="field"><label class="lbl" for="f_whoRunsIt">Who handles collections today?</label><input type="text" id="f_whoRunsIt" placeholder="name or role"></div>
+          <div class="field full"><label class="lbl">Upload your SOPs, email/SMS templates, sample invoices, anything</label>
+            <div class="drop" id="drop-zone">Drop files here or click to upload (PDF, DOCX, XLSX, images)</div>
+            <input type="file" id="file-input" multiple style="display:none;">
+            <ul class="doc-list" id="doc-list"></ul>
+          </div>
+          <div class="field full">
+            <div class="consent-row" style="background:#FFFBEB;border-color:#FDE68A;">
+              <input type="checkbox" id="f_wantSopBuilt">
+              <label for="f_wantSopBuilt" style="font-size:13.5px;cursor:pointer;">No documented process, or want it sharpened? Tick this and our team will build you a proven recovery SOP tailored to your business, your agent follows it from day one, and you approve it before anything goes out.</label>
+            </div>
+          </div>
+          <div class="field full"><label class="lbl" for="f_processDescription">Walk us through how you chase an unpaid invoice today, step by step.</label><textarea id="f_processDescription" placeholder="When do you start? What do you send first? What happens if they don't respond? (Skip if you'd rather we build it.)"></textarea></div>
+          <div class="field"><label class="lbl" for="f_cadence">Reminder cadence</label><input type="text" id="f_cadence" placeholder="e.g. day 1, day 7, day 14, day 30"></div>
+          <div class="field"><label class="lbl">Channels you use to chase</label><div class="check-grid two" id="rp-channels" style="grid-template-columns:repeat(3,1fr);"></div></div>
+          <div class="field"><label class="lbl" for="f_tone">Tone / voice</label><select id="f_tone"><option value="">Select…</option><option>Friendly</option><option>Firm but polite</option><option>Formal</option><option>Direct / no-nonsense</option><option>Escalating (soft → firm)</option></select></div>
+          <div class="field"><label class="lbl" for="f_alwaysPhrases">Phrases you always use</label><input type="text" id="f_alwaysPhrases" placeholder="optional"></div>
+          <div class="field"><label class="lbl" for="f_neverPhrases">Phrases / things to never say</label><input type="text" id="f_neverPhrases" placeholder="optional"></div>
+          <div class="field full"><label class="lbl" for="f_escalation">Escalation ladder</label><textarea id="f_escalation" placeholder="What happens at 30 / 60 / 90 days? When do you involve a collections agency or legal?"></textarea></div>
+          <div class="field full"><label class="lbl" for="f_templates">Paste your current reminder email / SMS templates</label><textarea id="f_templates" placeholder="Paste them here, or upload above."></textarea></div>
+          <div class="field full"><label class="lbl" for="f_settlementRules">Payment plans, discounts, settlements, what are you willing to offer?</label><textarea id="f_settlementRules" placeholder="e.g. We allow 3-month plans; up to 10% off for immediate payment."></textarea></div>
+          <div class="field"><label class="lbl" for="f_timeSpent">Time spent on this per week</label><input type="text" id="f_timeSpent" placeholder="e.g. ~10 hours"></div>
+          <div class="field"><label class="lbl" for="f_whatWorks">What's worked / what hasn't?</label><input type="text" id="f_whatWorks" placeholder="optional"></div>
+        </div>
+      </section>
+
+      <!-- STEP 5 — Outreach & Guardrails -->
+      <section class="step-panel" data-step="5">
+        <div class="step-head"><h2>Outreach &amp; Approval Guardrails</h2><p>How the agent reaches customers, and the rules that keep you in control.</p></div>
+        <div class="grid">
+          <div class="field full"><label class="lbl">Channels the agent may use</label><div class="check-grid two" id="out-channels"></div></div>
+          <div class="section-sub">Sending setup</div>
+          <div class="field"><label class="lbl" for="f_emailProvider">Email provider</label><input type="text" id="f_emailProvider" placeholder="e.g. Google Workspace, Outlook, SendGrid"></div>
+          <div class="field"><label class="lbl" for="f_sendingDomain">Sending domain / from-address</label><input type="text" id="f_sendingDomain" placeholder="e.g. billing@yourco.com"></div>
+          <div class="field"><label class="lbl" for="f_fromName">From name</label><input type="text" id="f_fromName" placeholder="e.g. YourCo Accounts"></div>
+          <div class="field"><label class="lbl" for="f_smsProvider">SMS provider (if any)</label><input type="text" id="f_smsProvider" placeholder="e.g. Twilio"></div>
+          <div class="field"><label class="lbl" for="f_smsNumber">SMS / phone number</label><input type="text" id="f_smsNumber" placeholder="optional"></div>
+          <div class="field"><label class="lbl" for="f_timezone">Timezone</label><input type="text" id="f_timezone" placeholder="e.g. America/New_York"></div>
+          <div class="field"><label class="lbl" for="f_businessHours">Send only during</label><input type="text" id="f_businessHours" placeholder="e.g. Mon–Fri 9am–5pm"></div>
+          <div class="field"><label class="lbl" for="f_languages">Languages</label><input type="text" id="f_languages" placeholder="e.g. English"></div>
+          <div class="field full"><label class="lbl" for="f_signature">Email signature / sign-off</label><textarea id="f_signature" placeholder="optional"></textarea></div>
+          <div id="letters-block" style="display:none">
+          <div class="section-sub">Letters / direct mail <span style="font-weight:400;text-transform:none;color:var(--muted);">(only if you tick "Letter" above)</span></div>
+          <div class="field"><label class="lbl" for="f_letterReturnName">Return name on the letter</label><input type="text" id="f_letterReturnName" placeholder="e.g. YourCo Accounts Receivable"></div>
+          <div class="field"><label class="lbl" for="f_letterReturnAddr1">Return address line 1</label><input type="text" id="f_letterReturnAddr1" placeholder="Street address"></div>
+          <div class="field"><label class="lbl" for="f_letterReturnAddr2">Return address line 2</label><input type="text" id="f_letterReturnAddr2" placeholder="Suite / unit (optional)"></div>
+          <div class="field"><label class="lbl" for="f_letterCity">City</label><input type="text" id="f_letterCity" placeholder="City"></div>
+          <div class="field"><label class="lbl" for="f_letterState">State / province</label><input type="text" id="f_letterState" placeholder="e.g. NY / ON"></div>
+          <div class="field"><label class="lbl" for="f_letterPostal">Postal / ZIP</label><input type="text" id="f_letterPostal" placeholder="e.g. 10001"></div>
+          <div class="field"><label class="lbl" for="f_letterCountry">Country</label><input type="text" id="f_letterCountry" placeholder="e.g. US or CA"></div>
+          <div class="field"><label class="lbl" for="f_letterMailingClass">Default mailing class</label><select id="f_letterMailingClass"><option value="">Select…</option><option value="first_class">First-Class</option><option value="standard">Standard</option></select></div>
+          <div class="field"><label class="lbl" for="f_letterCertified">Send the formal-demand letter certified?</label><select id="f_letterCertified"><option value="">Select…</option><option>Yes</option><option>No</option></select></div>
+          <div class="field full"><div class="secure-note" style="background:#EFF6FF;border-color:#BFDBFE;color:#1E40AF;"><b>Connect your PostGrid account (for posting letters):</b><br>1. Create a free account at <b>postgrid.com</b>.<br>2. Verify your sender / return address.<br>3. Open <b>Settings → API Keys</b> and copy your <b>Live API key</b>.<br>4. We'll email you a secure one-time link to connect it. <b>Never paste the key into this form</b> — letters post on your own PostGrid account, billed to you, on your letterhead.<br><br><b>Letter billing notice:</b> if you keep Letters enabled but do not provide your own PostGrid API key, you can opt out in the secure access form. If you do not opt out and later approve/authorize physical letters, any postage, print, processing, certified-mail, or related letter costs we incur will be passed through and billed at month-end in addition to your maintenance/retainer fee. Current per-piece estimate: <b>$1.219 per letter + 20p per page</b> (plus any certified-mail or provider pass-through extras).</div></div>
+          </div>
+          <div class="section-sub">Control &amp; guardrails</div>
+          <div class="field"><label class="lbl" for="f_approvalModel">Approval model (for channels you don't fully automate below)</label><select id="f_approvalModel"><option value="">Select…</option><option>Approve every message before it sends</option><option>Approve each batch before it sends</option><option>Approve templates once, then auto-send</option></select></div>
+          <div class="field"><label class="lbl" for="f_batchSize">Preferred batch size</label><select id="f_batchSize"><option value="">Select…</option><option>10</option><option>25</option><option>50</option><option>100</option><option>No preference</option></select></div>
+          <div class="field full"><label class="lbl">Fully automate these channels — send without per-message approval</label>
+            <div class="check-grid" id="auto-send-channels" style="grid-template-columns:repeat(3,1fr);"></div>
+            <div class="secure-note" style="margin-top:10px;background:#FFFBEB;border-color:#FDE68A;color:#92400E;">Ticking a channel lets your agent send on it automatically, hands-off, no per-message approval. We still never message anyone on your do-not-contact list, always follow your compliance rules, only send during your hours, and stop the moment a customer disputes or replies. Leave a channel unticked to approve each message yourself.</div>
+          </div>
+          <div class="field full"><label class="lbl" for="f_doNotContact">Who should the agent NEVER contact?</label><textarea id="f_doNotContact" placeholder="Customers in active dispute, on payment plans, VIPs, legal hold, etc."></textarea></div>
+          <div class="field full"><label class="lbl" for="f_compliance">Compliance constraints</label><textarea id="f_compliance" placeholder="Regulated industry? Required legal language? Collections rules to follow?"></textarea></div>
+          <div class="field"><label class="lbl" for="f_maxDiscount">Max discount/settlement the agent may offer alone</label><input type="text" id="f_maxDiscount" placeholder="e.g. up to 10%"></div>
+          <div class="field"><label class="lbl" for="f_escalationTriggers">When should it escalate to a human?</label><input type="text" id="f_escalationTriggers" placeholder="e.g. customer disputes or asks to stop"></div>
+        </div>
+      </section>
+
+      <!-- STEP 6 — Key Contacts -->
+      <section class="step-panel" data-step="6">
+        <div class="step-head"><h2>Key Contacts &amp; Access Owners</h2><p>Who we work with, and who can grant the integrations.</p></div>
+        <div style="overflow-x:auto;">
+          <table class="dyn-table" id="contact-table">
+            <thead><tr><th>Full Name</th><th>Role / Title</th><th>Email</th><th>Phone</th><th style="width:150px;">Tag</th><th style="width:38px;"></th></tr></thead>
+            <tbody id="contact-body"></tbody>
+          </table>
+        </div>
+        <div class="table-foot"><button type="button" class="btn btn-ghost btn-sm" onclick="addContactRow()">+ Add contact</button></div>
+        <div class="err-msg" data-for="contacts" style="margin:8px 0 12px;"></div>
+        <div class="field full" style="margin-top:8px;"><label class="lbl" for="f_primaryContact">Primary contact<span class="req">*</span></label>
+          <select id="f_primaryContact"></select>
+          <div class="hint">Receives weekly recovery reports and approves outreach unless you name separate approvers below.</div>
+          <div class="err-msg" data-for="f_primaryContact"></div>
+        </div>
+        <div class="section-sub" style="margin-top:18px;">Approval routing</div>
+        <div class="grid">
+          <div class="field full"><label class="lbl" for="f_approvalContacts">Who should receive draft approvals?</label><textarea id="f_approvalContacts" placeholder="Names, roles, emails, Slack/Teams handles. Example: Sarah Mitchell — AR Manager — sarah@company.com — Slack @sarah"></textarea><div class="hint">If blank, we use the primary contact above. These people approve drafts before any gated outreach is sent.</div></div>
+          <div class="field"><label class="lbl" for="f_approvalChannel">Preferred approval channel</label><select id="f_approvalChannel"><option value="">Use what fits our current workflow</option><option>Email</option><option>Slack</option><option>Microsoft Teams</option><option>CRM task</option><option>Shared inbox</option><option>Telegram</option><option>Other</option></select></div>
+          <div class="field"><label class="lbl" for="f_approvalSla">Expected approval turnaround</label><select id="f_approvalSla"><option value="">Select…</option><option>Same day</option><option>Within 24 hours</option><option>Within 48 hours</option><option>Twice weekly batch review</option><option>Weekly batch review</option></select></div>
+          <div class="field full"><label class="lbl" for="f_approvalNotes">Approval workflow notes</label><textarea id="f_approvalNotes" placeholder="e.g. Email approval links to the AR Manager; Slack approvals in #accounts-receivable; CFO only for discounts over 5% or balances over £10k."></textarea><div class="hint">We configure this to match your existing workflow — email, Slack, Teams, CRM tasks, or shared inbox — so you do not have to add a new platform unnecessarily.</div></div>
+        </div>
+      </section>
+
+      <!-- STEP 7 — Goals & Decision Catalyst -->
+      <section class="step-panel" data-step="7">
+        <div class="step-head"><h2>Goals &amp; Decision Catalyst</h2><p>What winning looks like, and why now.</p></div>
+        <div class="grid">
+          <div class="field"><label class="lbl" for="f_primaryGoal">Primary goal</label><select id="f_primaryGoal"><option value="">Select…</option><option>Recover outstanding AR</option><option>Reduce DSO (days sales outstanding)</option><option>Automate dunning / reminders</option><option>Free up our team's time</option><option>All of the above</option></select></div>
+          <div class="field"><label class="lbl" for="f_urgency">How urgent is this?</label><select id="f_urgency"><option>Critical</option><option>High</option><option selected>Medium</option><option>Just exploring</option></select></div>
+          <div class="field"><label class="lbl" for="f_recoveryTarget">Recovery target</label><input type="text" id="f_recoveryTarget" placeholder="e.g. collect $80k in 60 days"></div>
+          <div class="field"><label class="lbl" for="f_kpis">KPIs you care about</label><input type="text" id="f_kpis" placeholder="e.g. DSO, % recovered, response rate"></div>
+          <div class="field full"><label class="lbl">Other automations you'd want down the line</label><div class="check-grid" id="goal-autos"></div><input type="text" id="f_goalAutosOther" placeholder="Please specify the other automation you'd want" style="display:none;margin-top:10px;"></div>
+          <div class="field full"><label class="lbl" for="f_catalyst">What was the final thing that made you decide to do this now?<span class="req">*</span></label><textarea id="f_catalyst" placeholder="The straw that broke the camel's back…"></textarea><div class="err-msg" data-for="f_catalyst"></div></div>
+          <div class="field full"><label class="lbl" for="f_anythingElse">Anything else we should know?</label><textarea id="f_anythingElse" placeholder="Sensitive customers, disputes, arrangements in progress…"></textarea></div>
+          <div class="field full">
+            <div class="consent-row">
+              <input type="checkbox" id="f_consent">
+              <label for="f_consent" style="font-size:13.5px;cursor:pointer;">I authorize this recovery desk to contact our customers on our behalf about overdue invoices, following the rules and approvals we set above.<span class="req">*</span></label>
+            </div>
+            <div class="err-msg" data-for="f_consent"></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="step-nav">
+        <button type="button" class="btn btn-ghost" id="btn-back" onclick="prevStep()" style="visibility:hidden;">← Back</button>
+        <button type="button" class="btn btn-primary" id="btn-next" onclick="nextStep()">Next →</button>
+        <button type="submit" class="btn btn-primary" id="btn-submit" style="display:none;">Submit onboarding</button>
+      </div>
+    </form>
+
+    <div class="success-screen" id="success-screen">
+      <div class="ring">✓</div>
+      <h2>You're all set.</h2>
+      <p>Your recovery desk has the full picture. We'll connect your tools securely and have your agent working within one business day.</p>
+      <button type="button" class="btn btn-dark" onclick="resetToForm()">Submit another business</button>
+    </div>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+"use strict";
+
+/* ============================================================
+   CONFIG — paste your Supabase project values here.
+   Both are safe to ship (anon key is public; RLS protects data).
+   ============================================================ */
+var SUPABASE_URL = "https://stboueshyjvooiftfuxm.supabase.co";
+var SUPABASE_ANON_KEY = "__SUPABASE_ANON_KEY_PLACEHOLDER__";
+
+var CONFIGURED = !/YOUR-REF|YOUR-ANON/.test(SUPABASE_URL + SUPABASE_ANON_KEY);
+var sb = CONFIGURED && window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+var DRAFT_KEY = "rrd_intake_draft";
+var BUCKET = "onboarding-docs";
+var TOTAL_STEPS = 7;
+var STEP_LABELS = ["Business","Payments","CRM","Process","Outreach","Contacts","Goals"];
+var currentStep = 1;
+var maxStepReached = 1;       // high-water mark — gates clickable stepper + history seeding
+var RESTORED_STEP = 1;        // step saved in the draft, applied on reload
+var SESSION_ID = null;       // groups uploaded docs
+var DOCS = [];               // [{name,path,type,size}]
+
+var PAY_PLATFORMS = ["Stripe","Square","PayPal","Braintree","Authorize.net","GoCardless","Bill.com","Whop","Shopify","Maxio","Paystack","Razorpay","Lemon Squeezy","MoonClerk","ACH / bank transfer","Paper checks","Other"];
+var CRM_FIELDS = ["Email","Phone","Mailing address","Contact person name","Account owner"];
+var RP_CHANNELS = ["Email","Phone","SMS","Letter","In person"];
+var OUT_CHANNELS = ["Email","SMS","Letter"];
+var AUTO_CHANNELS = ["Email","SMS","Letter"];
+var GOAL_AUTOS = ["Lead follow-up","Appointment scheduling","Customer onboarding","Reporting & analytics","Review requests","Other"];
+var CONTACT_TAGS = ["General","Technical / integrations","Billing / AR","Draft approver","Decision maker"];
+
+var FIELD_IDS = ["f_company","f_contactName","f_email","f_phone","f_industry","f_size","f_website","f_businessModel","f_customerType","f_whoTheyServe","f_customerCount","f_typicalInvoiceSize","f_monthlyVolumeCount","f_monthlyVolumeAmount","f_paymentTerms","f_currencies","f_approxOutstanding","f_accounting","f_paymentLinks","f_payApiAccess","f_payConnection","f_payAccessOwner","f_payNotes","f_crm","f_crmRecordCount","f_crmDataLocation","f_crmDataQuality","f_crmApiAccess","f_crmAccessOwner","f_hasSop","f_whoRunsIt","f_processDescription","f_cadence","f_tone","f_alwaysPhrases","f_neverPhrases","f_escalation","f_templates","f_settlementRules","f_timeSpent","f_whatWorks","f_emailProvider","f_sendingDomain","f_fromName","f_smsProvider","f_smsNumber","f_timezone","f_businessHours","f_languages","f_signature","f_letterReturnName","f_letterReturnAddr1","f_letterReturnAddr2","f_letterCity","f_letterState","f_letterPostal","f_letterCountry","f_letterMailingClass","f_letterCertified","f_approvalModel","f_batchSize","f_doNotContact","f_compliance","f_maxDiscount","f_escalationTriggers","f_approvalContacts","f_approvalChannel","f_approvalSla","f_approvalNotes","f_primaryGoal","f_urgency","f_recoveryTarget","f_kpis","f_catalyst","f_anythingElse","f_industryOther","f_accountingOther","f_crmOther","f_payPlatformsOther","f_goalAutosOther"];
+var CHECK_GROUPS = {"pay-platforms":PAY_PLATFORMS,"crm-fields":CRM_FIELDS,"rp-channels":RP_CHANNELS,"out-channels":OUT_CHANNELS,"auto-send-channels":AUTO_CHANNELS,"goal-autos":GOAL_AUTOS};
+
+function val(id){var e=document.getElementById(id);return e?e.value.trim():"";}
+function num(id){var v=parseFloat(val(id));return isFinite(v)?v:0;}
+function isEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(v).trim());}
+function uuid(){return (crypto.randomUUID?crypto.randomUUID():(Date.now().toString(36)+Math.random().toString(36).slice(2)));}
+
+/* ---------- "Other" → please-specify wiring ---------- */
+// for a select: when value is "Other", use the typed specification instead
+function resolveSelectOther(selId,otherId){var v=val(selId);return (v==="Other"&&val(otherId))?val(otherId):v;}
+// for a checkbox group: swap the literal "Other" entry for the typed specification
+function resolveCheckOther(arr,otherId){var t=val(otherId);if(t&&arr.indexOf("Other")!==-1)return arr.map(function(x){return x==="Other"?t:x;});return arr;}
+function bindOtherSelect(selId,otherId){
+  var sel=document.getElementById(selId),other=document.getElementById(otherId);
+  function upd(){var on=sel.value==="Other";other.style.display=on?"":"none";if(!on)other.value="";}
+  sel.addEventListener("change",function(){upd();saveDraft();});upd();
+}
+function bindOtherCheck(groupId,otherId){
+  var other=document.getElementById(otherId);
+  function on(){var c=document.querySelector('#'+groupId+' input[value="Other"]');return !!(c&&c.checked);}
+  function upd(){var o=on();other.style.display=o?"":"none";if(!o)other.value="";}
+  document.querySelectorAll('#'+groupId+' input').forEach(function(cb){cb.addEventListener("change",upd);});upd();
+}
+function bindAllOther(){
+  bindOtherSelect("f_industry","f_industryOther");
+  bindOtherSelect("f_accounting","f_accountingOther");
+  bindOtherSelect("f_crm","f_crmOther");
+  bindOtherCheck("pay-platforms","f_payPlatformsOther");
+  bindOtherCheck("goal-autos","f_goalAutosOther");
+}
+
+/* ---------- stepper ---------- */
+function buildStepper(){
+  var ol=document.getElementById("stepper");ol.innerHTML="";
+  for(var i=1;i<=TOTAL_STEPS;i++){
+    var li=document.createElement("li");li.className="step-dot";li.dataset.step=String(i);
+    var bar=i<TOTAL_STEPS?'<span class="bar"></span>':"";
+    li.innerHTML='<span class="num">'+i+'</span><span class="lbl">'+STEP_LABELS[i-1]+'</span>'+bar;
+    ol.appendChild(li);
+  }
+}
+function paintStepper(){document.querySelectorAll("#stepper .step-dot").forEach(function(d){var s=parseInt(d.dataset.step,10);d.classList.toggle("active",s===currentStep);d.classList.toggle("done",s<currentStep);d.classList.toggle("clickable",s<=maxStepReached&&s!==currentStep);});}
+// render() = pure view update (no history). Navigation goes through goToStep().
+function render(n){
+  currentStep=n;
+  if(n>maxStepReached)maxStepReached=n;
+  document.querySelectorAll(".step-panel").forEach(function(p){p.classList.toggle("active",parseInt(p.dataset.step,10)===n);});
+  document.getElementById("btn-back").style.visibility=n===1?"hidden":"visible";
+  document.getElementById("btn-next").style.display=n===TOTAL_STEPS?"none":"";
+  document.getElementById("btn-submit").style.display=n===TOTAL_STEPS?"":"none";
+  paintStepper();window.scrollTo(0,0);
+}
+function showStep(n){render(n);} // back-compat alias for any direct callers
+// Single navigation entry point. History stays a linear path [1..maxStepReached]:
+// moving within it uses history.go (popstate renders); advancing to a brand-new
+// step pushes one entry. Browser Back/Forward therefore walk the steps.
+function goToStep(target){
+  if(target<1||target>TOTAL_STEPS||target===currentStep)return;
+  if(target<=maxStepReached){history.go(target-currentStep);}
+  else if(target===maxStepReached+1){history.pushState({rrdStep:target},"");render(target);saveDraft();}
+}
+function nextStep(){if(!validateStep(currentStep))return;goToStep(currentStep+1);}
+function prevStep(){goToStep(currentStep-1);}
+
+/* ---------- check groups ---------- */
+function buildCheckGroup(containerId,options){
+  var g=document.getElementById(containerId);g.innerHTML="";
+  options.forEach(function(t,i){
+    var l=document.createElement("label");l.className="check";
+    l.innerHTML='<input type="checkbox" value="'+t+'"><span>'+t+'</span>';
+    var cb=l.querySelector("input");cb.addEventListener("change",function(){l.classList.toggle("checked",cb.checked);saveDraft();});
+    g.appendChild(l);
+  });
+}
+function collectCheckGroup(containerId){var o=[];document.querySelectorAll("#"+containerId+" input:checked").forEach(function(c){o.push(c.value);});return o;}
+function setCheckGroup(containerId,values){values=values||[];document.querySelectorAll("#"+containerId+" .check").forEach(function(l){var cb=l.querySelector("input");var on=values.indexOf(cb.value)!==-1;cb.checked=on;l.classList.toggle("checked",on);});}
+/* Letters / direct-mail block only shows when the agent may use the "Letter" channel. */
+function updateLettersVisibility(){var lb=document.getElementById("letters-block");if(!lb)return;var letter=document.querySelector('#out-channels input[value="Letter"]');lb.style.display=(letter&&letter.checked)?"contents":"none";}
+
+/* ---------- contacts ---------- */
+function contactRow(){
+  var tags=CONTACT_TAGS.map(function(t){return '<option>'+t+'</option>';}).join("");
+  var tr=document.createElement("tr");
+  tr.innerHTML='<td data-label="Full name"><input type="text" class="ct-name" placeholder="Jane Doe" oninput="syncPrimary();saveDraft()"></td>'+
+    '<td data-label="Role / title"><input type="text" class="ct-role" placeholder="Controller"></td>'+
+    '<td data-label="Email"><input type="email" class="ct-email" placeholder="jane@co.com"></td>'+
+    '<td data-label="Phone"><input type="tel" class="ct-phone" placeholder="(555) 555-5555"></td>'+
+    '<td data-label="Tag"><select class="ct-tag">'+tags+'</select></td>'+
+    '<td data-label=""><button type="button" class="row-del" title="Remove" onclick="removeContact(this)">×</button></td>';
+  return tr;
+}
+function addContactRow(){document.getElementById("contact-body").appendChild(contactRow());}
+function removeContact(btn){var tr=btn.closest("tr"),tb=tr.parentNode;tr.remove();if(tb.children.length===0)addContactRow();syncPrimary();saveDraft();}
+function collectContacts(){
+  var rows=[];
+  document.querySelectorAll("#contact-body tr").forEach(function(tr){
+    rows.push({name:tr.querySelector(".ct-name").value.trim(),role:tr.querySelector(".ct-role").value.trim(),email:tr.querySelector(".ct-email").value.trim(),phone:tr.querySelector(".ct-phone").value.trim(),tag:tr.querySelector(".ct-tag").value});
+  });
+  return rows;
+}
+function syncPrimary(){
+  var sel=document.getElementById("f_primaryContact"),prev=sel.value;
+  var names=collectContacts().map(function(c){return c.name;}).filter(Boolean);
+  sel.innerHTML='<option value="">Select primary contact…</option>';
+  names.forEach(function(n){var o=document.createElement("option");o.value=n;o.textContent=n;sel.appendChild(o);});
+  if(names.indexOf(prev)!==-1)sel.value=prev;
+}
+
+/* ---------- uploads ---------- */
+function humanSize(n){if(n<1024)return n+" B";if(n<1048576)return (n/1024).toFixed(0)+" KB";return (n/1048576).toFixed(1)+" MB";}
+function renderDocs(){
+  var ul=document.getElementById("doc-list");
+  ul.innerHTML=DOCS.map(function(d,i){
+    return '<li class="doc-item'+(d.uploading?' uploading':'')+'"><span>📎 '+escapeHtml(d.name)+' <span class="meta">'+(d.uploading?'uploading…':humanSize(d.size||0))+'</span></span>'+(d.uploading?'':'<button type="button" class="row-del" onclick="removeDoc('+i+')">×</button>')+'</li>';
+  }).join("");
+}
+function escapeHtml(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function removeDoc(i){DOCS.splice(i,1);renderDocs();saveDraft();}
+async function handleFiles(files){
+  if(!sb){banner("warn","Connect Supabase to enable uploads. You can still paste templates and submit.");return;}
+  for(var i=0;i<files.length;i++){
+    var file=files[i];
+    var safe=file.name.replace(/[^\w.\-]+/g,"_");
+    var path=SESSION_ID+"/"+Date.now()+"_"+safe;
+    var entry={name:file.name,path:path,type:file.type,size:file.size,uploading:true};
+    DOCS.push(entry);renderDocs();
+    try{
+      var {error}=await sb.storage.from(BUCKET).upload(path,file,{upsert:false});
+      if(error)throw error;
+      entry.uploading=false;
+    }catch(err){
+      DOCS=DOCS.filter(function(d){return d!==entry;});
+      banner("err","Upload failed for "+file.name+": "+(err&&err.message||err));
+    }
+    renderDocs();saveDraft();
+  }
+}
+
+/* ---------- validation ---------- */
+function setError(k,msg){var b=document.querySelector('.err-msg[data-for="'+k+'"]'),i=document.getElementById(k);if(b){b.textContent=msg||"";b.classList.toggle("show",!!msg);}if(i){i.classList.toggle("invalid",!!msg);}}
+function clearErrors(){document.querySelectorAll(".err-msg").forEach(function(e){e.classList.remove("show");e.textContent="";});document.querySelectorAll(".invalid").forEach(function(e){e.classList.remove("invalid");});}
+function validateStep(step){
+  var ok=true,firstBad=null;
+  if(step===1){var em=document.getElementById("f_email");if(!em.value.trim()){setError("f_email","Work email is required.");ok=false;firstBad=em;}else if(!isEmail(em.value)){setError("f_email","Enter a valid email address.");ok=false;firstBad=em;}else setError("f_email","");}
+  if(step===6){
+    var named=collectContacts().filter(function(c){return c.name;});
+    var ce=document.querySelector('.err-msg[data-for="contacts"]');
+    if(named.length===0){ce.textContent="Add at least one contact with a name.";ce.classList.add("show");ok=false;firstBad=firstBad||document.querySelector("#contact-body input");}else{ce.classList.remove("show");ce.textContent="";}
+    var p=document.getElementById("f_primaryContact");if(!p.value){setError("f_primaryContact","Select a primary contact.");ok=false;firstBad=firstBad||p;}else setError("f_primaryContact","");
+  }
+  if(step===7){
+    var cat=document.getElementById("f_catalyst");if(!cat.value.trim()){setError("f_catalyst","This field is required.");ok=false;firstBad=firstBad||cat;}else setError("f_catalyst","");
+    var con=document.getElementById("f_consent");if(!con.checked){setError("f_consent","We need your authorization to proceed.");ok=false;firstBad=firstBad||con;}else setError("f_consent","");
+  }
+  if(firstBad&&firstBad.focus)firstBad.focus();
+  return ok;
+}
+
+/* ---------- build row ---------- */
+function buildRow(){
+  var payApi=val("f_payApiAccess"),crmApi=val("f_crmApiAccess");
+  var urgency=val("f_urgency")||"Medium";
+  var industry=resolveSelectOther("f_industry","f_industryOther");
+  var accounting=resolveSelectOther("f_accounting","f_accountingOther");
+  var crm=resolveSelectOther("f_crm","f_crmOther");
+  var platforms=resolveCheckOther(collectCheckGroup("pay-platforms"),"f_payPlatformsOther");
+  var otherAutos=resolveCheckOther(collectCheckGroup("goal-autos"),"f_goalAutosOther");
+  return {
+    company:val("f_company"),contact_name:val("f_contactName"),email:val("f_email"),phone:val("f_phone"),
+    industry:industry,size:val("f_size"),website:val("f_website"),
+    business_profile:{businessModel:val("f_businessModel"),customerType:val("f_customerType"),whoTheyServe:val("f_whoTheyServe"),customerCount:val("f_customerCount"),typicalInvoiceSize:val("f_typicalInvoiceSize"),monthlyVolumeCount:num("f_monthlyVolumeCount"),monthlyVolumeAmount:num("f_monthlyVolumeAmount"),paymentTerms:val("f_paymentTerms"),currencies:val("f_currencies"),approxOutstanding:num("f_approxOutstanding")},
+    payment_stack:{platforms:platforms,accounting:accounting,canGeneratePaymentLinks:val("f_paymentLinks"),apiAccess:payApi,accessOwner:val("f_payAccessOwner"),connectionMethod:val("f_payConnection"),notes:val("f_payNotes")},
+    crm_data:{crm:crm,dataLocation:val("f_crmDataLocation"),contactFields:collectCheckGroup("crm-fields"),recordCount:val("f_crmRecordCount"),dataQuality:val("f_crmDataQuality"),apiAccess:crmApi,accessOwner:val("f_crmAccessOwner")},
+    recovery_process:{hasSop:val("f_hasSop"),wantSopBuilt:document.getElementById("f_wantSopBuilt").checked,processDescription:val("f_processDescription"),cadence:val("f_cadence"),channels:collectCheckGroup("rp-channels"),tone:val("f_tone"),alwaysPhrases:val("f_alwaysPhrases"),neverPhrases:val("f_neverPhrases"),escalation:val("f_escalation"),templates:val("f_templates"),settlementRules:val("f_settlementRules"),whoRunsIt:val("f_whoRunsIt"),timeSpent:val("f_timeSpent"),whatWorks:val("f_whatWorks")},
+    outreach:{channels:collectCheckGroup("out-channels"),emailProvider:val("f_emailProvider"),sendingDomain:val("f_sendingDomain"),fromName:val("f_fromName"),signature:val("f_signature"),smsProvider:val("f_smsProvider"),smsNumber:val("f_smsNumber"),businessHours:val("f_businessHours"),timezone:val("f_timezone"),languages:val("f_languages"),letters:{returnAddress:{name:val("f_letterReturnName"),line1:val("f_letterReturnAddr1"),line2:val("f_letterReturnAddr2"),city:val("f_letterCity"),state:val("f_letterState"),postal:val("f_letterPostal"),country:val("f_letterCountry")},defaultMailingClass:val("f_letterMailingClass")||"first_class",certifiedOnDemandRung:val("f_letterCertified")!=="No"}},
+    guardrails:{approvalModel:val("f_approvalModel"),batchSize:val("f_batchSize"),autoSendChannels:collectCheckGroup("auto-send-channels"),doNotContact:val("f_doNotContact"),compliance:val("f_compliance"),maxDiscount:val("f_maxDiscount"),escalationTriggers:val("f_escalationTriggers"),approvalRouting:{approvers:val("f_approvalContacts"),preferredChannel:val("f_approvalChannel"),sla:val("f_approvalSla"),notes:val("f_approvalNotes")}},
+    goals:{primaryGoal:val("f_primaryGoal"),recoveryTarget:val("f_recoveryTarget"),kpis:val("f_kpis"),otherAutomations:otherAutos},
+    documents:DOCS.filter(function(d){return !d.uploading;}).map(function(d){return {name:d.name,path:d.path,type:d.type,size:d.size};}),
+    contacts:collectContacts().filter(function(c){return c.name||c.email||c.role||c.phone;}),
+    primary_contact:val("f_primaryContact"),catalyst:val("f_catalyst"),urgency:urgency,anything_else:val("f_anythingElse"),
+    consent:document.getElementById("f_consent").checked,
+    payment_platforms:platforms,crm:crm,
+    has_sop:(val("f_hasSop")==="Yes"),integration_ready:(payApi==="Yes"&&crmApi==="Yes"),
+    approx_outstanding:num("f_approxOutstanding"),priority:urgency
+  };
+}
+
+/* ---------- draft autosave ---------- */
+var saveTimer=null;
+function saveDraft(){
+  if(saveTimer)clearTimeout(saveTimer);
+  saveTimer=setTimeout(function(){
+    var snap={sessionId:SESSION_ID,step:currentStep,fields:{},checks:{},contacts:collectContacts(),primary:val("f_primaryContact"),consent:document.getElementById("f_consent").checked,wantSopBuilt:document.getElementById("f_wantSopBuilt").checked,docs:DOCS.filter(function(d){return !d.uploading;})};
+    FIELD_IDS.forEach(function(id){var e=document.getElementById(id);if(e)snap.fields[id]=e.value;});
+    Object.keys(CHECK_GROUPS).forEach(function(g){snap.checks[g]=collectCheckGroup(g);});
+    try{localStorage.setItem(DRAFT_KEY,JSON.stringify(snap));flagDraft("Draft saved");}catch(e){}
+  },400);
+}
+function flagDraft(msg){var f=document.getElementById("draft-flag");f.textContent=msg;}
+function restoreDraft(){
+  var raw;try{raw=localStorage.getItem(DRAFT_KEY);}catch(e){}
+  if(!raw)return false;
+  var snap;try{snap=JSON.parse(raw);}catch(e){return false;}
+  SESSION_ID=snap.sessionId||SESSION_ID;
+  RESTORED_STEP=(typeof snap.step==="number"&&snap.step>=1&&snap.step<=TOTAL_STEPS)?snap.step:1;
+  (snap.contacts&&snap.contacts.length?snap.contacts:[{}]).forEach(function(c){
+    addContactRow();var tr=document.querySelector("#contact-body tr:last-child");
+    tr.querySelector(".ct-name").value=c.name||"";tr.querySelector(".ct-role").value=c.role||"";tr.querySelector(".ct-email").value=c.email||"";tr.querySelector(".ct-phone").value=c.phone||"";if(c.tag)tr.querySelector(".ct-tag").value=c.tag;
+  });
+  FIELD_IDS.forEach(function(id){if(snap.fields&&snap.fields[id]!=null){var e=document.getElementById(id);if(e)e.value=snap.fields[id];}});
+  Object.keys(CHECK_GROUPS).forEach(function(g){setCheckGroup(g,(snap.checks&&snap.checks[g])||[]);});
+  DOCS=snap.docs||[];renderDocs();
+  document.getElementById("f_consent").checked=!!snap.consent;
+  document.getElementById("f_wantSopBuilt").checked=!!snap.wantSopBuilt;
+  syncPrimary();if(snap.primary)document.getElementById("f_primaryContact").value=snap.primary;
+  flagDraft("Draft restored");
+  return true;
+}
+
+/* ---------- submit ---------- */
+function banner(kind,msg){var b=document.getElementById("config-banner");b.className="banner-inner show "+(kind==="err"?"banner-err":"banner-warn");b.textContent=msg;}
+async function handleSubmit(e){
+  e.preventDefault();
+  var steps=[1,6,7];
+  for(var i=0;i<steps.length;i++){if(!validateStep(steps[i])){goToStep(steps[i]);return;}}
+  if(!sb){banner("err","This form is not connected yet. Add your Supabase URL and anon key to the CONFIG block, then reload.");return;}
+  var btn=document.getElementById("btn-submit"),card=document.getElementById("form-card");
+  btn.disabled=true;btn.textContent="Submitting…";card.classList.add("submitting");
+  try{
+    var {error}=await sb.from("submissions").insert(buildRow());
+    if(error)throw error;
+    try{localStorage.removeItem(DRAFT_KEY);}catch(e2){}
+    document.getElementById("intake-form").style.display="none";
+    document.getElementById("success-screen").classList.add("show");
+    window.scrollTo(0,0);
+  }catch(err){banner("err","Could not submit: "+(err&&err.message||err)+". Please try again or contact your recovery desk.");}
+  finally{btn.disabled=false;btn.textContent="Submit onboarding";card.classList.remove("submitting");}
+}
+function resetToForm(){try{localStorage.removeItem(DRAFT_KEY);}catch(e){}location.reload();}
+
+/* ---------- init ---------- */
+function init(){
+  SESSION_ID=uuid();
+  buildStepper();
+  Object.keys(CHECK_GROUPS).forEach(function(g){buildCheckGroup(g,CHECK_GROUPS[g]);});
+  var restored=restoreDraft();
+  if(!restored){addContactRow();syncPrimary();}
+  bindAllOther();
+  // Letters / direct-mail block: reflect any restored state and live-toggle when the
+  // "Letter" channel tick changes (delegated listener survives buildCheckGroup re-renders).
+  var outCh=document.getElementById("out-channels");
+  if(outCh)outCh.addEventListener("change",updateLettersVisibility);
+  updateLettersVisibility();
+  // resume at the saved step and seed a linear history back-stack [1..startStep]
+  var startStep=restored?RESTORED_STEP:1; if(startStep<1)startStep=1; if(startStep>TOTAL_STEPS)startStep=TOTAL_STEPS;
+  maxStepReached=startStep;
+  history.replaceState({rrdStep:1},"");
+  for(var hs=2;hs<=startStep;hs++)history.pushState({rrdStep:hs},"");
+  render(startStep);
+  // browser Back/Forward (and in-page Back / stepper jumps via history.go) move between steps
+  window.addEventListener("popstate",function(e){var s=(e.state&&e.state.rrdStep)||1;if(s<1)s=1;if(s>TOTAL_STEPS)s=TOTAL_STEPS;render(s);saveDraft();});
+  document.getElementById("intake-form").addEventListener("submit",handleSubmit);
+  document.getElementById("intake-form").addEventListener("input",saveDraft);
+  // Enter in a text input must not implicitly submit the form (this caused the jump to step 6)
+  document.getElementById("intake-form").addEventListener("keydown",function(e){
+    if(e.key!=="Enter")return;
+    var t=e.target;
+    if(!t||t.tagName!=="INPUT")return;                 // textareas keep newlines; selects unaffected
+    if(t.type==="submit"||t.type==="button"||t.type==="checkbox"||t.type==="radio")return;
+    e.preventDefault();
+  });
+  // clickable stepper — only steps already reached (forward stays via Next)
+  document.getElementById("stepper").addEventListener("click",function(e){
+    var dot=e.target.closest(".step-dot");if(!dot)return;
+    var target=parseInt(dot.dataset.step,10);
+    if(target<=maxStepReached&&target!==currentStep)goToStep(target);
+  });
+  // upload wiring
+  var dz=document.getElementById("drop-zone"),fi=document.getElementById("file-input");
+  dz.addEventListener("click",function(){fi.click();});
+  fi.addEventListener("change",function(){if(fi.files.length)handleFiles(fi.files);fi.value="";});
+  dz.addEventListener("dragover",function(e){e.preventDefault();dz.style.borderColor="#F59E0B";});
+  dz.addEventListener("dragleave",function(){dz.style.borderColor="";});
+  dz.addEventListener("drop",function(e){e.preventDefault();dz.style.borderColor="";if(e.dataTransfer.files.length)handleFiles(e.dataTransfer.files);});
+  if(!CONFIGURED){banner("warn","Setup needed: paste your Supabase project URL and anon key into the CONFIG block at the top of the script in this file.");}
+  else if(!window.supabase){banner("err","Could not load the Supabase client library. Check your network connection.");}
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+</script>
+</body>
+</html>

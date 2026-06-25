@@ -1,0 +1,323 @@
+#!/usr/bin/env node
+/**
+ * rrd-local-sandbox — local Orgo-equivalent demo harness for Revenue Recovery Desk.
+ *
+ * Mirrors the Orgo operating model without a paid cloud desktop:
+ *   provision/start/status/run/stop/destroy/demo <profile>
+ *
+ * Each profile gets an isolated local directory under:
+ *   /Users/AIAgenterminal/.openclaw/local-sandboxes/<profile>/
+ *
+ * Demo modes:
+ *   rrd-local-sandbox demo rr-test --fake
+ *   rrd-local-sandbox demo rr-test --live-readonly
+ *
+ * Safety:
+ * - never sends customer outreach;
+ * - never prints token values;
+ * - live-readonly only calls read endpoints for installed connectors;
+ * - audit/output is written into the sandbox for client walkthroughs.
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import { fileURLToPath } from 'node:url';
+import { recover } from './rrd-collect.mjs';
+import { execute } from './rrd-recover.mjs';
+
+const OPERATOR_HOME = process.env.RRD_OPERATOR_HOME || '/Users/AIAgenterminal';
+const ROOT = process.env.RRD_LOCAL_SANDBOX_ROOT || path.join(OPERATOR_HOME, '.openclaw', 'local-sandboxes');
+const PROFILES_DIR = process.env.HERMES_PROFILES_DIR || path.join(OPERATOR_HOME, '.hermes', 'profiles');
+const SELF = fileURLToPath(import.meta.url);
+
+function usage(exit = 1) {
+  console.error(`rrd-local-sandbox — local Orgo-equivalent demo harness
+
+Usage:
+  rrd-local-sandbox provision <profile>
+  rrd-local-sandbox start <profile>
+  rrd-local-sandbox stop <profile>
+  rrd-local-sandbox status <profile>
+  rrd-local-sandbox list
+  rrd-local-sandbox destroy <profile>
+  rrd-local-sandbox demo <profile> --fake
+  rrd-local-sandbox demo <profile> --live-readonly
+
+Notes:
+  --fake          deterministic fake invoice/demo data; no external APIs
+  --live-readonly reads installed connector metadata only; no sends, no writes`);
+  process.exit(exit);
+}
+
+function nowIso() { return new Date().toISOString(); }
+function stamp() { return new Date().toISOString().replace(/[:.]/g, '-'); }
+function profileDir(profile) { return path.join(PROFILES_DIR, profile); }
+function sbDir(profile) { return path.join(ROOT, profile); }
+function metaPath(profile) { return path.join(sbDir(profile), 'sandbox.json'); }
+function auditDir(profile) { return path.join(sbDir(profile), 'audit'); }
+function outDir(profile) { return path.join(sbDir(profile), 'outputs'); }
+function workspaceDir(profile) { return path.join(sbDir(profile), 'workspace'); }
+function tmpDir(profile) { return path.join(sbDir(profile), 'tmp'); }
+
+function readJson(file, fallback = null) {
+  try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return fallback; }
+}
+function writeJson(file, obj) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(obj, null, 2) + '\n');
+}
+function ensureProfile(profile) {
+  if (!profile) usage();
+  const dir = profileDir(profile);
+  if (!fs.existsSync(dir)) throw new Error(`Profile not found: ${profile} (${dir})`);
+}
+function provision(profile) {
+  ensureProfile(profile);
+  for (const d of [sbDir(profile), workspaceDir(profile), path.join(sbDir(profile), 'downloads'), auditDir(profile), outDir(profile), tmpDir(profile), path.join(sbDir(profile), 'browser-profile')]) {
+    fs.mkdirSync(d, { recursive: true });
+  }
+  const manifest = readJson(path.join(profileDir(profile), 'manifest.json'), {});
+  const meta = {
+    profile,
+    company: manifest.company || profile.replace(/^rr-/, ''),
+    createdAt: fs.existsSync(metaPath(profile)) ? (readJson(metaPath(profile), {})?.createdAt || nowIso()) : nowIso(),
+    updatedAt: nowIso(),
+    state: 'provisioned',
+    root: sbDir(profile),
+    workspace: workspaceDir(profile),
+    audit: auditDir(profile),
+    browserProfile: path.join(sbDir(profile), 'browser-profile'),
+    model: 'local-orgo-equivalent-demo',
+    productionEquivalent: 'Orgo project + desktop per client; this local sandbox mirrors the run lifecycle on this Mac',
+    secretsPolicy: 'profile .env stays in Hermes profile; demo outputs list key names only, never values'
+  };
+  writeJson(metaPath(profile), meta);
+  return meta;
+}
+function updateState(profile, state, extra = {}) {
+  const cur = fs.existsSync(metaPath(profile)) ? readJson(metaPath(profile), {}) : provision(profile);
+  const next = { ...cur, ...extra, state, updatedAt: nowIso() };
+  writeJson(metaPath(profile), next);
+  return next;
+}
+function start(profile) { ensureProfile(profile); provision(profile); return updateState(profile, 'running', { startedAt: nowIso() }); }
+function stop(profile) {
+  ensureProfile(profile);
+  fs.rmSync(tmpDir(profile), { recursive: true, force: true });
+  fs.mkdirSync(tmpDir(profile), { recursive: true });
+  return updateState(profile, 'stopped', { stoppedAt: nowIso(), tmpWiped: true });
+}
+function destroy(profile) {
+  ensureProfile(profile);
+  fs.rmSync(sbDir(profile), { recursive: true, force: true });
+  return { profile, destroyed: true, root: sbDir(profile) };
+}
+function status(profile) {
+  ensureProfile(profile);
+  if (!fs.existsSync(metaPath(profile))) provision(profile);
+  const meta = readJson(metaPath(profile), {});
+  const files = fs.existsSync(outDir(profile)) ? fs.readdirSync(outDir(profile)).sort() : [];
+  return { ...meta, outputCount: files.length, latestOutput: files.at(-1) || null };
+}
+function list() {
+  fs.mkdirSync(ROOT, { recursive: true });
+  return fs.readdirSync(ROOT).filter((n) => fs.existsSync(metaPath(n))).map((n) => status(n));
+}
+
+function readEnvKeys(profile) {
+  const envPath = path.join(profileDir(profile), '.env');
+  const text = fs.existsSync(envPath) ? fs.readFileSync(envPath, 'utf8') : '';
+  const keys = [];
+  const present = new Set();
+  const vals = {};
+  for (const line of text.split(/\r?\n/)) {
+    if (!line || line.trim().startsWith('#') || !line.includes('=')) continue;
+    const i = line.indexOf('=');
+    const k = line.slice(0, i).trim();
+    const v = line.slice(i + 1).trim().replace(/^['"]|['"]$/g, '');
+    if (k) keys.push(k);
+    if (v && !/^CHANGE_ME|TODO|PLACEHOLDER|xxx/i.test(v)) { present.add(k); vals[k] = v; }
+  }
+  return { envPath, keys: [...new Set(keys)].sort(), present: [...present].sort(), vals };
+}
+
+const fakeInvoices = [
+  { id: 'demo-inv-1007', number: 'INV-1007', amount: 1840, currency: 'USD', daysOverdue: 9, dueDate: '2026-06-13', customerEmail: 'ap@northstar-demo.example', customerName: 'Northstar Facilities', hostedInvoiceUrl: 'https://pay.example.test/inv-1007', source: 'fake' },
+  { id: 'demo-inv-1018', number: 'INV-1018', amount: 5275, currency: 'USD', daysOverdue: 34, dueDate: '2026-05-19', customerEmail: 'finance@ridgeway-demo.example', customerName: 'Ridgeway Property Group', hostedInvoiceUrl: 'https://pay.example.test/inv-1018', source: 'fake' },
+  { id: 'demo-inv-1021', number: 'INV-1021', amount: 920, currency: 'USD', daysOverdue: 4, dueDate: '2026-06-18', customerEmail: null, customerName: 'No Email Demo Account', hostedInvoiceUrl: 'https://pay.example.test/inv-1021', source: 'fake' }
+];
+
+async function demoFake(profile) {
+  const started = start(profile);
+  const audit = [];
+  const out = await recover(profile, {
+    send: false,
+    approved: true,
+    atHour: 10,
+    limit: 10,
+    minDaysOverdue: 1,
+    deps: {
+      manifest: readJson(path.join(profileDir(profile), 'manifest.json'), {}),
+      listInvoices: async () => fakeInvoices,
+      executeImpl: async (p, action, opts) => execute(p, action, {
+        ...opts,
+        deps: {
+          auditWrite: (_profile, entry) => audit.push(entry),
+          usageBump: () => {},
+          capCheck: () => ({ allowed: true, violations: [] })
+        }
+      })
+    }
+  });
+  const approvalProbe = await execute(profile, {
+    channel: 'Email',
+    to: { email: 'controller@approval-demo.example', name: 'Approval Demo' },
+    subject: 'Approval gate demo',
+    text: 'This message intentionally has no approval flag.',
+    tool: 'send_via_executor',
+    atHour: 10
+  }, {
+    send: false,
+    deps: {
+      auditWrite: (_profile, entry) => audit.push(entry),
+      usageBump: () => {},
+      capCheck: () => ({ allowed: true, violations: [] })
+    }
+  });
+  const payload = {
+    mode: 'fake',
+    profile,
+    sandbox: started.root,
+    generatedAt: nowIso(),
+    safety: { sent: false, externalApis: false, fakeDataOnly: true },
+    recovery: out,
+    approvalGateProbe: {
+      allowed: approvalProbe.decision?.allowed || false,
+      violations: approvalProbe.decision?.violations || []
+    },
+    audit
+  };
+  return writeDemo(profile, 'fake', payload);
+}
+
+async function fetchJson(url, init = {}) {
+  const res = await fetch(url, init);
+  const text = await res.text();
+  let body; try { body = text ? JSON.parse(text) : null; } catch { body = { raw: text.slice(0, 500) }; }
+  if (!res.ok) return { ok: false, status: res.status, error: body?.error?.message || body?.message || body?.error || `HTTP ${res.status}` };
+  return { ok: true, status: res.status, body };
+}
+async function microsoftProbe(token) {
+  const headers = { Authorization: `Bearer ${token}` };
+  const me = await fetchJson('https://graph.microsoft.com/v1.0/me?$select=displayName,userPrincipalName,mail', { headers });
+  const folders = await fetchJson('https://graph.microsoft.com/v1.0/me/mailFolders?$top=5&$select=displayName,totalItemCount,unreadItemCount', { headers });
+  return {
+    me: me.ok ? { ok: true, displayName: me.body?.displayName || null, userPrincipalName: me.body?.userPrincipalName || null, mail: me.body?.mail || null } : me,
+    mailFolders: folders.ok ? { ok: true, folders: (folders.body?.value || []).map((f) => ({ displayName: f.displayName, totalItemCount: f.totalItemCount, unreadItemCount: f.unreadItemCount })) } : folders
+  };
+}
+async function mondayProbe(token) {
+  const res = await fetchJson('https://api.monday.com/v2', {
+    method: 'POST',
+    headers: { Authorization: token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: 'query { me { id name email } account { id name } }' })
+  });
+  if (!res.ok) return res;
+  if (res.body?.errors) return { ok: false, status: 200, error: res.body.errors.map((e) => e.message).join('; ') };
+  return { ok: true, me: res.body?.data?.me || null, account: res.body?.data?.account || null };
+}
+async function hubspotProbe(token) {
+  const res = await fetchJson('https://api.hubapi.com/crm/v3/objects/deals?limit=3&properties=dealname,amount,closedate', { headers: { Authorization: `Bearer ${token}` } });
+  if (!res.ok) return res;
+  return { ok: true, deals: (res.body?.results || []).map((d) => ({ id: d.id, properties: d.properties })) };
+}
+
+async function demoLiveReadonly(profile) {
+  const started = start(profile);
+  const env = readEnvKeys(profile);
+  const connectors = {};
+  if (env.vals.MICROSOFT_ACCESS_TOKEN) connectors.microsoft = await microsoftProbe(env.vals.MICROSOFT_ACCESS_TOKEN);
+  if (env.vals.MONDAY_ACCESS_TOKEN) connectors.monday = await mondayProbe(env.vals.MONDAY_ACCESS_TOKEN);
+  if (env.vals.HUBSPOT_ACCESS_TOKEN) connectors.hubspot = await hubspotProbe(env.vals.HUBSPOT_ACCESS_TOKEN);
+  const gate = await execute(profile, {
+    channel: 'Email',
+    to: { email: 'readonly-demo@example.test', name: 'Read Only Demo' },
+    subject: 'Read-only demo gate',
+    text: 'This is a gate-only dry-run. Nothing is sent.',
+    tool: 'send_via_executor',
+    approved: true,
+    atHour: 10
+  }, {
+    send: false,
+    deps: { auditWrite: () => {}, usageBump: () => {}, capCheck: () => ({ allowed: true, violations: [] }) }
+  });
+  const payload = {
+    mode: 'live-readonly',
+    profile,
+    sandbox: started.root,
+    generatedAt: nowIso(),
+    safety: { sent: false, externalApis: true, readonly: true, tokenValuesPrinted: false },
+    installedKeyNames: env.present.filter((k) => /_TOKEN$|_TOKEN_EXPIRES_AT$|_INSTANCE_URL$|_API_DOMAIN$|_REALM_ID$/.test(k)),
+    connectorProbes: connectors,
+    gateOnlyProbe: { wouldSend: !!gate.wouldSend, allowed: !!gate.decision?.allowed, violations: gate.decision?.violations || [] }
+  };
+  return writeDemo(profile, 'live-readonly', payload);
+}
+
+function writeDemo(profile, mode, payload) {
+  const file = path.join(outDir(profile), `${stamp()}-${mode}.json`);
+  writeJson(file, payload);
+  const summaryPath = path.join(outDir(profile), `${stamp()}-${mode}.md`);
+  fs.writeFileSync(summaryPath, renderSummary(payload) + '\n');
+  updateState(profile, 'stopped', { lastRunAt: nowIso(), lastMode: mode, latestOutput: file, latestSummary: summaryPath });
+  return { ...payload, outputFile: file, summaryFile: summaryPath };
+}
+function renderSummary(p) {
+  const L = [];
+  L.push(`# RRD Local Sandbox Demo — ${p.profile}`);
+  L.push(`Mode: ${p.mode}`);
+  L.push(`Generated: ${p.generatedAt}`);
+  L.push(`Sandbox: ${p.sandbox}`);
+  L.push('');
+  L.push('## Safety');
+  for (const [k, v] of Object.entries(p.safety || {})) L.push(`- ${k}: ${v}`);
+  if (p.mode === 'fake') {
+    L.push(''); L.push('## Recovery dry-run');
+    L.push(`- Overdue invoices found: ${p.recovery?.found}`);
+    L.push(`- Outcomes: ${JSON.stringify(p.recovery?.summary?.byOutcome || {})}`);
+    L.push(`- Amount targeted: ${p.recovery?.summary?.targetedUsd}`);
+    L.push(`- Approval probe allowed: ${p.approvalGateProbe?.allowed}`);
+    L.push(`- Approval probe violations: ${(p.approvalGateProbe?.violations || []).map((v) => v.code).join(', ') || 'none'}`);
+    for (const r of p.recovery?.results || []) L.push(`- ${r.outcome}: ${r.number || r.invoiceId} -> ${r.email || 'no email'} (${r.amountUsd})`);
+  } else {
+    L.push(''); L.push('## Installed token key names');
+    for (const k of p.installedKeyNames || []) L.push(`- ${k}`);
+    L.push(''); L.push('## Connector probes');
+    for (const [name, val] of Object.entries(p.connectorProbes || {})) L.push(`- ${name}: ${val.ok === false ? 'failed: ' + val.error : 'ok'}`);
+    L.push(`- gateOnlyProbe: allowed=${p.gateOnlyProbe?.allowed}, wouldSend=${p.gateOnlyProbe?.wouldSend}`);
+  }
+  return L.join('\n');
+}
+
+function printResult(obj) { console.log(JSON.stringify(obj, null, 2)); }
+async function main() {
+  const [, , cmd, profile, ...args] = process.argv;
+  if (!cmd || cmd === 'help' || cmd === '-h' || cmd === '--help') usage(cmd ? 0 : 1);
+  let res;
+  if (cmd === 'list') res = list();
+  else if (cmd === 'provision') res = provision(profile);
+  else if (cmd === 'start') res = start(profile);
+  else if (cmd === 'stop') res = stop(profile);
+  else if (cmd === 'status') res = status(profile);
+  else if (cmd === 'destroy') res = destroy(profile);
+  else if (cmd === 'demo') {
+    if (args.includes('--fake')) res = await demoFake(profile);
+    else if (args.includes('--live-readonly')) res = await demoLiveReadonly(profile);
+    else throw new Error('demo requires --fake or --live-readonly');
+  } else if (cmd === 'run') {
+    throw new Error('run is reserved for the Hermes task runner; use demo --fake or demo --live-readonly for now');
+  } else usage();
+  printResult(res);
+}
+
+if (import.meta.url === `file://${SELF}`) main().catch((e) => { console.error('Error: ' + (e?.message || e)); process.exit(1); });

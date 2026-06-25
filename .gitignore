@@ -1,0 +1,33 @@
+# dependencies
+node_modules/
+
+# secrets and local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+auth.json
+llm-runtime.json
+hosts.yml
+.git-credentials
+
+# runtime state/logs/backups
+*.log
+*.err
+*.pid
+*.bak
+*.backup
+*.sqlite
+*.sqlite3
+*.db
+*.ndjson
+.openclaw/
+.hermes/
+.vercel/
+.rrd-*
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,12 @@
+{
+  "name": "revenue-recovery-desk",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test test/rrd-*.test.mjs",
+    "test:targeted": "node --test test/rrd-agent-llm.test.mjs test/rrd-ready.test.mjs test/rrd-readiness-checklist.test.mjs"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1"
+  }
+}

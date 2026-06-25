@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow">
+  <title>Revenue Recovery Desk — Integration Mapping</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <style>
+    :root{--navy:#0F172A;--amber:#F59E0B;--amber-dark:#D97706;--bg:#F8FAFC;--white:#fff;--text:#0F172A;--muted:#64748B;--line:#E2E8F0;--danger:#DC2626;--green:#16A34A;--radius:14px;--shadow:0 1px 3px rgba(15,23,42,.08),0 12px 30px rgba(15,23,42,.08);--font:'DM Sans',system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.5}header{background:var(--navy);color:white;padding:18px 28px}.brand{display:flex;align-items:center;gap:12px}.fa-wordmark{font-family:Georgia,serif;font-size:22px}.brand-divider{height:24px;width:1px;background:#475569}.title{font-weight:700}.sub{font-size:12px;color:#94A3B8}main{max-width:960px;margin:0 auto;padding:32px 20px 80px}h1{font-size:28px;margin:0 0 6px}.lead{color:var(--muted);margin:0 0 24px}.card{background:white;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.section{grid-column:1/-1;border-top:1px solid var(--line);padding-top:18px;margin-top:4px;font-size:12px;font-weight:800;letter-spacing:.45px;color:#64748B;text-transform:uppercase}label{font-size:13px;font-weight:700;color:#334155}.hint,.warn{font-size:12px;color:var(--muted)}.warn{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;border-radius:10px;padding:10px 12px;margin-bottom:18px}input,textarea,select{width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:14px var(--font)}textarea{min-height:96px;resize:vertical}input:focus,textarea:focus,select:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.16)}.btn{border:0;border-radius:10px;background:var(--amber);color:var(--navy);font-weight:800;font-family:var(--font);padding:12px 18px;cursor:pointer}.btn:hover{background:var(--amber-dark);color:white}.actions{display:flex;justify-content:flex-end;margin-top:24px}.msg{display:none;border-radius:10px;padding:12px 14px;margin-top:14px}.msg.show{display:block}.ok{background:#F0FDF4;border:1px solid #BBF7D0;color:#166534}.err{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B}@media(max-width:760px){.grid{grid-template-columns:1fr}.card{padding:20px 16px}main{padding:22px 14px 60px}.actions{justify-content:stretch}.btn{width:100%;min-height:48px}}
+  </style>
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<header><div class="brand"><span class="fa-wordmark">FlowAudit</span><span class="brand-divider"></span><div><div class="title">Revenue Recovery Desk</div><div class="sub">Integration Mapping</div></div></div></header>
+<main>
+  <h1>Map your recovery data</h1>
+  <p class="lead" id="lead">Loading your client details…</p>
+  <div class="card">
+    <div class="warn">Please do not enter passwords, API keys, tokens, card details, or customer exports here. Use the secure integration/vault link for secrets and sensitive files.</div>
+    <form id="form">
+      <div class="grid">
+        <div class="section">Main systems</div>
+        <div class="field"><label>Source of truth for overdue balances</label><input id="sourceOfTruth" required placeholder="Example: Xero aged receivables; Stripe invoices; HubSpot custom report"></div>
+        <div class="field"><label>Who can answer mapping questions?</label><input id="mappingContact" required placeholder="Name, role, email"></div>
+        <div class="field"><label>CRM/customer system</label><input id="crmSystem" required placeholder="HubSpot, Salesforce, monday, GoHighLevel, spreadsheet, custom API"></div>
+        <div class="field"><label>Accounting/invoice system</label><input id="accountingSystem" required placeholder="Xero, QuickBooks, Sage, spreadsheet, custom export"></div>
+        <div class="field"><label>Payment system</label><input id="paymentSystem" required placeholder="Stripe, GoCardless, bank transfer, PayPal, custom"></div>
+        <div class="field"><label>Preferred reporting/export name</label><input id="reportName" required placeholder="Aged receivables, open invoices, collections queue, AR report"></div>
+
+        <div class="section">Invoice and customer fields</div>
+        <div class="field full"><label>Where do open/overdue invoices live?</label><textarea id="invoiceLocation" required placeholder="Menu/report/table/object names; filters used; who owns it"></textarea></div>
+        <div class="field full"><label>Required invoice fields</label><textarea id="invoiceFields" required placeholder="Invoice number, customer/account, amount due, amount paid, balance, due date, currency, status, payment link"></textarea></div>
+        <div class="field full"><label>Customer/contact fields</label><textarea id="contactFields" required placeholder="Billing contact, email, phone, postal address, owner/account manager, preferred contact channel"></textarea></div>
+
+        <div class="section">Safety flags and writeback</div>
+        <div class="field full"><label>Stop / dispute / do-not-contact flags</label><textarea id="safetyFields" required placeholder="DNC, dispute, vulnerable customer, VIP, legal/collections, active complaint, payment plan, promise-to-pay"></textarea></div>
+        <div class="field full"><label>Where should recovery activity be written back?</label><textarea id="writeback" required placeholder="CRM note, task, email log, deal update, case/ticket, custom object, or no writeback"></textarea></div>
+        <div class="field full"><label>Refresh cadence and owner</label><textarea id="refresh" required placeholder="Realtime API, daily export, weekly spreadsheet refresh; owner responsible for updates"></textarea></div>
+        <div class="field full"><label>Anything unusual about the data?</label><textarea id="notes" required placeholder="Multiple currencies, subsidiaries, partial payments, credit notes, retained deposits, legacy systems, merged accounts"></textarea></div>
+      </div>
+      <div class="actions"><button class="btn btn-primary" id="submitBtn" type="submit">Submit mapping details</button></div>
+      <div class="msg" id="msg"></div>
+    </form>
+  </div>
+</main>
+<script>
+const q=new URLSearchParams(location.search);
+const token=q.get('token')||'';
+const $=id=>document.getElementById(id);
+const intakeUrl=()=>location.hostname==='flowaudit.co.uk'?'https://revenue-recovery-web-ivory.vercel.app/api/intake':new URL('api/intake', location.href).toString();
+function valid(){return !!token&&token.includes('.')}
+function show(kind,text){const m=$('msg');m.className='msg show '+kind;m.textContent=text;}
+function v(id){return ($(id).value||'').trim();}
+const REQUIRED_FIELDS=['sourceOfTruth','mappingContact','crmSystem','accountingSystem','paymentSystem','reportName','invoiceLocation','invoiceFields','contactFields','safetyFields','writeback','refresh','notes'];
+const REQUIRED_LABELS={sourceOfTruth:'Source of truth for overdue balances',mappingContact:'Who can answer mapping questions',crmSystem:'CRM/customer system',accountingSystem:'Accounting/invoice system',paymentSystem:'Payment system',reportName:'Preferred reporting/export name',invoiceLocation:'Where open/overdue invoices live',invoiceFields:'Required invoice fields',contactFields:'Customer/contact fields',safetyFields:'Stop / dispute / do-not-contact flags',writeback:'Where recovery activity should be written back',refresh:'Refresh cadence and owner',notes:'Anything unusual about the data'};
+function missingRequired(){return REQUIRED_FIELDS.filter((id)=>!v(id));}
+$('lead').textContent=valid()?'Tell us where recovery-critical fields live so we can prepare a proposed mapping before go-live.':'This mapping link is invalid. Please ask support for a fresh link.';
+async function postIntake(payload){
+  const r=await fetch(intakeUrl(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:payload.requestType,payload})});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok||!data.ok)throw new Error(data.error||`HTTP ${r.status}`);
+  return data;
+}
+$('form').addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  if(!valid())return show('err','Invalid mapping link.');
+  const missing=missingRequired();
+  if(missing.length){
+    const first=$(missing[0]);
+    if(first) first.focus();
+    return show('err','Please complete every required mapping field before submitting. Missing: '+missing.map((id)=>REQUIRED_LABELS[id]).join(', '));
+  }
+  $('submitBtn').disabled=true;$('submitBtn').textContent='Submitting…';
+  const payload={requestType:'mapping_details',token,sourceOfTruth:v('sourceOfTruth'),mappingContact:v('mappingContact'),systems:{crm:v('crmSystem'),accounting:v('accountingSystem'),payment:v('paymentSystem'),reportName:v('reportName')},fields:{invoiceLocation:v('invoiceLocation'),invoiceFields:v('invoiceFields'),contactFields:v('contactFields'),safetyFields:v('safetyFields'),writeback:v('writeback'),refresh:v('refresh')},notes:v('notes'),submittedVia:'mapping-page'};
+  try{await postIntake(payload);show('ok','Mapping details received. We will use them to prepare the integration map before anything goes live.');$('form').reset();}
+  catch(err){show('err','Could not submit mapping: '+(err.message||err));$('submitBtn').disabled=false;$('submitBtn').textContent='Submit mapping details';}
+});
+</script>
+</body>
+</html>

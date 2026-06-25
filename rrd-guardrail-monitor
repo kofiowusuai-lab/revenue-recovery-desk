@@ -1,0 +1,216 @@
+#!/usr/bin/env bash
+# rrd-guardrail-monitor — agent-guardrail DRIFT MONITOR for the Revenue Recovery Desk.
+#
+# Item 4 of AGENT-GUARDRAILS-PLAN.md. Runs on a timer (launchd
+# com.openclaw.rrd-guardrail-monitor, every hour). It watches each recovery
+# agent's append-only audit log and alerts the recoverydesk Telegram when an
+# agent drifts from its mandate or trips a guardrail.
+#
+# For each Hermes profile under ~/.hermes/profiles/ named rr-* that has an audit
+# log at ~/.openclaw/rrd-audit/<profile>.ndjson, it pulls a rollup of the LAST
+# HOUR via the audit module (rrd-audit.mjs, built by another workstream) and
+# inspects it for drift signals:
+#   - blocked >= GUARDRAIL_DRIFT_MIN_BLOCKED        (default 1) — attempted off-policy send
+#   - requiresHuman >= GUARDRAIL_DRIFT_MIN_REQUIRES (default 1) — human escalations
+#   - any byViolation count for DO_NOT_CONTACT / DISCOUNT_OVER_CAP / OUTSIDE_HOURS
+#   - total > DRIFT_MAX_ACTIONS_PER_HOUR            (default 200) — activity spike
+# When llm.sh exists it MAY additionally ask an LLM judge whether recent activity
+# fits the mandate (optional, non-fatal, off unless GUARDRAIL_LLM_JUDGE=1).
+#
+# DEGRADE GRACEFULLY: if rrd-audit.mjs is missing or the node call errors, the
+# profile is skipped without crashing the loop. Idempotent: each profile+hour
+# bucket alerts at most once (state in ~/.openclaw/guardrail-monitor-state.json).
+set -uo pipefail
+cd /Users/AIAgenterminal
+
+set -a
+[ -f ./.env.local ] && . ./.env.local
+[ -f "$HOME/.openclaw/.env" ] && . "$HOME/.openclaw/.env"
+set +a
+
+# --- config (env-overridable, conservative defaults) -------------------------
+PROFILES_DIR="${HERMES_PROFILES_DIR:-$HOME/.hermes/profiles}"
+AUDIT_DIR="${RRD_AUDIT_DIR:-$HOME/.openclaw/rrd-audit}"
+AUDIT_MODULE="${RRD_AUDIT_MODULE:-/Users/AIAgenterminal/rrd-audit.mjs}"
+STATE="${GUARDRAIL_MONITOR_STATE:-$HOME/.openclaw/guardrail-monitor-state.json}"
+SEND="$HOME/.local/bin/recoverydesk"
+LLM="$HOME/.openclaw/scripts/llm.sh"
+
+DRIFT_MIN_BLOCKED="${GUARDRAIL_DRIFT_MIN_BLOCKED:-1}"
+DRIFT_MIN_REQUIRES="${GUARDRAIL_DRIFT_MIN_REQUIRES:-1}"
+DRIFT_MAX_ACTIONS_PER_HOUR="${DRIFT_MAX_ACTIONS_PER_HOUR:-200}"
+# Violation codes that should always alert (space-separated, overridable).
+DRIFT_CRITICAL_VIOLATIONS="${GUARDRAIL_DRIFT_CRITICAL_VIOLATIONS:-DO_NOT_CONTACT DISCOUNT_OVER_CAP OUTSIDE_HOURS}"
+# Optional LLM mandate judge — off by default (set GUARDRAIL_LLM_JUDGE=1 to enable).
+LLM_JUDGE="${GUARDRAIL_LLM_JUDGE:-0}"
+WINDOW_MS="${GUARDRAIL_WINDOW_MS:-3600000}"
+
+ts() { date -u +%FT%TZ; }
+# Hour bucket keys idempotency: one alert per profile per wall-clock hour.
+HOUR_BUCKET="$(date -u +%Y%m%dT%H)"
+
+ping() { [ -x "$SEND" ] && "$SEND" send --to telegram --quiet "$1" >/dev/null 2>&1 || true; }
+
+mkdir -p "$(dirname "$STATE")" 2>/dev/null || true
+
+# Has this profile+hour already been alerted? (reads state, fail-open to "no")
+already_alerted() {
+  python3 - "$STATE" "$1" "$HOUR_BUCKET" <<'PY' 2>/dev/null || echo "no"
+import json,sys
+path,prof,bucket=sys.argv[1],sys.argv[2],sys.argv[3]
+try:
+    d=json.load(open(path))
+except Exception:
+    d={}
+print("yes" if d.get("alerts",{}).get(f"{prof}:{bucket}") else "no")
+PY
+}
+
+# Record that we alerted this profile+hour (and a small last-run breadcrumb).
+mark_alerted() {
+  python3 - "$STATE" "$1" "$HOUR_BUCKET" "$(ts)" <<'PY' 2>/dev/null || true
+import json,sys
+path,prof,bucket,now=sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4]
+try:
+    d=json.load(open(path))
+except Exception:
+    d={}
+alerts=d.setdefault("alerts",{})
+alerts[f"{prof}:{bucket}"]=now
+# Keep the file from growing unbounded: retain the 500 most recent alert keys.
+if len(alerts)>500:
+    for k in sorted(alerts,key=lambda k:alerts[k])[:len(alerts)-500]:
+        alerts.pop(k,None)
+d["checkedAt"]=now
+json.dump(d,open(path,"w"),indent=2)
+PY
+  chmod 600 "$STATE" 2>/dev/null || true
+}
+
+# Pull the last-hour rollup for a profile from the audit module. Emits the raw
+# JSON on success, nothing on any failure (degrade gracefully).
+audit_stats() {
+  local profile="$1"
+  [ -f "$AUDIT_MODULE" ] || return 1
+  RRD_MOD="$AUDIT_MODULE" RRD_PROF="$profile" GUARDRAIL_WINDOW_MS="$WINDOW_MS" node -e '
+    const mod=process.env.RRD_MOD, prof=process.env.RRD_PROF;
+    const win=parseInt(process.env.GUARDRAIL_WINDOW_MS||"3600000",10);
+    import(mod).then(m=>{
+      const s=m.auditStats(prof,{sinceMs:Date.now()-win});
+      process.stdout.write(JSON.stringify(s));
+    }).catch(e=>{ process.exit(3); });
+  ' 2>/dev/null
+}
+
+# Given a stats JSON, emit a newline-separated list of human-readable drift
+# signals (empty output = no drift). Thresholds passed via env.
+eval_drift() {
+  GD_STATS="$1" \
+  GD_MIN_BLOCKED="$DRIFT_MIN_BLOCKED" \
+  GD_MIN_REQUIRES="$DRIFT_MIN_REQUIRES" \
+  GD_MAX_ACTIONS="$DRIFT_MAX_ACTIONS_PER_HOUR" \
+  GD_CRITICAL="$DRIFT_CRITICAL_VIOLATIONS" \
+  python3 - <<'PY'
+import json,os,sys
+raw=(os.environ.get("GD_STATS") or "").strip()
+try:
+    s=json.loads(raw) if raw else {}
+except Exception:
+    s={}
+total=int(s.get("total") or 0)
+blocked=int(s.get("blocked") or 0)
+requires=int(s.get("requiresHuman") or 0)
+byv=s.get("byViolation") or {}
+min_blocked=int(os.environ.get("GD_MIN_BLOCKED","1"))
+min_requires=int(os.environ.get("GD_MIN_REQUIRES","1"))
+max_actions=int(os.environ.get("GD_MAX_ACTIONS","200"))
+critical=[c.strip() for c in os.environ.get("GD_CRITICAL","").split() if c.strip()]
+sig=[]
+if blocked>=min_blocked:
+    sig.append(f"{blocked} blocked send attempt(s)")
+if requires>=min_requires:
+    sig.append(f"{requires} action(s) need human review")
+for code in critical:
+    c=int(byv.get(code) or 0)
+    if c>0:
+        sig.append(f"{c}x {code}")
+# Any other recorded violation is worth surfacing too (non-critical).
+for code,c in sorted(byv.items()):
+    try: c=int(c)
+    except Exception: c=0
+    if c>0 and code not in critical:
+        sig.append(f"{c}x {code}")
+if total>max_actions:
+    sig.append(f"activity spike: {total} actions in window (> {max_actions})")
+print("\n".join(sig))
+PY
+}
+
+# Optional LLM mandate judge. Best-effort, non-fatal. Returns a one-line verdict
+# on stdout only if it flags drift; silent otherwise.
+llm_judge() {
+  local profile="$1" stats="$2"
+  [ "$LLM_JUDGE" = "1" ] || return 0
+  [ -x "$LLM" ] || return 0
+  local prompt verdict
+  prompt="You are a guardrail auditor for an automated revenue-recovery agent (profile: ${profile}). Below is a JSON rollup of its last hour of audited actions. Does this activity look like it stays on the client's recovery mandate and obeys its rules, or does it look like DRIFT (off-mandate, risky, or anomalous)? Answer with exactly DRIFT or OK on the first line, then one short reason. JSON: ${stats}"
+  verdict="$("$LLM" --task lead_score --prompt "$prompt" 2>/dev/null | head -3 || true)"
+  case "$verdict" in
+    DRIFT*|*DRIFT*) printf 'LLM judge: %s\n' "$(printf '%s' "$verdict" | tr '\n' ' ')" ;;
+    *) return 0 ;;
+  esac
+}
+
+# --- main loop ---------------------------------------------------------------
+echo "[$(ts)] guardrail-monitor run start (window=${WINDOW_MS}ms bucket=${HOUR_BUCKET})"
+
+if [ ! -d "$PROFILES_DIR" ]; then
+  echo "[$(ts)] no profiles dir ($PROFILES_DIR) — nothing to monitor."
+  exit 0
+fi
+
+CHECKED=0; ALERTED=0; SKIPPED=0
+shopt -s nullglob
+for path in "$PROFILES_DIR"/rr-*; do
+  profile="$(basename "$path")"
+  log="$AUDIT_DIR/$profile.ndjson"
+  if [ ! -f "$log" ]; then
+    echo "[$(ts)] $profile: no audit log yet ($log) — skip."
+    SKIPPED=$((SKIPPED+1))
+    continue
+  fi
+
+  STATS="$(audit_stats "$profile" || true)"
+  if [ -z "${STATS:-}" ]; then
+    echo "[$(ts)] $profile: audit rollup unavailable (module missing or errored) — skip."
+    SKIPPED=$((SKIPPED+1))
+    continue
+  fi
+  CHECKED=$((CHECKED+1))
+
+  SIGNALS="$(eval_drift "$STATS")"
+  JUDGE="$(llm_judge "$profile" "$STATS" || true)"
+  [ -n "$JUDGE" ] && SIGNALS="$(printf '%s\n%s' "${SIGNALS}" "$JUDGE" | sed '/^$/d')"
+
+  if [ -z "$SIGNALS" ]; then
+    echo "[$(ts)] $profile: clean ($STATS)."
+    continue
+  fi
+
+  if [ "$(already_alerted "$profile")" = "yes" ]; then
+    echo "[$(ts)] $profile: drift signals present but already alerted this hour — quiet."
+    continue
+  fi
+
+  MSG="⚠️ Guardrail drift — ${profile} (last hour):
+$(printf '%s' "$SIGNALS" | sed 's/^/• /')
+Stats: ${STATS}"
+  echo "[$(ts)] $profile: ALERT
+$MSG"
+  ping "$MSG"
+  mark_alerted "$profile"
+  ALERTED=$((ALERTED+1))
+done
+
+echo "[$(ts)] guardrail-monitor run done — checked=${CHECKED} alerted=${ALERTED} skipped=${SKIPPED}"
+exit 0

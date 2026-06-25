@@ -1,0 +1,10 @@
+#!/bin/sh
+# Wrapper for the new-client notifier. Sets a launchd-safe PATH (so `hermes`
+# and `node` resolve), sources the locked Supabase creds, then runs the poller.
+export PATH="/Users/AIAgenterminal/.local/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+cd /Users/AIAgenterminal
+set -a
+. ./.env.local
+[ -f /Users/AIAgenterminal/.openclaw/.env ] && . /Users/AIAgenterminal/.openclaw/.env
+set +a
+exec /usr/local/bin/node /Users/AIAgenterminal/rrd-notify.mjs "$@"

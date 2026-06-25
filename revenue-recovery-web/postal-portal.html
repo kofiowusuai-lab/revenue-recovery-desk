@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>FlowAudit Postal Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    *{box-sizing:border-box} html{background:var(--fa-bg)} body{margin:0;min-height:100vh;background:var(--fa-bg);color:var(--fa-text);font-family:var(--fa-sans);line-height:1.55} body:before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(circle at 50% -8%,rgba(255,255,255,.9),transparent 45%),linear-gradient(90deg,transparent 0 calc(50% - 560px),rgba(55,50,47,.08) calc(50% - 560px) calc(50% - 559px),transparent calc(50% - 559px) calc(50% + 559px),rgba(55,50,47,.08) calc(50% + 559px) calc(50% + 560px),transparent calc(50% + 560px));z-index:-1}
+    .top{max-width:1120px;margin:16px auto 0;padding:0 18px}.nav-shell{height:48px;display:flex;align-items:center;justify-content:space-between;gap:16px;background:rgba(255,255,255,.88);border:1px solid var(--fa-line);border-radius:999px;box-shadow:var(--fa-shadow);backdrop-filter:blur(12px);padding:0 10px 0 20px}.brand{display:flex;align-items:center;gap:10px;min-width:0}.brand-divider{width:1px;height:24px;background:var(--fa-line);display:inline-block}.product{font-size:13px;font-weight:600;color:var(--fa-muted);white-space:nowrap}.nav-meta{display:flex;align-items:center;gap:10px}.nav-pill{background:var(--fa-primary);color:var(--fa-on-primary);border-radius:999px;padding:9px 14px;font-size:12px;font-weight:600;white-space:nowrap}.shell{max-width:1240px;margin:0 auto;padding:70px 18px 88px}.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(300px,.95fr);gap:20px;align-items:stretch;margin-bottom:22px}.panel,.letter-card,.preview-card{background:var(--fa-card);border:1px solid var(--fa-line);border-radius:var(--fa-radius);box-shadow:var(--fa-shadow);padding:24px}.eyebrow{margin-bottom:14px}.hero h1{font-family:var(--fa-serif);font-size:clamp(42px,7vw,76px);line-height:.96;font-weight:400;letter-spacing:-.02em;margin:0 0 18px;color:var(--fa-text)}.lead{font-size:16px;color:var(--fa-muted);max-width:660px;margin:0 0 24px}.secure-box{display:flex;gap:12px;align-items:flex-start;background:var(--fa-surface);border:1px solid var(--fa-line);border-radius:14px;padding:14px;color:var(--fa-muted);font-size:13px}.secure-box strong{color:var(--fa-text)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{background:var(--fa-surface);border:1px solid var(--fa-line);border-radius:14px;padding:14px}.stat .k{font-size:12px;color:var(--fa-muted);font-weight:600}.stat .v{font-family:var(--fa-serif);font-size:34px;line-height:1;color:var(--fa-text);margin-top:7px}.layout{display:grid;grid-template-columns:380px minmax(0,1fr);gap:20px;align-items:start}.section-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}.section-head h2{font-size:17px;margin:0}.small{font-size:12px;color:var(--fa-muted)}.letter-list{display:flex;flex-direction:column;gap:10px}.letter-card{padding:16px;cursor:pointer;transition:border-color .15s,transform .05s}.letter-card:hover,.letter-card.active{border-color:var(--fa-primary)}.letter-card:active{transform:translateY(1px)}.letter-row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.letter-title{font-weight:700;color:var(--fa-text)}.letter-meta{color:var(--fa-muted);font-size:13px;margin-top:4px}.badge{font-size:11px;font-weight:700;border-radius:999px;padding:4px 9px;white-space:nowrap}.badge.pending{background:var(--fa-amber-bg);border:1px solid var(--fa-amber-line);color:var(--fa-amber-ink)}.badge.signed{background:var(--fa-emerald-bg);border:1px solid var(--fa-emerald-line);color:#065F46}.workspace{display:grid;gap:20px}.letter-detail{display:block}.preview-open-card{background:linear-gradient(135deg,#fff,#f8f7f5);border:1px solid var(--fa-line);border-radius:var(--fa-radius);box-shadow:var(--fa-shadow);padding:22px;margin-bottom:20px}.preview-open-card h3{margin:0 0 6px;font-size:18px}.preview-open-card p{margin:0;color:var(--fa-muted);font-size:13px}.preview-open-card .actions{margin-top:16px}.preview-card{padding:18px;overflow:auto;background:#f8f7f5}.preview-modal{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:28px 18px;background:rgba(28,25,23,.62);backdrop-filter:blur(8px)}.preview-modal.hidden{display:none!important}.preview-dialog{width:min(980px,100%);max-height:calc(100vh - 56px);overflow:auto;background:var(--fa-card);border:1px solid var(--fa-line);border-radius:24px;box-shadow:0 28px 90px rgba(15,23,42,.28);padding:18px}.preview-dialog-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px;background:var(--fa-card);padding-bottom:12px;border-bottom:1px solid var(--fa-line)}.preview-dialog-head h2{margin:0;font-family:var(--fa-serif);font-size:32px;font-weight:400}.modal-close-actions{display:flex;align-items:center;gap:8px;flex:none}.icon-btn{width:44px;height:44px;border:1px solid var(--fa-line);border-radius:999px;background:#fff;cursor:pointer;font-size:24px;line-height:1;font-weight:700}.secure-access-preview-shell{width:min(100%,640px);max-width:640px;aspect-ratio:8.5 / 11;margin:0 auto;background:#fff;border-radius:2px;box-shadow:0 14px 42px rgba(15,23,42,.16);overflow:hidden;position:relative}.letter-preview-page{--preview-scale:.753;position:absolute;top:0;left:0;width:850px;height:1100px;transform:scale(var(--preview-scale));transform-origin:top left;background:#fff;font-family:Georgia,'Times New Roman',serif;color:#161616}.target-letter-hero{height:228px;background:url('assets/northern-peak-header-reference.jpg') center center/cover no-repeat;border-bottom:5px solid #173b5a;margin:0}.target-letter-content{padding:58px 98px 0}.target-letter-top{display:flex;justify-content:space-between;gap:52px;align-items:flex-start;margin-bottom:38px}.target-letter-meta{min-width:300px}.target-letter-main{width:100%;max-width:none}.letter-date,.addr,.subject,.body-copy,.signature-zone{font-size:17px;line-height:1.36}.letter-date{margin-bottom:52px}.addr{margin-bottom:0}.target-letter-brand{width:250px;flex:none;margin-top:-18px}.target-letter-brand-img{display:block;width:250px;height:auto}.subject{font-size:18px;font-weight:700;margin-bottom:24px}.body-copy{font-size:15.7px;line-height:1.34}.body-copy p{margin:0 0 8px}.signature-zone{margin-top:22px;min-height:116px}.signature-img{max-width:310px;max-height:88px;display:block;margin-bottom:7px;object-fit:contain}.signature-placeholder{width:310px;height:78px;border:1px dashed #d4d4d4;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#9ca3af;font:14px Arial,Helvetica,sans-serif;margin-bottom:8px;background:#fbfaf8}.signer-name{font-weight:700}.signer-title{color:#222}.target-letter-footer{position:absolute;left:88px;right:88px;bottom:42px;border-top:4px solid #173b5a;text-align:center;padding-top:12px;font:bold 12px Arial,Helvetica,sans-serif;letter-spacing:1px;color:#416078}.target-letter-footer span{margin:0 14px}.form-card h3{margin:0 0 8px;font-size:18px}.field{display:flex;flex-direction:column;gap:6px;margin:14px 0}.field label{font-size:13px;font-weight:600}.hint{font-size:12px;color:var(--fa-muted)}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.btn{border:0;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;padding:12px 18px}.btn-primary:disabled{opacity:.55;cursor:not-allowed}.danger-link{background:var(--fa-card);color:var(--fa-danger);border:1px solid var(--fa-danger-line)!important}.audit{margin-top:14px;background:var(--fa-surface);border:1px solid var(--fa-line);border-radius:12px;padding:12px;font-size:12px;color:var(--fa-muted)}.gate{border-left:3px solid var(--fa-primary);padding-left:12px;margin-top:14px;font-size:13px;color:var(--fa-muted)}.empty,.invalid{background:var(--fa-card);border:1px solid var(--fa-line);border-radius:var(--fa-radius);box-shadow:var(--fa-shadow);padding:28px;text-align:center;color:var(--fa-muted)}.hidden{display:none!important}@media(max-width:980px){.hero,.layout,.letter-detail{grid-template-columns:1fr}.shell{padding-top:42px}.stats{grid-template-columns:1fr 1fr 1fr}}@media(max-width:620px){.nav-meta{display:none}.stats{grid-template-columns:1fr}.letter-paper{padding:34px 26px}.hero h1{font-size:44px}}
+  </style>
+</head>
+<body>
+  <header class="top"><nav class="nav-shell" aria-label="FlowAudit"><div class="brand"><span class="fa-wordmark">FlowAudit</span><span class="brand-divider" aria-hidden="true"></span><span class="product">Revenue Recovery Postal Portal</span></div><div class="nav-meta"><span class="small">Secure postal approvals</span><span class="nav-pill">Private portal</span></div></nav></header>
+  <main class="shell">
+    <section id="invalid" class="invalid hidden"><h1>Postal portal link unavailable</h1><p>Please use the secure FlowAudit Postal Portal link from your welcome email or ask support@flowaudit.co.uk for a fresh link.</p></section>
+    <section id="app">
+      <div class="hero">
+        <div class="panel">
+          <div class="eyebrow">Secure postal approvals</div>
+          <h1>Approve letters before they ever leave.</h1>
+          <p class="lead">Your FlowAudit Postal Portal is the final sign-off layer for physical recovery letters. Pending letters appear here, you choose the signer, upload the signature, preview the exact page, then approve or reject.</p>
+          <div class="secure-box"><strong>🔒</strong><div><strong>No portal signature approval, no physical letter.</strong><br>This link is private to your company. This MVP does not send live letters; final send remains blocked until the signed-preview hash is recorded and the gated executor is wired to PostGrid.</div></div>
+        </div>
+        <aside class="panel">
+          <div class="section-head"><h2 id="companyName">Demo Company</h2><span class="badge pending">Portal MVP</span></div>
+          <p class="small">Client dashboard foundation</p>
+          <div class="stats"><div class="stat"><div class="k">Pending</div><div class="v" id="pendingCount">0</div></div><div class="stat"><div class="k">Signed</div><div class="v" id="signedCount">0</div></div><div class="stat"><div class="k">Blocked sends</div><div class="v">∞</div></div></div>
+          <div class="gate"><strong>Hard gate:</strong> every physical letter must have a signer name/team, uploaded signature, preview acknowledgement, timestamped approval, and matching signed-preview hash before PostGrid can send.</div>
+        </aside>
+      </div>
+      <div class="layout">
+        <section class="panel">
+          <div class="section-head"><h2>Pending letters</h2><span class="small" id="lastUpdated">Loaded locally</span></div>
+          <div id="letterList" class="letter-list"></div>
+        </section>
+        <section id="letterDetail" class="workspace letter-detail"></section>
+      </div>
+    </section>
+  </main>
+  <div id="letterPreviewModal" class="preview-modal hidden" role="dialog" aria-modal="true" aria-labelledby="letterPreviewTitle" onclick="closePreviewFromBackdrop(event)">
+    <div class="preview-dialog">
+      <div class="preview-dialog-head"><div><h2 id="letterPreviewTitle">Letter preview</h2><p class="small">This is the full page that will be signed and approval-gated before any physical send. Click outside the preview or use the × button to leave.</p></div><div class="modal-close-actions"><button class="icon-btn" type="button" aria-label="Close preview" onclick="closeLetterPreview()">×</button></div></div>
+      <div class="preview-card"><div id="letterPreviewStage"></div></div>
+    </div>
+  </div>
+<script>
+const q = new URLSearchParams(location.search);
+const token = q.get('token') || q.get('demo') || '';
+const pendingLetters = [
+  { id:'ltr-1007', customer:'Northbridge Facilities Ltd', invoice:'INV-1048', amount:'£4,820.00', type:'Formal reminder', due:'31 days overdue', status:'Needs signature', body:['We are writing about the outstanding balance shown above. Our records show this invoice remains unpaid past the agreed terms.','Please arrange payment or reply with a remittance date within five business days. If there is a dispute, contact us so we can pause recovery activity and resolve it with the account owner.','Thank you for your prompt attention.'] },
+  { id:'ltr-1011', customer:'Cedar House Maintenance', invoice:'INV-1083', amount:'£1,245.50', type:'Second reminder', due:'18 days overdue', status:'Needs signature', body:['This is a polite reminder that the invoice referenced above remains outstanding.','Please confirm when payment will be made, or reply if there is anything preventing settlement.'] }
+];
+let selectedId = pendingLetters[0].id;
+let signatureImageData = '';
+let signerDrafts = {};
+let signed = new Set();
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function current(){return pendingLetters.find(l=>l.id===selectedId)||pendingLetters[0];}
+function renderList(){
+  document.getElementById('pendingCount').textContent = pendingLetters.length - signed.size;
+  document.getElementById('signedCount').textContent = signed.size;
+  document.getElementById('letterList').innerHTML = pendingLetters.map(l => `<article class="letter-card ${l.id===selectedId?'active':''}" onclick="viewLetter('${l.id}')"><div class="letter-row"><div><div class="letter-title">${esc(l.customer)}</div><div class="letter-meta">${esc(l.invoice)} · ${esc(l.amount)} · ${esc(l.due)}</div></div><span class="badge ${signed.has(l.id)?'signed':'pending'}">${signed.has(l.id)?'Signed preview':'Needs signature'}</span></div></article>`).join('');
+}
+function renderLetterPreviewPage(l, signerName, signerTitle){
+  const body = l.body && l.body.length ? l.body : ['We are writing about the overdue balance on your account. Our records show the invoice below remains unpaid.','Please arrange payment within 7 days, or contact us if this has already been resolved.'];
+  return `<div class="secure-access-preview-shell"><div class="letter-preview-page"><div class="target-letter-hero" aria-label="Northern Peak mountain lake letterhead image"></div><div class="target-letter-content"><div class="target-letter-top"><div class="target-letter-meta"><div class="letter-date">May 20, 2024</div><div class="addr">Accounts Payable Team<br>${esc(l.customer || 'Customer Account')}<br>Billing Address</div></div><aside class="target-letter-brand"><img class="target-letter-brand-img" src="assets/northern-peak-logo-contact-reference.jpg" alt="NORTHERN PEAK SOLUTIONS logo and contact details"></aside></div><div class="target-letter-main"><div class="subject">Subject: Overdue invoice reminder</div><div class="body-copy letter-main-copy"><p>Dear Customer,</p>${body.map(p=>`<p>${esc(p)}</p>`).join('')}<p><b>Invoice:</b> ${esc(l.invoice)}<br><b>Amount due:</b> ${esc(l.amount)}</p><p>Please arrange payment within seven days, or contact us if this balance has already been resolved.</p><div class="signature-zone">${signatureImageData?`<img class="signature-img" src="${signatureImageData}" alt="Uploaded signature preview">`:'<div class="signature-placeholder">Signature preview</div>'}<div>Sincerely,</div><div class="signer-name">${esc(signerName)}</div><div class="signer-title">${esc(signerTitle)}</div></div></div></div></div><div class="target-letter-footer"><span>INNOVATE</span>•<span>COLLABORATE</span>•<span>ELEVATE</span></div></div></div>`;
+}
+function currentSigner(){
+  const live = {
+    name: document.getElementById('signerName')?.value || '',
+    title: document.getElementById('signerTitle')?.value || ''
+  };
+  const saved = signerDrafts[selectedId] || {};
+  return {
+    name: live.name || saved.name || 'Accounts Receivable Team',
+    title: live.title || saved.title || 'Northern Peak Solutions'
+  };
+}
+function rememberSigner(){
+  signerDrafts[selectedId] = currentSigner();
+}
+function renderDetail(){
+  const l = current();
+  const signer = currentSigner();
+  document.getElementById('letterDetail').innerHTML = `<div class="preview-open-card"><h3>Review full letter</h3><p>Use the preview button to open the exact full-page letter. The inline mock preview has been removed so every letter opens in the reconstructed template style.</p><div class="actions"><button class="btn btn-primary" type="button" onclick="openLetterPreview()">Preview letter</button></div></div><div class="panel form-card"><h3>Apply signature preview</h3><p class="hint">Upload the authorised signature and enter the person or team signing this letter. Use Preview letter to review the full page before approval.</p><div class="field"><label for="signerName">Signer name</label><input id="signerName" type="text" value="${esc(signer.name==='Accounts Receivable Team'?'':signer.name)}" placeholder="e.g. Sarah Jones" oninput="rememberSigner();syncOpenPreview()"></div><div class="field"><label for="signerTitle">Signer title or team</label><input id="signerTitle" type="text" value="${esc(signer.title==='Northern Peak Solutions'?'':signer.title)}" placeholder="e.g. Finance Director or Accounts Receivable Team" oninput="rememberSigner();syncOpenPreview()"></div><div class="field"><label for="signatureUpload">Signature upload</label><input id="signatureUpload" type="file" accept="image/png,image/jpeg,image/webp" onchange="loadSignature(event)"><div class="hint">Transparent PNG preferred. Recommended canvas: about 900 × 270 px (3:1 ratio) with the signature filling most of the canvas; it renders at about 310 × 88 px on the letter so it will not look tiny. Stored signature handling will be encrypted in the backend phase.</div></div><div class="actions"><button class="btn btn-primary" onclick="approveLetter()">Approve signature and queue this letter</button><button class="btn danger-link" onclick="rejectLetter()">Reject / request changes</button></div><div class="audit">Approval artifact planned: signer identity, timestamp, letter id, preview hash, and signature asset reference. No live PostGrid send occurs from this MVP page.</div></div>`;
+}
+function openLetterPreview(){
+  const signer = currentSigner();
+  document.getElementById('letterPreviewStage').innerHTML = renderLetterPreviewPage(current(), signer.name, signer.title);
+  document.getElementById('letterPreviewModal').classList.remove('hidden');
+}
+function closeLetterPreview(){ document.getElementById('letterPreviewModal').classList.add('hidden'); }
+function closePreviewFromBackdrop(event){ if(event.target === event.currentTarget) closeLetterPreview(); }
+function viewLetter(id){ selectedId=id; signatureImageData=''; renderList(); renderDetail(); }
+function syncOpenPreview(){
+  const modal = document.getElementById('letterPreviewModal');
+  if(modal && !modal.classList.contains('hidden')) openLetterPreview();
+}
+function syncPreview(){ syncOpenPreview(); }
+function loadSignature(ev){ const f=ev.target.files && ev.target.files[0]; if(!f) return; const signer=currentSigner(); signerDrafts[selectedId]=signer; const r=new FileReader(); r.onload=()=>{ signatureImageData=r.result; renderDetail(); syncOpenPreview(); }; r.readAsDataURL(f); }
+function approveLetter(){ const n=document.getElementById('signerName')?.value.trim(); const t=document.getElementById('signerTitle')?.value.trim(); if(!n || !t || !signatureImageData){ alert('Add signer name, signer title/team, and a signature upload before approval.'); return; } signed.add(selectedId); renderList(); alert('Signed-preview approval captured for this MVP. Live sending remains blocked until backend audit/hash wiring is added.'); }
+function rejectLetter(){ alert('Request-changes path captured for MVP. Backend will route this back to the operator queue.'); }
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeLetterPreview(); });
+if(!token){ document.getElementById('app').classList.add('hidden'); document.getElementById('invalid').classList.remove('hidden'); }
+renderList(); renderDetail();
+</script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revenue Recovery Desk — Offboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#0F172A;--navy-soft:#1E293B;--navy-line:#334155;--amber:#F59E0B;--amber-dark:#D97706;--white:#FFFFFF;--bg:#F8FAFC;--text:#0F172A;--muted:#64748B;--line:#E2E8F0;--danger:#DC2626;--green:#16A34A;--radius:12px;--shadow:0 1px 3px rgba(15,23,42,.08),0 8px 24px rgba(15,23,42,.06);--font:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  header.app-header{background:var(--navy);color:var(--white);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:50;}
+  .brand{display:flex;align-items:center;gap:12px;}.brand-mark{width:36px;height:36px;border-radius:9px;background:var(--amber);color:var(--navy);display:grid;place-items:center;font-weight:700;font-size:18px;flex:none;}.brand-text{display:flex;flex-direction:column;line-height:1.15;}.brand-text .title{font-weight:700;font-size:16px;letter-spacing:.2px;}.brand-text .sub{font-size:12px;color:#94A3B8;}
+  main{max-width:940px;margin:0 auto;padding:32px 20px 80px;}h1.page-title{font-size:26px;font-weight:700;margin:0 0 4px;}p.page-lead{color:var(--muted);margin:0 0 28px;font-size:15px;}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;}.step-head{margin-bottom:20px;}.step-head h2{font-size:20px;margin:0 0 4px;font-weight:700;}.step-head p{margin:0;color:var(--muted);font-size:14px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px 18px;}.field{display:flex;flex-direction:column;gap:6px;}.field.full{grid-column:1/-1;}label.lbl{font-size:13px;font-weight:600;color:#334155;}label.lbl .req{color:var(--amber-dark);margin-left:2px;}.hint{font-size:12px;color:var(--muted);}
+  input[type=text],input[type=email],input[type=date],select,textarea{font-family:var(--font);font-size:14px;color:var(--text);padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--white);width:100%;transition:border-color .15s,box-shadow .15s;}textarea{resize:vertical;min-height:92px;}input:focus,select:focus,textarea:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.16);}input.invalid,textarea.invalid{border-color:var(--danger);box-shadow:0 0 0 3px rgba(220,38,38,.12);}
+  .section-sub{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin:8px 0 2px;grid-column:1/-1;border-top:1px solid var(--line);padding-top:16px;}.secure-note{background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;border-radius:9px;padding:10px 14px;font-size:13px;margin-bottom:16px;}.warn-note{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;border-radius:9px;padding:10px 14px;font-size:13px;margin:0 0 16px;}
+  .consent-row{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:9px;padding:12px 14px;background:#FFFBEB;border-color:#FDE68A;}.consent-row input{width:18px;height:18px;accent-color:var(--amber-dark);margin-top:2px;flex:none;}
+  .btn{font-family:var(--font);font-weight:600;font-size:14px;padding:11px 20px;border-radius:9px;cursor:pointer;border:1px solid transparent;transition:background .15s,border-color .15s,color .15s,transform .05s;}.btn-primary{background:var(--amber);color:var(--navy);}.btn-primary:hover{background:var(--amber-dark);color:var(--white);}.btn:disabled{opacity:.55;cursor:not-allowed;}.actions{display:flex;align-items:center;justify-content:flex-end;margin-top:24px;gap:12px;}
+  .err-msg{color:var(--danger);font-size:12px;display:none;}.err-msg.show{display:block;}.banner{max-width:940px;margin:18px auto 0;padding:0 20px;}.banner-inner{border-radius:10px;padding:12px 16px;font-size:13.5px;display:none;}.banner-inner.show{display:block;}.banner-err{background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;}.banner-warn{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;}
+  .success-screen{display:none;text-align:center;padding:44px 20px;}.success-screen.show{display:block;}.success-screen .ring{width:72px;height:72px;border-radius:50%;margin:0 auto 18px;background:#DCFCE7;color:var(--green);display:grid;place-items:center;font-size:36px;}.success-screen h2{font-size:24px;margin:0 0 8px;}.success-screen p{color:var(--muted);margin:0 auto 18px;max-width:620px;}.submitting{opacity:.6;pointer-events:none;}
+  @media (max-width:760px){.grid{grid-template-columns:1fr;}main{padding:22px 14px 60px;}.card{padding:20px 16px;}}
+</style>
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<header class="app-header"><div class="brand"><span class="fa-wordmark">FlowAudit</span><span class="brand-divider" aria-hidden="true"></span><div class="brand-text"><span class="title">Revenue Recovery Desk</span><span class="sub">Client Offboarding</span></div></div></header>
+<div class="banner"><div class="banner-inner" id="config-banner"></div></div>
+<main>
+  <h1 class="page-title">Offboarding request</h1>
+  <p class="page-lead">Use this secure form to request cancellation and offboarding. We’ll calculate any final prorated amount, pause recovery activity, and take down the active system once the account is clear.</p>
+  <div class="card" id="form-card">
+    <form id="offboard-form" novalidate>
+      <div class="step-head"><h2>Tell us what to close down</h2><p>Please complete the details below. Do not include API keys, passwords, or card details.</p></div>
+      <div class="secure-note"><b>Secure process:</b> this form only collects offboarding instructions. If a final payment is needed, we’ll send a Stripe payment link separately.</div>
+      <div class="grid">
+        <div class="field"><label class="lbl" for="company">Company name<span class="req">*</span></label><input id="company" type="text" autocomplete="organization" readonly><div class="hint">Locked from the active client account.</div><div class="err-msg" data-for="company"></div></div>
+        <div class="field"><label class="lbl" for="contact">Primary contact name<span class="req">*</span></label><input id="contact" type="text" autocomplete="name"><div class="err-msg" data-for="contact"></div></div>
+        <div class="field"><label class="lbl" for="email">Business / billing email<span class="req">*</span></label><input id="email" type="email" autocomplete="email" readonly><div class="hint">Locked to the company email on file.</div><div class="err-msg" data-for="email"></div></div>
+        <div class="field"><label class="lbl" for="cancelDate">Desired cancellation date<span class="req">*</span></label><input id="cancelDate" type="date"><div class="err-msg" data-for="cancelDate"></div></div>
+        <div class="field full"><label class="lbl" for="reason">Reason for leaving</label><textarea id="reason" placeholder="Optional, but helpful for the team."></textarea></div>
+        <div class="field full"><label class="lbl" for="didNotWork">Anything that did not work as expected?</label><textarea id="didNotWork" placeholder="Optional feedback."></textarea></div>
+        <div class="field full"><label class="lbl" for="handover">Any outstanding customer/recovery activity we should pause or hand over?</label><textarea id="handover" placeholder="Tell us about active customer conversations, open recovery items, or anything we should stop immediately."></textarea></div>
+        <div class="section-sub">Authorization</div>
+        <div class="field full"><div class="warn-note">Submitting this form authorizes Revenue Recovery Desk to begin offboarding, calculate any final prorated amount, and take down the active recovery system once the account is clear.</div></div>
+        <div class="field full"><div class="consent-row"><input type="checkbox" id="authorize"><label for="authorize" style="font-size:13.5px;cursor:pointer;">I confirm I am authorized to request offboarding for this company.<span class="req">*</span></label></div><div class="err-msg" data-for="authorize"></div></div>
+      </div>
+      <div class="actions"><button type="submit" class="btn btn-primary" id="submit-btn">Submit offboarding request</button></div>
+    </form>
+    <div class="success-screen" id="success-screen"><div class="ring">✓</div><h2>Offboarding request submitted</h2><p>We’ve received the form. You’ll get an email confirming submission, then we’ll reach out with any final payment required or confirmation once offboarding is complete.</p></div>
+  </div>
+</main>
+<script>
+function $(id){return document.getElementById(id);}
+function val(id){return ($(id).value||'').trim();}
+function setError(id,msg){var el=$(id), box=document.querySelector('.err-msg[data-for="'+id+'"]'); if(box){box.textContent=msg||'';box.classList.toggle('show',!!msg);} if(el)el.classList.toggle('invalid',!!msg);}
+function banner(kind,msg){var b=$('config-banner');b.className='banner-inner show '+(kind==='err'?'banner-err':'banner-warn');b.textContent=msg;}
+var PARAMS = new URLSearchParams(location.search);
+var TOKEN = PARAMS.get('token') || '';
+function hasValidLink(){return !!TOKEN && TOKEN.indexOf('.') > 0;}
+function intakeUrl(){return location.hostname==='flowaudit.co.uk'?'https://revenue-recovery-web-ivory.vercel.app/api/intake':new URL('api/intake', location.href).toString();}
+function syncSubmitState(){var btn=$('submit-btn');var ok=hasValidLink();btn.disabled=!ok;if(!ok)btn.title='This offboarding link is missing or expired.';else btn.title='';}
+function applyLockedAccount(){
+  $('company').placeholder='Locked from signed account link';
+  $('email').placeholder='Locked from signed account link';
+  $('company').readOnly=true;$('email').readOnly=true;
+  if(!hasValidLink()) banner('err','For security, offboarding links must be signed and unexpired. Please request a fresh offboarding link from support.');
+  syncSubmitState();
+}
+function validate(){
+  var ok=true;['contact','cancelDate'].forEach(function(id){setError(id,'');}); setError('authorize','');
+  if(!hasValidLink()){banner('err','This offboarding link is invalid or incomplete. Please request a fresh link from support.');ok=false;}
+  if(!val('contact')){setError('contact','Primary contact name is required.');ok=false;}
+  if(!val('cancelDate')){setError('cancelDate','Desired cancellation date is required.');ok=false;}
+  if(!$('authorize').checked){setError('authorize','Authorization is required.');ok=false;}
+  syncSubmitState();return ok;
+}
+function buildPayload(){return {requestType:'offboarding',token:TOKEN,primaryContactName:val('contact'),desiredCancellationDate:val('cancelDate'),reason:val('reason'),didNotWork:val('didNotWork'),handoverNotes:val('handover'),authorization:$('authorize').checked,submittedVia:'web-offboard-form'};}
+async function submitForm(e){
+  e.preventDefault();if(!validate())return;
+  var btn=$('submit-btn'), card=$('form-card'); btn.disabled=true; btn.textContent='Submitting…'; card.classList.add('submitting');
+  try{var r=await fetch(intakeUrl(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'offboarding',payload:buildPayload()})});var data=await r.json().catch(function(){return {};});if(!r.ok||!data.ok)throw new Error(data.error||('HTTP '+r.status));$('offboard-form').style.display='none';$('success-screen').classList.add('show');window.scrollTo(0,0);}catch(err){banner('err','Could not submit: '+((err&&err.message)||err)+'. Please try again or contact support@flowaudit.co.uk.');btn.disabled=false;}finally{btn.textContent='Submit offboarding request';card.classList.remove('submitting');syncSubmitState();}
+}
+function init(){applyLockedAccount();['contact','cancelDate'].forEach(function(id){$(id).addEventListener('input',syncSubmitState);});$('offboard-form').addEventListener('submit',submitForm);}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+</script>
+</body>
+</html>

@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revenue Recovery Desk — Internal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#37322F;--navy-soft:#4A443E;--navy-line:#5C554E;--amber:#37322F;--amber-dark:#2A2622;--white:#FFFFFF;--bg:#F7F5F3;--text:#37322F;--muted:#8A8178;--line:#E7E2DC;--danger:#DC2626;--green:#16A34A;--radius:12px;--shadow:0 1px 3px rgba(55,50,47,.08),0 8px 24px rgba(55,50,47,.06);--font:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
+  *{box-sizing:border-box;}html,body{margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.5;-webkit-font-smoothing:antialiased;}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;}
+  header.app-header{background:var(--navy);color:var(--white);padding:18px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;position:sticky;top:0;z-index:50;}
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{width:36px;height:36px;border-radius:9px;background:var(--amber);color:var(--navy);display:grid;place-items:center;font-weight:700;font-size:18px;flex:none;}
+  .brand-text{display:flex;flex-direction:column;line-height:1.15;}.brand-text .title{font-weight:700;font-size:16px;}.brand-text .sub{font-size:12px;color:#94A3B8;}
+  .header-right{display:flex;align-items:center;gap:14px;}
+  .view-toggle{display:flex;background:var(--navy-soft);border-radius:999px;padding:4px;gap:2px;}
+  .view-toggle button{border:0;background:transparent;color:#CBD5E1;font-family:var(--font);font-weight:600;font-size:13px;padding:8px 16px;border-radius:999px;cursor:pointer;white-space:nowrap;}
+  .view-toggle button.active{background:var(--amber);color:var(--navy);}
+  .who{font-size:12px;color:#94A3B8;}
+  .logout{border:0;background:transparent;color:#CBD5E1;font-family:var(--font);font-weight:600;font-size:13px;cursor:pointer;padding:6px 10px;border-radius:8px;}.logout:hover{background:var(--navy-soft);color:#fff;}
+  main{max-width:1140px;margin:0 auto;padding:32px 20px 80px;}
+  h1.page-title{font-size:26px;font-weight:700;margin:0 0 4px;}
+  p.page-lead{color:var(--muted);margin:0 0 28px;font-size:15px;}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;}
+  .btn{font-family:var(--font);font-weight:600;font-size:14px;padding:11px 20px;border-radius:9px;cursor:pointer;border:1px solid transparent;transition:background .15s,border-color .15s,color .15s,transform .05s;}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--amber);color:var(--navy);}.btn-primary:hover{background:var(--amber-dark);color:var(--white);}
+  .btn-ghost{background:var(--white);color:var(--navy);border-color:var(--line);}.btn-ghost:hover{border-color:var(--navy-line);}
+  .btn-dark{background:var(--navy);color:var(--white);}.btn-dark:hover{background:var(--navy-soft);}
+  .btn-sm{padding:7px 13px;font-size:13px;}.btn:disabled{opacity:.55;cursor:not-allowed;}
+  .login-wrap{min-height:calc(100vh - 73px);display:grid;place-items:center;padding:20px;}
+  .login-card{width:100%;max-width:380px;}
+  .login-card h2{margin:0 0 4px;font-size:20px;}.login-card p{margin:0 0 20px;color:var(--muted);font-size:14px;}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+  label.lbl{font-size:13px;font-weight:600;color:#334155;}
+  input[type=text],input[type=email],input[type=password],select,textarea{font-family:var(--font);font-size:14px;color:var(--text);padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--white);width:100%;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,158,11,.16);}
+  .login-err{color:var(--danger);font-size:13px;margin-top:6px;min-height:18px;}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:26px;}
+  .stat-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);}
+  .stat-card .k{font-size:12.5px;color:var(--muted);font-weight:600;margin-bottom:8px;}
+  .stat-card .v{font-size:26px;font-weight:700;line-height:1.1;}
+  .stat-card.accent{background:var(--navy);border-color:var(--navy);}.stat-card.accent .k{color:#94A3B8;}.stat-card.accent .v{color:var(--amber);}
+  .dash-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px;flex-wrap:wrap;}.dash-bar h2{margin:0;font-size:18px;}
+  .live-dot{font-size:12px;color:var(--green);font-weight:700;}
+  .sub-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:16px;overflow:hidden;}
+  .sub-top{padding:18px 22px;display:flex;gap:16px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;}
+  .sub-main{min-width:0;flex:1;}
+  .sub-company{font-size:17px;font-weight:700;margin:0 0 2px;}
+  .sub-meta{font-size:13px;color:var(--muted);margin:0 0 10px;}.sub-meta b{color:#334155;font-weight:600;}
+  .goal-preview{font-size:14px;color:#475569;margin:0 0 10px;}
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+  .badge{font-size:11.5px;font-weight:700;padding:3px 9px;border-radius:7px;display:inline-flex;gap:5px;align-items:center;}
+  .badge.on{background:#DCFCE7;color:#166534;}.badge.off{background:#F1F5F9;color:#94A3B8;}
+  .sub-figures{font-size:13px;color:var(--muted);}.sub-figures b{color:var(--amber-dark);font-weight:700;}
+  .sub-side{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+  .chip{display:inline-block;padding:4px 11px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap;}
+  .chip-critical{background:#FEE2E2;color:#B91C1C;}.chip-high{background:#FEF3C7;color:#B45309;}.chip-medium{background:#DBEAFE;color:#1D4ED8;}.chip-exploring{background:#E2E8F0;color:#475569;}
+  .chip-retain{background:#DCFCE7;color:#166534;}.chip-expiring{background:#FEF3C7;color:#B45309;}.chip-expired{background:#FEE2E2;color:#B91C1C;}
+  .warn-box{background:#FEF3C7;border:1px solid #FDE68A;color:#92400E;border-radius:9px;padding:10px 14px;font-size:13px;margin-bottom:14px;}
+  .modal-note{font-size:13px;color:var(--muted);margin:0 0 16px;}
+  .sub-detail{display:none;border-top:1px solid var(--line);padding:20px 22px;background:#FCFDFE;}.sub-detail.show{display:block;}
+  .detail-section{margin-bottom:20px;}.detail-section:last-child{margin-bottom:0;}
+  .detail-section h4{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:0 0 10px;}
+  .kv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px 20px;}
+  .kv{font-size:14px;}.kv .k{color:var(--muted);font-size:12px;}.kv .v{color:var(--text);font-weight:500;word-break:break-word;}.kv .v.empty{color:#94A3B8;font-weight:400;font-style:italic;}
+  table.detail-table{width:100%;border-collapse:collapse;font-size:13px;}
+  table.detail-table th{text-align:left;background:var(--navy);color:var(--white);padding:8px 10px;font-weight:600;font-size:12px;}
+  table.detail-table td{padding:8px 10px;border-bottom:1px solid var(--line);}table.detail-table tr:last-child td{border-bottom:0;}
+  .tag-list{display:flex;flex-wrap:wrap;gap:6px;}.tag{background:#F1F5F9;border:1px solid var(--line);border-radius:7px;padding:4px 10px;font-size:13px;}
+  .longtext{font-size:14px;color:#334155;white-space:pre-wrap;margin:0;}
+  .doc-links{display:flex;flex-direction:column;gap:8px;}
+  .doc-links a,.doc-links button{font-size:13px;text-align:left;background:#F1F5F9;border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer;color:var(--navy);font-family:var(--font);}
+  .doc-links button:hover{border-color:var(--amber);}
+  .empty-state{text-align:center;padding:56px 20px;color:var(--muted);background:var(--white);border:1px dashed var(--line);border-radius:var(--radius);}.empty-state .big{font-size:40px;margin-bottom:10px;}
+  /* agent */
+  .agent-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start;}
+  .agent-col{display:flex;flex-direction:column;gap:16px;}
+  .agent-card h3{margin:0 0 12px;font-size:16px;}
+  .agent-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}.agent-card-head h3{margin:0;}
+  .status-pill{font-size:12px;font-weight:700;color:var(--green);background:#DCFCE7;padding:4px 11px;border-radius:999px;}
+  .agent-note{color:var(--muted);font-size:13px;margin:0 0 12px;}
+  .agent-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;}
+  .kv .v code{background:#F1F5F9;padding:2px 6px;border-radius:5px;}
+  .code-block{background:var(--navy);color:#E2E8F0;border-radius:10px;padding:14px 16px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.6;overflow-x:auto;margin:0;white-space:pre;}
+  .method-list{display:flex;flex-direction:column;gap:8px;}
+  .method-item{border:1px solid var(--line);border-radius:9px;padding:10px 12px;}
+  .method-item .sig{font-family:ui-monospace,monospace;font-size:13px;font-weight:600;color:var(--amber-dark);}
+  .method-item .desc{font-size:12.5px;color:var(--muted);margin-top:3px;}
+  .repl-row{display:flex;gap:8px;margin-bottom:10px;}.repl-row select{flex:1;}
+  .repl-arg{width:100%;min-height:70px;font-family:ui-monospace,monospace;font-size:13px;margin-bottom:10px;border:1px solid var(--line);border-radius:9px;padding:10px 12px;resize:vertical;}
+  .repl-out{max-height:380px;overflow:auto;white-space:pre-wrap;}.repl-out.err{color:#FCA5A5;}
+  /* modal */
+  .modal-back{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .modal-back.show{display:flex;}
+  .modal{background:var(--white);border-radius:14px;max-width:880px;width:100%;max-height:88vh;display:flex;flex-direction:column;overflow:hidden;}
+  .modal-head{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+  .modal-head h3{margin:0;font-size:18px;}
+  .modal-tabs{display:flex;gap:4px;padding:12px 22px 0;flex-wrap:wrap;}
+  .modal-tabs button{border:0;background:#F1F5F9;color:#475569;font-family:var(--font);font-weight:600;font-size:13px;padding:7px 14px;border-radius:8px 8px 0 0;cursor:pointer;}
+  .modal-tabs button.active{background:var(--navy);color:#fff;}
+  .modal-body{padding:0 22px 22px;overflow:auto;}
+  .modal-body pre{background:var(--navy);color:#E2E8F0;border-radius:0 10px 10px 10px;padding:16px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;margin:0;}
+  .modal-foot{padding:14px 22px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;}
+  .charcount{font-size:11.5px;color:var(--muted);margin-top:6px;}
+  .charcount.over{color:var(--danger);font-weight:700;}
+  .hidden{display:none!important;}
+  @media (max-width:860px){.stats-row{grid-template-columns:1fr 1fr;}.agent-grid{grid-template-columns:1fr;}.kv-grid{grid-template-columns:1fr;}}
+  @media (max-width:520px){.stats-row{grid-template-columns:1fr;}main{padding:22px 14px 60px;}}
+</style>
+  <link rel="stylesheet" href="theme.css">
+  <style>
+    /* FlowAudit retheme — theme.css applies a global `color:var(--fa-text)` (espresso),
+       which blanks out text on the dashboard's dark espresso surfaces. Restore light
+       text on every dark surface so nothing gets "blocked out". */
+    .stat-card.accent .v { color:#FFFFFF !important; }
+    .stat-card.accent .k { color:#CFC8C0 !important; }
+    .view-toggle, .view-toggle button { color:#E7E2DC !important; }
+    .view-toggle button.active { color:#FFFFFF !important; }
+    table.detail-table th { color:#FFFFFF !important; }
+    .modal-tabs button.active { color:#FFFFFF !important; }
+    .code-block, .code-block *, .modal-body pre, .modal-body pre * { color:#E7E2DC !important; }
+  </style>
+</head>
+<body>
+<header class="app-header">
+  <div class="brand"><span class="fa-wordmark">FlowAudit</span><span class="brand-divider" aria-hidden="true"></span><div class="brand-text"><span class="title">Revenue Recovery Desk</span><span class="sub">Internal</span></div></div>
+  <div class="header-right" id="header-right" style="display:none;">
+    <div class="view-toggle"><button id="tab-dashboard" class="active" onclick="switchView('dashboard')">Dashboard</button><button id="tab-offboarded" onclick="switchView('offboarded')">Offboarded</button><button id="tab-agent" onclick="switchView('agent')">Agent API</button></div>
+    <span class="who" id="who"></span>
+    <button class="logout" onclick="doLogout()">Sign out</button>
+  </div>
+</header>
+
+<div id="login-view" class="login-wrap">
+  <div class="card login-card">
+    <h2>Staff sign in</h2>
+    <p>This desk is private. Sign in with your recovery-desk account.</p>
+    <form id="login-form">
+      <div class="field"><label class="lbl" for="login-email">Email</label><input type="email" id="login-email" autocomplete="username" required></div>
+      <div class="field"><label class="lbl" for="login-password">Password</label><input type="password" id="login-password" autocomplete="current-password" required></div>
+      <button type="submit" class="btn btn-primary" id="login-btn" style="width:100%;">Sign in</button>
+      <div class="login-err" id="login-err"></div>
+    </form>
+  </div>
+</div>
+
+<main id="dashboard-view" style="display:none;">
+  <h1 class="page-title">Internal Dashboard</h1>
+  <p class="page-lead">Every onboarded business, live. Readiness, full recon detail, document downloads, and one-click Hermes provisioning.</p>
+  <div class="stats-row">
+    <div class="stat-card"><div class="k">Clients onboarded</div><div class="v" id="stat-total">0</div></div>
+    <div class="stat-card accent"><div class="k">Est. overdue across book</div><div class="v" id="stat-overdue">$0</div></div>
+    <div class="stat-card"><div class="k">Integration-ready</div><div class="v" id="stat-ready">0</div></div>
+    <div class="stat-card"><div class="k">Critical / High priority</div><div class="v" id="stat-priority">0</div></div>
+  </div>
+  <div class="dash-bar"><h2>Onboarded businesses <span class="live-dot" id="live-dot">● live</span></h2><button type="button" class="btn btn-dark btn-sm" onclick="exportCSV()">⬇ Export CSV</button></div>
+  <div id="cards-container"></div>
+</main>
+
+<main id="offboarded-view" style="display:none;">
+  <h1 class="page-title">Offboarded Clients</h1>
+  <p class="page-lead">Clients who left the book. Their full onboarding record is retained for <b id="retain-years">6</b> years, then auto-deleted. Auto-delete runs daily in the database (pg_cron) and via the harness; you can also purge expired records here.</p>
+  <div class="stats-row">
+    <div class="stat-card"><div class="k">Archived clients</div><div class="v" id="off-total">0</div></div>
+    <div class="stat-card accent"><div class="k">Total recovered (lifetime)</div><div class="v" id="off-recovered">$0</div></div>
+    <div class="stat-card"><div class="k">Expiring within 90 days</div><div class="v" id="off-expiring">0</div></div>
+    <div class="stat-card"><div class="k">Past retention (purgeable)</div><div class="v" id="off-expired">0</div></div>
+  </div>
+  <div id="off-expired-warn"></div>
+  <div class="dash-bar"><h2>Archive <span class="live-dot" id="off-live-dot">● live</span></h2>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button type="button" class="btn btn-ghost btn-sm" onclick="exportOffboardedCSV()">⬇ Export CSV</button>
+      <button type="button" class="btn btn-dark btn-sm" id="purge-btn" onclick="purgeExpired()">🗑 Purge expired</button>
+    </div>
+  </div>
+  <div id="off-cards-container"></div>
+</main>
+
+<main id="agent-view" style="display:none;">
+  <h1 class="page-title">Agent Harness</h1>
+  <p class="page-lead">A self-describing interface over your Supabase data. Browser agents call <code>window.RRD</code>; out-of-process jobs use <code>rrd-agent.mjs</code>. <code>RRD.hermesPack(id)</code> emits a ready-to-provision agent profile.</p>
+  <div class="agent-grid">
+    <div class="agent-col">
+      <div class="card agent-card">
+        <div class="agent-card-head"><h3>Connection</h3><span class="status-pill" id="agent-status">● Live</span></div>
+        <div class="kv-grid" style="grid-template-columns:1fr;">
+          <div class="kv"><div class="k">Backend</div><div class="v"><code>Supabase · public.submissions</code></div></div>
+          <div class="kv"><div class="k">Global handle</div><div class="v"><code>window.RRD</code></div></div>
+          <div class="kv"><div class="k">Records on file</div><div class="v"><code id="agent-count">0</code></div></div>
+          <div class="kv"><div class="k">Hermes pack</div><div class="v"><code>RRD.hermesPack(id) → SOUL/MEMORY/USER/manifest</code></div></div>
+          <div class="kv"><div class="k">Live feed</div><div class="v"><code>Supabase Realtime → auto-refresh</code></div></div>
+        </div>
+        <div class="agent-actions">
+          <button type="button" class="btn btn-dark btn-sm" onclick="agentCopyManifest()">Copy manifest JSON</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="exportCSV()">Export CSV</button>
+          <button type="button" class="btn btn-ghost btn-sm" onclick="RRD.download('json')">Export JSON</button>
+        </div>
+      </div>
+      <div class="card agent-card">
+        <h3>Attach out-of-process</h3>
+        <p class="agent-note">No browser needed. Point at your project with a service-role key, then query or provision Hermes.</p>
+        <pre class="code-block"><code>export SUPABASE_URL="https://YOUR-REF.supabase.co"
+export SUPABASE_SERVICE_ROLE_KEY="service-role-secret"
+
+node rrd-agent.mjs stats
+node rrd-agent.mjs query '{"where":{"integrationReady":true}}'
+node hermes-provision.mjs --dry-run &lt;submission-id&gt;</code></pre>
+      </div>
+      <div class="card agent-card"><h3>Capabilities</h3><div id="agent-methods" class="method-list"></div></div>
+    </div>
+    <div class="agent-col">
+      <div class="card agent-card">
+        <h3>Query console</h3>
+        <p class="agent-note">Runs against the live Supabase mirror, exactly what an attached agent calls.</p>
+        <div class="repl-row">
+          <select id="repl-method" onchange="agentPreset()">
+            <option value="stats">stats()</option><option value="query">query(spec)</option><option value="search">search(text)</option>
+            <option value="aggregate">aggregate(spec)</option><option value="list">list(filter)</option><option value="get">get(id)</option>
+            <option value="count">count(filter)</option><option value="hermesPack">hermesPack(id)</option><option value="offboarded">offboarded()</option><option value="getOffboarded">getOffboarded(id)</option><option value="retention">retention()</option><option value="export">export(format)</option><option value="schema">schema()</option><option value="manifest">describe()</option>
+          </select>
+          <button type="button" class="btn btn-primary btn-sm" onclick="agentRun()">Run ▸</button>
+        </div>
+        <textarea id="repl-arg" class="repl-arg" spellcheck="false"></textarea>
+        <pre class="code-block repl-out" id="repl-out">// results appear here</pre>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Hermes pack modal -->
+<div class="modal-back" id="pack-modal">
+  <div class="modal">
+    <div class="modal-head"><h3 id="pack-title">Hermes Profile Pack</h3><button class="logout" onclick="closePack()" style="color:var(--muted);">✕ Close</button></div>
+    <div class="modal-tabs" id="pack-tabs"></div>
+    <div class="modal-body"><pre id="pack-body"></pre><div class="charcount" id="pack-charcount"></div></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost btn-sm" onclick="copyPackActive()">Copy this file</button>
+      <button class="btn btn-dark btn-sm" onclick="downloadPack()">Download pack (.json)</button>
+    </div>
+  </div>
+</div>
+
+<!-- Offboard modal -->
+<div class="modal-back" id="offboard-modal">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-head"><h3>Offboard client</h3><button class="logout" onclick="closeOffboard()" style="color:var(--muted);">✕ Close</button></div>
+    <div class="modal-body" style="padding:22px;">
+      <p class="modal-note">This moves <b id="offboard-company">this client</b> out of the active book into the archive. Their full onboarding record is snapshotted and retained for <b>6 years</b>, then auto-deleted. The active book entry is removed immediately.</p>
+      <div class="field"><label class="lbl" for="offboard-reason">Reason for leaving</label>
+        <select id="offboard-reason">
+          <option value="">Select a reason…</option>
+          <option>Churned — switched to in-house</option>
+          <option>Churned — switched to a competitor</option>
+          <option>Engagement complete — AR recovered</option>
+          <option>Non-payment / billing dispute</option>
+          <option>Business closed</option>
+          <option>Out of scope / poor fit</option>
+          <option>Other</option>
+        </select></div>
+      <div class="field"><label class="lbl" for="offboard-recovered">Total recovered during engagement (USD)</label><input type="text" id="offboard-recovered" inputmode="decimal" placeholder="e.g. 4200"></div>
+      <div class="field"><label class="lbl" for="offboard-notes">Closing notes (optional)</label><textarea id="offboard-notes" rows="3" placeholder="Handover detail, open disputes, anything to remember…"></textarea></div>
+      <div class="login-err" id="offboard-err"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost btn-sm" onclick="closeOffboard()">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="offboard-confirm" onclick="submitOffboard()">Offboard & archive</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+"use strict";
+
+/* ============================================================ CONFIG ============================================================ */
+var SUPABASE_URL = "https://stboueshyjvooiftfuxm.supabase.co";
+var SUPABASE_ANON_KEY = "__SUPABASE_ANON_KEY_PLACEHOLDER__";
+
+var CONFIGURED = !/YOUR-REF|YOUR-ANON/.test(SUPABASE_URL + SUPABASE_ANON_KEY);
+var sb = CONFIGURED && window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+var BUCKET = "onboarding-docs";
+
+var RRD_VERSION = "3.1.0";
+var RETENTION_YEARS = 6;
+var STORE = [];
+var OFF_STORE = [];
+var CHANGE_LISTENERS = [];
+var realtimeChannel = null;
+var offRealtimeChannel = null;
+
+/* ---------- helpers ---------- */
+function fmtMoneyShort(n){var v=isFinite(n)?n:0;return "$"+Math.round(v).toLocaleString("en-US");}
+function fmtDate(iso){try{return new Date(iso).toLocaleDateString("en-US",{year:"numeric",month:"short",day:"numeric"});}catch(e){return iso;}}
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");}
+function truncate(s,n){s=String(s||"");return s.length>n?s.slice(0,n).trimEnd()+"…":s;}
+function slug(s){return String(s||"client").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40)||"client";}
+
+/* ---------- row <-> record ---------- */
+function rowToRecord(r){
+  return {id:r.id,submittedAt:r.created_at,company:r.company,contactName:r.contact_name,email:r.email,phone:r.phone,industry:r.industry,size:r.size,website:r.website,
+    businessProfile:r.business_profile||{},paymentStack:r.payment_stack||{},crmData:r.crm_data||{},recoveryProcess:r.recovery_process||{},outreach:r.outreach||{},guardrails:r.guardrails||{},goals:r.goals||{},
+    documents:r.documents||[],contacts:r.contacts||[],primaryContact:r.primary_contact,catalyst:r.catalyst,urgency:r.urgency,anythingElse:r.anything_else,consent:r.consent,
+    paymentPlatforms:r.payment_platforms||[],crm:r.crm,hasSop:r.has_sop,integrationReady:r.integration_ready,approxOutstanding:Number(r.approx_outstanding)||0,priority:r.priority||r.urgency,
+    wantsSopBuilt:!!((r.recovery_process||{}).wantSopBuilt),needsSop:!r.has_sop,autoSendChannels:(r.guardrails||{}).autoSendChannels||[],fullAutomation:(((r.guardrails||{}).autoSendChannels)||[]).length>0};
+}
+function recordToRow(rec){
+  var bp=rec.businessProfile||{},ps=rec.paymentStack||{},cd=rec.crmData||{};
+  var row={company:rec.company,contact_name:rec.contactName,email:rec.email||"agent@desk.local",phone:rec.phone,industry:rec.industry,size:rec.size,website:rec.website,
+    business_profile:bp,payment_stack:ps,crm_data:cd,recovery_process:rec.recoveryProcess||{},outreach:rec.outreach||{},guardrails:rec.guardrails||{},goals:rec.goals||{},
+    documents:rec.documents||[],contacts:rec.contacts||[],primary_contact:rec.primaryContact,catalyst:rec.catalyst||"(added via agent)",urgency:rec.urgency||"Medium",anything_else:rec.anythingElse,consent:!!rec.consent,
+    payment_platforms:rec.paymentPlatforms||ps.platforms||[],crm:rec.crm||cd.crm,has_sop:!!(rec.hasSop||(rec.recoveryProcess&&rec.recoveryProcess.hasSop==="Yes")),
+    integration_ready:!!(ps.apiAccess==="Yes"&&cd.apiAccess==="Yes"),approx_outstanding:Number(rec.approxOutstanding||bp.approxOutstanding)||0,priority:rec.urgency||"Medium"};
+  if(rec.id)row.id=rec.id;
+  return row;
+}
+
+/* ---------- offboarded row <-> record (mirror of rrd-hermes.mjs) ---------- */
+function rowToOffboarded(r){
+  return {id:r.id,offboardedAt:r.offboarded_at,offboardedBy:r.offboarded_by,reason:r.reason||"",finalNotes:r.final_notes||"",recoveredTotal:Number(r.recovered_total)||0,
+    company:r.company,email:r.email,industry:r.industry,approxOutstanding:Number(r.approx_outstanding)||0,
+    snapshot:r.snapshot||{},retainUntil:r.retain_until,purged:!!r.purged,
+    record:(r.snapshot&&r.snapshot.id)?rowToRecord(r.snapshot):null};
+}
+function retentionStatus(retainUntilIso,nowMs){
+  var now=nowMs==null?Date.now():nowMs;var until=new Date(retainUntilIso).getTime();
+  var daysLeft=Math.ceil((until-now)/86400000);return {retainUntil:retainUntilIso,daysLeft:daysLeft,expired:until<now};
+}
+
+/* ---------- view switching ---------- */
+function switchView(view){
+  var v=["dashboard","offboarded","agent"].indexOf(view)!==-1?view:"dashboard";
+  document.getElementById("dashboard-view").style.display=v==="dashboard"?"":"none";
+  document.getElementById("offboarded-view").style.display=v==="offboarded"?"":"none";
+  document.getElementById("agent-view").style.display=v==="agent"?"":"none";
+  document.getElementById("tab-dashboard").classList.toggle("active",v==="dashboard");
+  document.getElementById("tab-offboarded").classList.toggle("active",v==="offboarded");
+  document.getElementById("tab-agent").classList.toggle("active",v==="agent");
+  if(v==="dashboard")renderDashboard();if(v==="offboarded")renderOffboarded();if(v==="agent")renderAgentView();
+  window.scrollTo(0,0);
+}
+
+/* ---------- auth ---------- */
+async function handleLogin(e){
+  e.preventDefault();var errEl=document.getElementById("login-err");errEl.textContent="";
+  if(!sb){errEl.textContent=CONFIGURED?"Supabase client failed to load.":"Setup needed: add your Supabase URL + anon key to the CONFIG block.";return;}
+  var btn=document.getElementById("login-btn");btn.disabled=true;btn.textContent="Signing in…";
+  try{var {error}=await sb.auth.signInWithPassword({email:document.getElementById("login-email").value.trim(),password:document.getElementById("login-password").value});if(error)throw error;}
+  catch(err){errEl.textContent=err&&err.message||String(err);}
+  finally{btn.disabled=false;btn.textContent="Sign in";}
+}
+async function doLogout(){if(sb)await sb.auth.signOut();}
+function showApp(session){
+  document.getElementById("login-view").style.display="none";
+  document.getElementById("header-right").style.display="flex";
+  document.getElementById("who").textContent=session.user.email;
+  document.getElementById("dashboard-view").style.display="";
+  Promise.all([loadAll(),loadOffboarded()]).then(function(){switchView("dashboard");setupRealtime();});
+}
+function showLogin(){
+  document.getElementById("login-view").style.display="";
+  document.getElementById("header-right").style.display="none";
+  document.getElementById("dashboard-view").style.display="none";
+  document.getElementById("agent-view").style.display="none";
+  teardownRealtime();STORE=[];OFF_STORE=[];
+}
+
+/* ---------- data ---------- */
+async function loadAll(){
+  if(!sb)return;
+  var {data,error}=await sb.from("submissions").select("*").order("created_at",{ascending:false});
+  if(error){console.error("load failed",error);return;}
+  STORE=(data||[]).map(rowToRecord);emitChange("load");
+}
+async function loadOffboarded(){
+  if(!sb)return;
+  var {data,error}=await sb.from("offboarded_clients").select("*").order("offboarded_at",{ascending:false});
+  if(error){console.error("offboarded load failed",error);return;}
+  OFF_STORE=(data||[]).map(rowToOffboarded);emitChange("off-load");
+}
+function setupRealtime(){
+  if(!sb)return;
+  if(!realtimeChannel){
+    realtimeChannel=sb.channel("rrd-submissions").on("postgres_changes",{event:"*",schema:"public",table:"submissions"},function(p){
+      if(p.eventType==="INSERT")STORE.unshift(rowToRecord(p.new));
+      else if(p.eventType==="UPDATE"){var i=STORE.findIndex(function(r){return r.id===p.new.id;});if(i!==-1)STORE[i]=rowToRecord(p.new);else STORE.unshift(rowToRecord(p.new));}
+      else if(p.eventType==="DELETE")STORE=STORE.filter(function(r){return r.id!==p.old.id;});
+      emitChange("realtime");
+    }).subscribe();
+  }
+  if(!offRealtimeChannel){
+    offRealtimeChannel=sb.channel("rrd-offboarded").on("postgres_changes",{event:"*",schema:"public",table:"offboarded_clients"},function(p){
+      if(p.eventType==="INSERT")OFF_STORE.unshift(rowToOffboarded(p.new));
+      else if(p.eventType==="UPDATE"){var i=OFF_STORE.findIndex(function(r){return r.id===p.new.id;});if(i!==-1)OFF_STORE[i]=rowToOffboarded(p.new);else OFF_STORE.unshift(rowToOffboarded(p.new));}
+      else if(p.eventType==="DELETE")OFF_STORE=OFF_STORE.filter(function(r){return r.id!==p.old.id;});
+      emitChange("off-realtime");
+    }).subscribe();
+  }
+}
+function teardownRealtime(){
+  if(realtimeChannel){try{sb.removeChannel(realtimeChannel);}catch(e){}realtimeChannel=null;}
+  if(offRealtimeChannel){try{sb.removeChannel(offRealtimeChannel);}catch(e){}offRealtimeChannel=null;}
+}
+function emitChange(reason){
+  var detail={reason:reason||"change",count:STORE.length,at:new Date().toISOString()};
+  CHANGE_LISTENERS.slice().forEach(function(cb){try{cb(detail);}catch(e){console.error(e);}});
+  if(document.getElementById("dashboard-view").style.display!=="none")renderDashboard();
+  if(document.getElementById("offboarded-view").style.display!=="none")renderOffboarded();
+  if(document.getElementById("agent-view").style.display!=="none")renderAgentView();
+}
+
+/* ---------- query internals ---------- */
+function recordText(s){
+  var parts=[s.company,s.contactName,s.email,s.phone,s.industry,s.size,s.website,s.crm,s.catalyst,s.anythingElse,s.primaryContact];
+  [s.businessProfile,s.paymentStack,s.crmData,s.recoveryProcess,s.outreach,s.guardrails,s.goals].forEach(function(o){if(o)Object.keys(o).forEach(function(k){var v=o[k];if(Array.isArray(v))parts.push(v.join(" "));else parts.push(v);});});
+  (s.contacts||[]).forEach(function(c){parts.push(c.name,c.role,c.email);});
+  (s.paymentPlatforms||[]).forEach(function(p){parts.push(p);});
+  return parts.filter(Boolean).join(" ").toLowerCase();
+}
+function matchWhere(s,w){
+  if(!w||typeof w!=="object")return true;
+  function inList(v,c){return Array.isArray(c)?c.indexOf(v)!==-1:v===c;}
+  if(w.id!=null&&s.id!==w.id)return false;
+  if(w.urgency!=null&&!inList(s.urgency,w.urgency))return false;
+  if(w.priority!=null&&!inList(s.priority,w.priority))return false;
+  if(w.industry!=null&&!inList(s.industry,w.industry))return false;
+  if(w.size!=null&&!inList(s.size,w.size))return false;
+  if(w.crm!=null&&!inList(s.crm,w.crm))return false;
+  if(w.paymentPlatform!=null){var pw=Array.isArray(w.paymentPlatform)?w.paymentPlatform:[w.paymentPlatform];if(!pw.some(function(p){return (s.paymentPlatforms||[]).indexOf(p)!==-1;}))return false;}
+  if(w.hasSop!=null&&s.hasSop!==w.hasSop)return false;
+  if(w.needsSop!=null&&s.needsSop!==w.needsSop)return false;
+  if(w.wantsSopBuilt!=null&&s.wantsSopBuilt!==w.wantsSopBuilt)return false;
+  if(w.fullAutomation!=null&&s.fullAutomation!==w.fullAutomation)return false;
+  if(w.integrationReady!=null&&s.integrationReady!==w.integrationReady)return false;
+  if(w.consent!=null&&s.consent!==w.consent)return false;
+  if(w.minOutstanding!=null&&s.approxOutstanding<w.minOutstanding)return false;
+  if(w.maxOutstanding!=null&&s.approxOutstanding>w.maxOutstanding)return false;
+  if(w.since!=null&&new Date(s.submittedAt)<new Date(w.since))return false;
+  if(w.until!=null&&new Date(s.submittedAt)>new Date(w.until))return false;
+  if(w.text!=null&&recordText(s).indexOf(String(w.text).toLowerCase())===-1)return false;
+  return true;
+}
+var PRIORITY_ORDER={"Critical":0,"High":1,"Medium":2,"Just exploring":3};
+function sortRecords(arr,sort){
+  if(!sort)return arr;
+  var desc=sort.charAt(0)==="-",key=desc?sort.slice(1):sort;
+  function v(s){if(key==="outstanding")return s.approxOutstanding;if(key==="submittedAt")return new Date(s.submittedAt).getTime();if(key==="priority")return PRIORITY_ORDER[s.priority]==null?9:PRIORITY_ORDER[s.priority];return s[key]!=null?String(s[key]).toLowerCase():"";}
+  return arr.slice().sort(function(a,b){var va=v(a),vb=v(b);if(va<vb)return desc?1:-1;if(va>vb)return desc?-1:1;return 0;});
+}
+function projectRecord(s,fields){
+  if(!fields||!fields.length)return s;
+  var o={};fields.forEach(function(f){o[f]=s[f];});return o;
+}
+
+/* ---------- CSV ---------- */
+function csvCell(v){var s=String(v==null?"":v);if(/[",\n\r]/.test(s))s='"'+s.replace(/"/g,'""')+'"';return s;}
+function buildCSV(list){
+  var headers=["ID","Submitted","Company","Contact","Email","Phone","Industry","Size","Website","Priority","ApproxOutstanding","PaymentPlatforms","Accounting","PaymentAPIAccess","CRM","CRMAPIAccess","IntegrationReady","HasSOP","Cadence","Channels","Tone","ApprovalModel","BatchSize","PrimaryGoal","OtherAutomations","PrimaryContact","Catalyst","AnythingElse","Consent","DocCount"];
+  var lines=[headers.map(csvCell).join(",")];
+  list.forEach(function(s){
+    var rp=s.recoveryProcess||{},ps=s.paymentStack||{},cd=s.crmData||{},g=s.guardrails||{},go=s.goals||{};
+    var row=[s.id,s.submittedAt,s.company,s.contactName,s.email,s.phone,s.industry,s.size,s.website,s.priority,s.approxOutstanding,(s.paymentPlatforms||[]).join(" | "),ps.accounting,ps.apiAccess,s.crm,cd.apiAccess,s.integrationReady,s.hasSop,rp.cadence,(rp.channels||[]).join(" | "),rp.tone,g.approvalModel,g.batchSize,go.primaryGoal,(go.otherAutomations||[]).join(" | "),s.primaryContact,s.catalyst,s.anythingElse,s.consent,(s.documents||[]).length];
+    lines.push(row.map(csvCell).join(","));
+  });
+  return lines.join("\r\n");
+}
+function exportCSV(){if(STORE.length===0){alert("No submissions to export yet.");return;}var blob=new Blob(["﻿"+buildCSV(STORE)],{type:"text/csv;charset=utf-8;"});var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="recovery-onboarding.csv";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},1000);}
+
+/* ---------- dashboard render ---------- */
+function priorityChip(u){var m={"Critical":"chip-critical","High":"chip-high","Medium":"chip-medium","Just exploring":"chip-exploring"};return '<span class="chip '+(m[u]||"chip-exploring")+'">'+esc(u||"—")+'</span>';}
+function badge(on,label){return '<span class="badge '+(on?"on":"off")+'">'+(on?"✓":"○")+" "+esc(label)+'</span>';}
+function renderDashboard(){
+  var totalOverdue=STORE.reduce(function(a,s){return a+(s.approxOutstanding||0);},0);
+  document.getElementById("stat-total").textContent=String(STORE.length);
+  document.getElementById("stat-overdue").textContent=fmtMoneyShort(totalOverdue);
+  document.getElementById("stat-ready").textContent=String(STORE.filter(function(s){return s.integrationReady;}).length);
+  document.getElementById("stat-priority").textContent=String(STORE.filter(function(s){return s.priority==="Critical"||s.priority==="High";}).length);
+  var c=document.getElementById("cards-container");
+  if(STORE.length===0){c.innerHTML='<div class="empty-state"><div class="big">📭</div><div>No businesses onboarded yet. Client submissions appear here in real time.</div></div>';return;}
+  c.innerHTML=sortRecords(STORE,"priority").map(renderCard).join("");
+}
+function renderCard(s){
+  var ps=s.paymentStack||{},cd=s.crmData||{};
+  var goal=(s.goals&&s.goals.primaryGoal)||truncate(s.catalyst,120)||"—";
+  return '<div class="sub-card" data-id="'+esc(s.id)+'"><div class="sub-top"><div class="sub-main">'+
+    '<p class="sub-company">'+esc(s.company||"Unnamed business")+'</p>'+
+    '<p class="sub-meta"><b>'+esc(s.contactName||"—")+'</b> · '+esc(s.email||"—")+' · '+esc(s.industry||"—")+' · '+esc(fmtDate(s.submittedAt))+'</p>'+
+    '<div class="badges">'+badge(ps.apiAccess==="Yes","Payments")+badge(cd.apiAccess==="Yes","CRM")+badge(s.hasSop,"SOP")+badge(s.consent,"Consent")+
+      ((s.autoSendChannels||[]).length?'<span class="badge" style="background:#FEF3C7;color:#B45309;">⚡ Auto: '+esc(s.autoSendChannels.join(", "))+'</span>':'')+
+      ((s.needsSop&&s.wantsSopBuilt)?'<span class="badge" style="background:#DBEAFE;color:#1D4ED8;">✍ Build SOP</span>':'')+'</div>'+
+    '<p class="goal-preview">'+esc(goal)+'</p>'+
+    '<p class="sub-figures">est. overdue <b>'+esc(fmtMoneyShort(s.approxOutstanding))+'</b> · '+(s.paymentPlatforms||[]).length+' payment tool'+((s.paymentPlatforms||[]).length===1?"":"s")+' · CRM: '+esc(s.crm||"—")+'</p>'+
+    '</div><div class="sub-side">'+priorityChip(s.priority)+
+    '<button type="button" class="btn btn-primary btn-sm" onclick="openPack(\''+esc(s.id)+'\')">⚡ Hermes Pack</button>'+
+    '<button type="button" class="btn btn-ghost btn-sm" onclick="toggleDetail(this)">Expand ▾</button>'+
+    '<button type="button" class="btn btn-ghost btn-sm" style="color:var(--danger);border-color:#FECACA;" onclick="openOffboard(\''+esc(s.id)+'\')">↩ Offboard</button></div></div>'+
+    '<div class="sub-detail">'+renderDetail(s)+'</div></div>';
+}
+function kv(k,v){var empty=v==null||String(v).trim()==="";return '<div class="kv"><div class="k">'+esc(k)+'</div><div class="v'+(empty?" empty":"")+'">'+(empty?"—":esc(v))+'</div></div>';}
+function sectionKV(title,pairs){var has=pairs.some(function(p){return p[1]!=null&&String(p[1]).trim()!=="";});return '<div class="detail-section"><h4>'+esc(title)+'</h4><div class="kv-grid">'+pairs.map(function(p){return kv(p[0],p[1]);}).join("")+'</div></div>';}
+function longBlock(title,pairs){
+  var rows=pairs.filter(function(p){return p[1]&&String(p[1]).trim();}).map(function(p){return '<p class="longtext" style="margin-top:8px;"><b>'+esc(p[0])+':</b> '+esc(p[1])+'</p>';}).join("");
+  if(!rows)return "";
+  return '<div class="detail-section"><h4>'+esc(title)+'</h4>'+rows+'</div>';
+}
+function renderDetail(s){
+  var bp=s.businessProfile||{},ps=s.paymentStack||{},cd=s.crmData||{},rp=s.recoveryProcess||{},out=s.outreach||{},g=s.guardrails||{},go=s.goals||{};
+  var h="";
+  h+=sectionKV("Business Profile",[["Company",s.company],["Contact",s.contactName],["Email",s.email],["Phone",s.phone],["Industry",s.industry],["Size",s.size],["Website",s.website],["Customer type",bp.customerType],["Who they serve",bp.whoTheyServe],["Active customers",bp.customerCount],["Typical invoice",bp.typicalInvoiceSize],["Invoices/mo",bp.monthlyVolumeCount],["Volume/mo",bp.monthlyVolumeAmount?fmtMoneyShort(bp.monthlyVolumeAmount):""],["Payment terms",bp.paymentTerms],["Currencies",bp.currencies],["Approx overdue",fmtMoneyShort(s.approxOutstanding)],["Submitted",fmtDate(s.submittedAt)]]);
+  h+=longBlock("Business model",[["What they sell",bp.businessModel]]);
+  h+=sectionKV("Payment & Invoicing",[["Platforms",(s.paymentPlatforms||[]).join(", ")],["Accounting",ps.accounting],["Payment links",ps.canGeneratePaymentLinks],["API access",ps.apiAccess],["Connection",ps.connectionMethod],["Access owner",ps.accessOwner],["Notes",ps.notes]]);
+  h+=sectionKV("CRM & Customer Data",[["CRM",s.crm],["Data location",cd.dataLocation],["Contact fields",(cd.contactFields||[]).join(", ")],["Records",cd.recordCount],["Data quality",cd.dataQuality],["API access",cd.apiAccess],["Access owner",cd.accessOwner]]);
+  h+=longBlock("Recovery Process & SOPs",[["Has SOP",rp.hasSop],["Process",rp.processDescription],["Cadence",rp.cadence],["Channels",(rp.channels||[]).join(", ")],["Tone",rp.tone],["Always say",rp.alwaysPhrases],["Never say",rp.neverPhrases],["Escalation",rp.escalation],["Templates",rp.templates],["Settlement rules",rp.settlementRules],["Who runs it",rp.whoRunsIt],["Time/wk",rp.timeSpent],["What works",rp.whatWorks]]);
+  h+=sectionKV("Outreach & Guardrails",[["Channels",(out.channels||[]).join(", ")],["Email provider",out.emailProvider],["Sending domain",out.sendingDomain],["From name",out.fromName],["SMS provider",out.smsProvider],["SMS number",out.smsNumber],["Timezone",out.timezone],["Business hours",out.businessHours],["Languages",out.languages],["Approval model",g.approvalModel],["Batch size",g.batchSize],["Max discount",g.maxDiscount],["Auto-send (no approval)",(s.autoSendChannels||[]).join(", ")||"none — all approval-gated"],["SOP",s.hasSop?"client SOP on file":(s.wantsSopBuilt?"none — we'll build a starter SOP":"none on file")]]);
+  h+=longBlock("Rules",[["Signature",out.signature],["Do not contact",g.doNotContact],["Compliance",g.compliance],["Escalation triggers",g.escalationTriggers]]);
+  // documents
+  if((s.documents||[]).length){
+    h+='<div class="detail-section"><h4>Uploaded Documents</h4><div class="doc-links">'+s.documents.map(function(d){return '<button type="button" onclick="openDoc(\''+esc(d.path)+'\')">📎 '+esc(d.name)+'</button>';}).join("")+'</div></div>';
+  }
+  // contacts
+  if((s.contacts||[]).length){
+    var cr=s.contacts.map(function(c){var p=c.name&&c.name===s.primaryContact;return '<tr><td>'+esc(c.name||"—")+(p?' <span class="chip chip-high" style="font-size:10px;padding:1px 7px;">PRIMARY</span>':'')+'</td><td>'+esc(c.role||"—")+'</td><td>'+esc(c.email||"—")+'</td><td>'+esc(c.phone||"—")+'</td><td>'+esc(c.tag||"—")+'</td></tr>';}).join("");
+    h+='<div class="detail-section"><h4>Key Contacts</h4><table class="detail-table"><thead><tr><th>Name</th><th>Role</th><th>Email</th><th>Phone</th><th>Tag</th></tr></thead><tbody>'+cr+'</tbody></table></div>';
+  }
+  h+=longBlock("Goals & Decision Catalyst",[["Primary goal",go.primaryGoal],["Recovery target",go.recoveryTarget],["KPIs",go.kpis],["Other automations wanted",(go.otherAutomations||[]).join(", ")],["Why now",s.catalyst],["Urgency",s.urgency],["Anything else",s.anythingElse]]);
+  return h;
+}
+function toggleDetail(btn){var d=btn.closest(".sub-card").querySelector(".sub-detail");var open=d.classList.toggle("show");btn.innerHTML=open?"Collapse ▴":"Expand ▾";}
+async function openDoc(path){
+  if(!sb){alert("Not connected.");return;}
+  try{var {data,error}=await sb.storage.from(BUCKET).createSignedUrl(path,60);if(error)throw error;window.open(data.signedUrl,"_blank");}
+  catch(e){alert("Could not open document: "+(e&&e.message||e));}
+}
+
+/* ============================================================ Hermes profile pack ============================================================ */
+function clip(text,max){if(text.length<=max)return text;var cut=text.slice(0,max);var lastNl=cut.lastIndexOf("\n");return (lastNl>max*0.5?cut.slice(0,lastNl):cut).trim();}
+function line(label,v){return v&&String(v).trim()?label+String(v).trim():"";}
+// Integration registry — mirror of INTEGRATIONS in rrd-hermes.mjs.
+// auth:"apikey" → collected via the secrets vault. auth:"oauth" → connect flow, never pasted.
+var INTEGRATIONS={
+  payment:{"Stripe":{auth:"apikey",keys:["STRIPE_API_KEY"]},"Square":{auth:"apikey",keys:["SQUARE_ACCESS_TOKEN"]},"PayPal":{auth:"apikey",keys:["PAYPAL_CLIENT_ID","PAYPAL_CLIENT_SECRET"]},"Braintree":{auth:"apikey",keys:["BRAINTREE_MERCHANT_ID","BRAINTREE_PRIVATE_KEY"]},"Authorize.net":{auth:"apikey",keys:["AUTHNET_API_LOGIN_ID","AUTHNET_TRANSACTION_KEY"]},"GoCardless":{auth:"apikey",keys:["GOCARDLESS_ACCESS_TOKEN"]},"Bill.com":{auth:"apikey",keys:["BILLCOM_API_KEY"]},"Whop":{auth:"apikey",keys:["WHOP_API_KEY"]},"Shopify":{auth:"composio",provider:"shopify"},"Maxio":{auth:"apikey",keys:["MAXIO_SUBDOMAIN","MAXIO_API_KEY"]},"Paystack":{auth:"apikey",keys:["PAYSTACK_SECRET_KEY"]},"Razorpay":{auth:"apikey",keys:["RAZORPAY_KEY_ID","RAZORPAY_KEY_SECRET"]},"Lemon Squeezy":{auth:"apikey",keys:["LEMONSQUEEZY_API_KEY","LEMONSQUEEZY_STORE_ID"]},"MoonClerk":{auth:"apikey",keys:["MOONCLERK_API_KEY"]}},
+  accounting:{"QuickBooks Online":{auth:"oauth"},"Xero":{auth:"oauth"},"Sage":{auth:"oauth"},"FreshBooks":{auth:"oauth"},"Wave":{auth:"oauth"},"Zoho Books":{auth:"oauth"},"FreeAgent":{auth:"oauth"},"Bill.com":{auth:"apikey",keys:["BILLCOM_API_KEY"]},"Zoho Invoice":{auth:"oauth"},"Chaser":{auth:"composio",provider:"chaser"},"Clientary":{auth:"apikey",keys:["CLIENTARY_API_KEY"]},"Moneybird":{auth:"apikey",keys:["MONEYBIRD_ACCESS_TOKEN","MONEYBIRD_ADMINISTRATION_ID"]},"Sevdesk":{auth:"apikey",keys:["SEVDESK_API_TOKEN"]},"Lexoffice":{auth:"apikey",keys:["LEXOFFICE_API_KEY"]},"Quaderno":{auth:"apikey",keys:["QUADERNO_API_KEY","QUADERNO_PRIVATE_KEY"]},"Elorus":{auth:"apikey",keys:["ELORUS_API_KEY"]},"Coupa":{auth:"apikey",keys:["COUPA_BASE_URL","COUPA_CLIENT_ID","COUPA_CLIENT_SECRET"]},"Odoo":{auth:"apikey",keys:["ODOO_BASE_URL","ODOO_DATABASE","ODOO_USERNAME","ODOO_API_KEY"]},"NetSuite":{auth:"apikey",keys:["NETSUITE_ACCOUNT_ID","NETSUITE_CONSUMER_KEY","NETSUITE_CONSUMER_SECRET","NETSUITE_TOKEN_ID","NETSUITE_TOKEN_SECRET","NETSUITE_RESTLET_URL","NETSUITE_SUITEQL_ENABLED"]}},
+  crm:{"HubSpot":{auth:"composio",provider:"hubspot"},"Salesforce":{auth:"oauth"},"Zoho CRM":{auth:"oauth"},"Pipedrive":{auth:"oauth"},"monday.com":{auth:"oauth"},"GoHighLevel":{auth:"oauth"},"Close":{auth:"apikey",keys:["CLOSE_API_KEY"]},"Capsule CRM":{auth:"apikey",keys:["CAPSULE_ACCESS_TOKEN"]},"Attio":{auth:"apikey",keys:["ATTIO_API_KEY"]},"Kommo":{auth:"apikey",keys:["KOMMO_BASE_URL","KOMMO_ACCESS_TOKEN"]},"Dynamics 365":{auth:"composio",provider:"dynamics365"},"ServiceM8":{auth:"composio",provider:"servicem8"},"Nutshell":{auth:"apikey",keys:["NUTSHELL_USER_EMAIL","NUTSHELL_API_KEY"]},"Salesflare":{auth:"apikey",keys:["SALESFLARE_API_KEY"]},"Salesmate":{auth:"apikey",keys:["SALESMATE_DOMAIN","SALESMATE_ACCESS_KEY","SALESMATE_SESSION_TOKEN"]},"noCRM.io":{auth:"apikey",keys:["NOCRM_SUBDOMAIN","NOCRM_API_KEY"]},"ActiveCampaign":{auth:"apikey",keys:["ACTIVECAMPAIGN_API_URL","ACTIVECAMPAIGN_API_KEY"]},"Odoo":{auth:"apikey",keys:["ODOO_BASE_URL","ODOO_DATABASE","ODOO_USERNAME","ODOO_API_KEY"]},"RepairShopr":{auth:"apikey",keys:["REPAIRSHOPR_SUBDOMAIN","REPAIRSHOPR_API_TOKEN"]},"AccuLynx":{auth:"composio",provider:"acculynx"}},
+  email:{"Google Workspace":{auth:"oauth",oauthName:"Google Workspace"},"Gmail":{auth:"oauth",oauthName:"Google Workspace"},"Microsoft 365":{auth:"oauth",oauthName:"Microsoft 365 / Outlook"},"Office 365":{auth:"oauth",oauthName:"Microsoft 365 / Outlook"},"Outlook":{auth:"oauth",oauthName:"Microsoft 365 / Outlook"},"SendGrid":{auth:"apikey",keys:["SENDGRID_API_KEY"]},"Postmark":{auth:"apikey",keys:["POSTMARK_SERVER_TOKEN"]},"Mailgun":{auth:"apikey",keys:["MAILGUN_API_KEY"]}},
+  sms:{"Twilio":{auth:"apikey",keys:["TWILIO_ACCOUNT_SID","TWILIO_AUTH_TOKEN"]}},
+  mail:{"PostGrid":{auth:"apikey",keys:["POSTGRID_API_KEY"]}}
+};
+function usesLetters(rec){var out=rec.outreach||{},rp=rec.recoveryProcess||{};var ch=(out.channels&&out.channels.length)?out.channels:(rp.channels||[]);return ch.some(function(c){return /letter|mail|post/i.test(String(c));});}
+function selectedIntegrations(rec){
+  var ps=rec.paymentStack||{},out=rec.outreach||{};var hits=[];
+  (rec.paymentPlatforms||ps.platforms||[]).forEach(function(p){if(INTEGRATIONS.payment[p])hits.push(Object.assign({name:p},INTEGRATIONS.payment[p]));});
+  if(ps.accounting&&INTEGRATIONS.accounting[ps.accounting])hits.push(Object.assign({name:ps.accounting},INTEGRATIONS.accounting[ps.accounting]));
+  if(rec.crm&&INTEGRATIONS.crm[rec.crm])hits.push(Object.assign({name:rec.crm},INTEGRATIONS.crm[rec.crm]));
+  Object.keys(INTEGRATIONS.email).forEach(function(n){if((out.emailProvider||"").indexOf(n)!==-1)hits.push(Object.assign({name:INTEGRATIONS.email[n].oauthName||n},INTEGRATIONS.email[n]));});
+  Object.keys(INTEGRATIONS.sms).forEach(function(n){if((out.smsProvider||"").toLowerCase().indexOf(n.toLowerCase())!==-1)hits.push(Object.assign({name:n},INTEGRATIONS.sms[n]));});
+  if(usesLetters(rec))Object.keys(INTEGRATIONS.mail).forEach(function(n){hits.push(Object.assign({name:n},INTEGRATIONS.mail[n]));});
+  return hits;
+}
+function dedupe(a){return a.filter(function(v,i,arr){return arr.indexOf(v)===i;});}
+function envKeysFor(rec){var k=[];selectedIntegrations(rec).forEach(function(h){if(h.auth==="apikey")k=k.concat(h.keys||[]);});return dedupe(k);}
+function oauthConnectionsFor(rec){var c=[];selectedIntegrations(rec).forEach(function(h){if(h.auth==="oauth")c.push(h.name);});return dedupe(c);}
+function composioEnvKey(provider){return "COMPOSIO_"+String(provider||"").toUpperCase().replace(/[^A-Z0-9]+/g,"_")+"_CONNECTED_ACCOUNT_ID";}
+function composioConnectionsFor(rec){var c=[];selectedIntegrations(rec).forEach(function(h){if(h.auth==="composio")c.push(h.name);});return dedupe(c);}
+function composioEnvKeysFor(rec){var c=[];selectedIntegrations(rec).forEach(function(h){if(h.auth==="composio")c.push(composioEnvKey(h.provider||h.name));});return dedupe(c);}
+function buildHermesPack(rec){
+  var bp=rec.businessProfile||{},ps=rec.paymentStack||{},cd=rec.crmData||{},rp=rec.recoveryProcess||{},out=rec.outreach||{},g=rec.guardrails||{},go=rec.goals||{};
+  var co=rec.company||"the client";
+  var profileName="rr-"+slug(rec.company||rec.email);
+
+  // SOUL.md
+  var S=[];
+  S.push("# "+co+" — Revenue Recovery Desk\n");
+  S.push("You are the dedicated revenue-recovery agent for **"+co+"**"+(rec.industry?", a "+rec.industry+" business":"")+". Your mission: recover "+co+"'s overdue invoices by contacting their customers on their behalf, following "+co+"'s own process and voice, and getting invoices paid.\n");
+  var autoChannels=(g.autoSendChannels||[]).filter(Boolean);
+  var allChannels=(out.channels&&out.channels.length)?out.channels:(rp.channels||[]);
+  var gatedChannels=allChannels.filter(function(c){return autoChannels.indexOf(c)===-1;});
+  if(autoChannels.length){
+    S.push("## HARD RULE — SENDING MODE (partial automation, authorized by "+co+")");
+    S.push(co+" has pre-authorized these channels to send AUTOMATICALLY, with no per-message human approval: **"+autoChannels.join(", ")+"**. On those, you draft and send yourself in batches"+(g.batchSize?" of "+g.batchSize:"")+", within the Safety Rails below.");
+    S.push("Every other channel"+(gatedChannels.length?" ("+gatedChannels.join(", ")+")":"")+" still needs human approval first — approval model: "+(g.approvalModel||"approve every message")+". Queue those drafts and get "+(rec.primaryContact||"the primary contact")+"'s sign-off before sending.\n");
+  }else{
+    S.push("## HARD RULE — APPROVAL BEFORE ANY SEND (NON-NEGOTIABLE)");
+    S.push("You never contact a customer without explicit human approval. Approval model: "+(g.approvalModel||"approve every message")+". Work in batches"+(g.batchSize?" of "+g.batchSize:"")+". Queue drafts, get "+(rec.primaryContact||"the primary contact")+"'s approval, then send.\n");
+  }
+  S.push("## HARD RULE — SAFETY RAILS THAT NEVER BEND (even on automated channels)");
+  S.push("- Never contact anyone on the do-not-contact list: "+(g.doNotContact||"(none given — if unsure, ask a human before contacting)")+".");
+  S.push("- Always follow these compliance constraints: "+(g.compliance||"courteous collections only; no threats; honor all applicable laws and any required legal language")+".");
+  S.push("- The moment a customer disputes, replies, asks to stop, or sounds distressed: STOP that thread immediately and escalate to a human"+(rec.primaryContact?" ("+rec.primaryContact+")":"")+"."+(g.escalationTriggers?" Also escalate when: "+g.escalationTriggers+".":""));
+  S.push("- Only send during "+(((out.businessHours||"")+(out.timezone?" "+out.timezone:"")).trim()||"normal local business hours")+".");
+  S.push("- Never offer more than "+(g.maxDiscount||"no discount")+" without escalating.\n");
+  var haveProcess=rec.hasSop===true||rp.processDescription||rp.cadence||(rp.channels||[]).length||rp.escalation;
+  if(haveProcess){
+    S.push("## How "+co+" recovers money (their SOP — follow it)");
+    [line("Cadence: ",rp.cadence),line("Channels: ",(rp.channels||[]).join(", ")),line("Process: ",rp.processDescription),line("Escalation ladder: ",rp.escalation),line("Settlement rules: ",rp.settlementRules)].filter(Boolean).forEach(function(l){S.push("- "+l);});
+    S.push("");
+  }else if(rec.wantsSopBuilt){
+    S.push("## Starter recovery SOP (drafted for "+co+" — confirm with them before go-live)");
+    S.push(co+" had no documented process and asked us to build one. Follow this proven default until they confirm or adjust it:");
+    S.push("- Cadence: Day 1 friendly reminder, Day 7 follow-up, Day 14 firmer notice, Day 21 pre-escalation warning, Day 30 final notice.");
+    S.push("- Channels: "+(allChannels.length?allChannels.join(", "):"Email, then a phone call for older balances")+".");
+    S.push("- Tone: start friendly, move to firm-but-professional as the balance ages.");
+    S.push("- Escalation ladder: 30 days → phone call; 60 days → formal written demand; 90 days → hand back to "+co+" for a collections/legal decision.");
+    S.push("- Settlement: offer a payment plan up to 3 months on request; no discounts beyond the limit above without escalating.");
+    S.push("");
+  }else{
+    S.push("## Recovery approach (no SOP on file)");
+    S.push(co+" has no documented process and didn't request one. Use a standard, courteous dunning cadence — reminders around day 1 / 7 / 14 / 30, escalating tone — and flag to the team that an SOP should be built.");
+    S.push("");
+  }
+  S.push("## Voice");
+  S.push([line("Tone: ",rp.tone),line("Always say: ",rp.alwaysPhrases),line("Never say: ",rp.neverPhrases)].filter(Boolean).join(". ")||"Professional, firm but polite.");
+  S.push([line("Sign as: ",out.fromName),line("Send from: ",out.sendingDomain),line("Send during: ",(out.businessHours||"")+(out.timezone?" "+out.timezone:"")),line("Languages: ",out.languages)].filter(Boolean).join(". "));
+  if(out.signature)S.push("Signature:\n"+out.signature);
+  S.push("");
+  S.push("## The recovery loop");
+  S.push("1. Detect unpaid invoices in "+((rec.paymentPlatforms||[]).join("/")||ps.accounting||"the payment/accounting system")+".");
+  S.push("2. Pull the customer's contact from "+(rec.crm||"the CRM")+".");
+  S.push("3. Draft outreach in the voice and SOP above.");
+  if(autoChannels.length){
+    S.push("4. On "+autoChannels.join(" / ")+": send automatically (within the Safety Rails)."+(gatedChannels.length?" On "+gatedChannels.join(" / ")+": queue for "+(rec.primaryContact||"approval")+" first.":""));
+  }else{
+    S.push("4. Queue a batch and get approval from "+(rec.primaryContact||"the primary contact")+".");
+  }
+  S.push("5. If the customer agrees to pay, send a payment link.");
+  S.push("6. Log every outcome and report to "+(rec.primaryContact||"the primary contact")+" weekly.");
+  if(usesLetters(rec)){
+    S.push("\n## Letters (physical mail) — HARD RULES");
+    S.push("- "+co+" uses physical letters in recovery. Mail goes through "+co+"'s OWN PostGrid account (their POSTGRID_API_KEY in your profile .env). Never use another client's mail account.");
+    S.push("- Letters are ALWAYS approval-gated by default — they cost money and cannot be unsent. Queue the drafted letter for human approval before mailing, even if email/SMS are auto-send.");
+    S.push("- Before mailing, VERIFY the customer's postal address (from the CRM); never mail to an unverified or do-not-contact address.");
+    S.push("- The formal-demand rung (around day 60) goes CERTIFIED / return-receipt for legal-grade proof of service.");
+    S.push("- You never print or post a letter directly. You draft it in the voice/SOP above and submit it through the recovery executor, which enforces the approval gate, the do-not-contact list, and the spend cap.");
+  }
+  var soul=S.join("\n");
+
+  // MEMORY.md
+  var M=[];
+  M.push("§ "+co+" is a "+(rec.industry||"business")+(rec.size?" ("+rec.size+")":"")+".");
+  if(bp.businessModel)M.push("§ Model: "+bp.businessModel);
+  M.push("§ Invoices "+(bp.customerType||"customers")+"; ~"+(bp.customerCount||"?")+" active; typical invoice "+(bp.typicalInvoiceSize||"?")+"; ~"+(bp.monthlyVolumeCount||"?")+"/mo"+(bp.monthlyVolumeAmount?", "+fmtMoneyShort(bp.monthlyVolumeAmount)+"/mo":"")+"; terms "+(bp.paymentTerms||"?")+(bp.currencies?"; "+bp.currencies:"")+".");
+  M.push("§ Approx overdue at onboarding: "+fmtMoneyShort(rec.approxOutstanding)+".");
+  M.push("§ Payments: "+((rec.paymentPlatforms||[]).join(", ")||"?")+"; accounting "+(ps.accounting||"?")+"; payment links "+(ps.canGeneratePaymentLinks||"?")+"; API access "+(ps.apiAccess||"?")+(ps.accessOwner?" (owner "+ps.accessOwner+")":"")+(ps.connectionMethod?" via "+ps.connectionMethod:"")+".");
+  M.push("§ CRM: "+(rec.crm||"?")+(cd.dataLocation?" ("+cd.dataLocation+")":"")+"; ~"+(cd.recordCount||"?")+" records; quality "+(cd.dataQuality||"?")+"; API access "+(cd.apiAccess||"?")+(cd.accessOwner?" (owner "+cd.accessOwner+")":"")+".");
+  if(rp.whoRunsIt||rp.whatWorks)M.push("§ Current collections: "+(rp.whoRunsIt||"?")+(rp.timeSpent?", "+rp.timeSpent+"/wk":"")+(rp.whatWorks?"; what works: "+rp.whatWorks:"")+".");
+  M.push("§ Goal: "+(go.primaryGoal||"recover AR")+(go.recoveryTarget?"; target "+go.recoveryTarget:"")+(go.kpis?"; KPIs "+go.kpis:"")+".");
+  if((go.otherAutomations||[]).length)M.push("§ Cross-sell interest: "+go.otherAutomations.join(", ")+".");
+  M.push("§ SOP: "+(rec.hasSop?"on file, follow theirs":(rec.wantsSopBuilt?"none — we drafted a starter SOP for them to confirm":"none on file"))+".");
+  M.push("§ Sending: "+((rec.autoSendChannels||[]).length?"auto-send (no approval) on "+rec.autoSendChannels.join(", ")+"; approval still required on all other channels":"human approval required on every channel")+". Safety rails (do-not-contact, compliance, stop-on-reply, hours, discount cap) always apply.");
+  var memory=clip(M.join("\n"),2200);
+
+  // USER.md
+  var U=[];
+  U.push("§ Primary contact & approver: "+(rec.primaryContact||"?")+".");
+  U.push("§ Onboarding contact: "+[rec.contactName,rec.email,rec.phone].filter(Boolean).join(" · ")+".");
+  if(out.timezone||out.businessHours||out.languages)U.push("§ Timezone "+(out.timezone||"?")+"; hours "+(out.businessHours||"?")+"; languages "+(out.languages||"?")+".");
+  if(rp.tone)U.push("§ Preferred tone: "+rp.tone+".");
+  U.push("§ Approval model: "+(g.approvalModel||"approve every message")+(g.batchSize?"; batch size "+g.batchSize:"")+((rec.autoSendChannels||[]).length?"; auto-send authorized on "+rec.autoSendChannels.join(", "):"")+".");
+  var user=clip(U.join("\n"),1375);
+
+  // manifest
+  var manifest={profile:profileName,company:co,industry:rec.industry||null,
+    integrations:{payment:{platforms:rec.paymentPlatforms||[],accounting:ps.accounting||null,apiAccess:ps.apiAccess||null,connectionMethod:ps.connectionMethod||null,accessOwner:ps.accessOwner||null,canGeneratePaymentLinks:ps.canGeneratePaymentLinks||null},
+      crm:{name:rec.crm||null,apiAccess:cd.apiAccess||null,accessOwner:cd.accessOwner||null,dataLocation:cd.dataLocation||null},
+      outreach:{channels:out.channels||[],emailProvider:out.emailProvider||null,sendingDomain:out.sendingDomain||null,smsProvider:out.smsProvider||null}},
+    envKeysNeeded:envKeysFor(rec),
+    oauthConnectionsNeeded:oauthConnectionsFor(rec),
+    composioConnectionsNeeded:composioConnectionsFor(rec),
+    composioEnvKeysNeeded:composioEnvKeysFor(rec),
+    documents:(rec.documents||[]).map(function(d){return {name:d.name,path:d.path};}),
+    automation:{autoSendChannels:rec.autoSendChannels||[],fullyAutomated:((rec.autoSendChannels||[]).length>0),approvalModel:g.approvalModel||"approve every message"},
+    sop:{hasSop:!!rec.hasSop,wantsSopBuilt:!!rec.wantsSopBuilt,status:rec.hasSop?"client SOP":(rec.wantsSopBuilt?"starter SOP drafted by us":"none")},
+    letters:{uses:usesLetters(rec),provider:usesLetters(rec)?"PostGrid":null,returnAddress:(out.letters&&out.letters.returnAddress)||null,defaultMailingClass:(out.letters&&out.letters.defaultMailingClass)||"first_class",certifiedOnDemandRung:!(out.letters&&out.letters.certifiedOnDemandRung===false)},
+    toolAllowlist:["read_payments","read_crm","draft_message","queue_for_approval","send_via_executor","generate_payment_link"],
+    readiness:{integrationReady:!!rec.integrationReady,hasSop:!!rec.hasSop,consent:!!rec.consent}};
+
+  return {profileName:profileName,soul:soul,memory:memory,user:user,manifest:manifest};
+}
+
+/* ---------- pack modal ---------- */
+var PACK_CACHE=null,PACK_ACTIVE="SOUL.md";
+function openPack(id){
+  var rec=STORE.filter(function(r){return r.id===id;})[0];
+  if(!rec)return;
+  PACK_CACHE=buildHermesPack(rec);
+  document.getElementById("pack-title").textContent="Hermes Pack · "+PACK_CACHE.profileName;
+  var files=[["SOUL.md",PACK_CACHE.soul,Infinity],["MEMORY.md",PACK_CACHE.memory,2200],["USER.md",PACK_CACHE.user,1375],["manifest.json",JSON.stringify(PACK_CACHE.manifest,null,2),Infinity]];
+  document.getElementById("pack-tabs").innerHTML=files.map(function(f){return '<button data-file="'+f[0]+'" onclick="packTab(\''+f[0]+'\')">'+f[0]+'</button>';}).join("");
+  PACK_FILES=files;packTab("SOUL.md");
+  document.getElementById("pack-modal").classList.add("show");
+}
+var PACK_FILES=[];
+function packTab(name){
+  PACK_ACTIVE=name;
+  document.querySelectorAll("#pack-tabs button").forEach(function(b){b.classList.toggle("active",b.dataset.file===name);});
+  var f=PACK_FILES.filter(function(x){return x[0]===name;})[0];
+  document.getElementById("pack-body").textContent=f[1];
+  var cc=document.getElementById("pack-charcount");
+  if(f[2]!==Infinity){var over=f[1].length>f[2];cc.textContent=f[1].length+" / "+f[2]+" chars"+(over?" — OVER LIMIT":"");cc.className="charcount"+(over?" over":"");}
+  else cc.textContent="";
+}
+function closePack(){document.getElementById("pack-modal").classList.remove("show");}
+function copyPackActive(){var f=PACK_FILES.filter(function(x){return x[0]===PACK_ACTIVE;})[0];navigator.clipboard&&navigator.clipboard.writeText(f[1]);}
+function downloadPack(){
+  var blob=new Blob([JSON.stringify(PACK_CACHE,null,2)],{type:"application/json"});
+  var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=PACK_CACHE.profileName+"-hermes-pack.json";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},1000);
+}
+
+/* ============================================================ Offboarding + retention ============================================================ */
+var OFFBOARD_TARGET=null,PURGE_ARMED=false,PURGE_TIMER=null;
+function moneyParse(v){var n=parseFloat(String(v==null?"":v).replace(/[^0-9.\-]/g,""));return isFinite(n)?n:0;}
+
+function openOffboard(id){
+  var rec=STORE.filter(function(r){return r.id===id;})[0];if(!rec)return;
+  OFFBOARD_TARGET=id;
+  document.getElementById("offboard-company").textContent=rec.company||"this client";
+  document.getElementById("offboard-reason").value="";
+  document.getElementById("offboard-recovered").value="";
+  document.getElementById("offboard-notes").value="";
+  document.getElementById("offboard-err").textContent="";
+  var btn=document.getElementById("offboard-confirm");btn.disabled=false;btn.textContent="Offboard & archive";
+  document.getElementById("offboard-modal").classList.add("show");
+}
+function closeOffboard(){document.getElementById("offboard-modal").classList.remove("show");OFFBOARD_TARGET=null;}
+async function submitOffboard(){
+  if(!OFFBOARD_TARGET)return;
+  var errEl=document.getElementById("offboard-err");errEl.textContent="";
+  var reason=document.getElementById("offboard-reason").value;
+  if(!reason){errEl.textContent="Pick a reason for leaving.";return;}
+  var recovered=moneyParse(document.getElementById("offboard-recovered").value);
+  var notes=document.getElementById("offboard-notes").value.trim();
+  var btn=document.getElementById("offboard-confirm");btn.disabled=true;btn.textContent="Archiving…";
+  try{
+    var {error}=await sb.rpc("offboard_submission",{p_id:OFFBOARD_TARGET,p_reason:reason,p_notes:notes||null,p_recovered:recovered});
+    if(error)throw error;
+    closeOffboard();
+    // realtime will sync both stores; refresh defensively in case realtime is delayed
+    await Promise.all([loadAll(),loadOffboarded()]);
+    switchView("offboarded");
+  }catch(e){errEl.textContent=(e&&e.message||String(e));btn.disabled=false;btn.textContent="Offboard & archive";}
+}
+
+function retentionChip(o){
+  var st=retentionStatus(o.retainUntil);
+  if(st.expired)return '<span class="chip chip-expired">⏿ Past retention — purgeable</span>';
+  if(st.daysLeft<=90)return '<span class="chip chip-expiring">⏳ Auto-deletes in '+st.daysLeft+' day'+(st.daysLeft===1?"":"s")+'</span>';
+  var years=Math.floor(st.daysLeft/365);
+  return '<span class="chip chip-retain">🔒 Retained — deletes '+esc(fmtDate(o.retainUntil))+(years>0?" (~"+years+"y)":"")+'</span>';
+}
+function renderOffboarded(){
+  document.getElementById("retain-years").textContent=String(RETENTION_YEARS);
+  var totalRecovered=OFF_STORE.reduce(function(a,o){return a+(o.recoveredTotal||0);},0);
+  var expired=OFF_STORE.filter(function(o){return retentionStatus(o.retainUntil).expired;});
+  var soon=OFF_STORE.filter(function(o){var s=retentionStatus(o.retainUntil);return !s.expired&&s.daysLeft<=90;});
+  document.getElementById("off-total").textContent=String(OFF_STORE.length);
+  document.getElementById("off-recovered").textContent=fmtMoneyShort(totalRecovered);
+  document.getElementById("off-expiring").textContent=String(soon.length);
+  document.getElementById("off-expired").textContent=String(expired.length);
+  var warn=document.getElementById("off-expired-warn");
+  warn.innerHTML=expired.length?'<div class="warn-box">'+expired.length+' record'+(expired.length===1?" is":"s are")+' past the '+RETENTION_YEARS+'-year retention window and can be purged. The database purges these automatically every day; use “Purge expired” to do it now.</div>':"";
+  var purgeBtn=document.getElementById("purge-btn");if(purgeBtn)purgeBtn.disabled=expired.length===0;
+  var c=document.getElementById("off-cards-container");
+  if(OFF_STORE.length===0){c.innerHTML='<div class="empty-state"><div class="big">🗂️</div><div>No offboarded clients yet. When a client leaves, offboard them from the Dashboard and they appear here.</div></div>';return;}
+  c.innerHTML=OFF_STORE.map(renderOffCard).join("");
+}
+function renderOffCard(o){
+  var rec=o.record||{};
+  return '<div class="sub-card" data-id="'+esc(o.id)+'"><div class="sub-top"><div class="sub-main">'+
+    '<p class="sub-company">'+esc(o.company||"Unnamed business")+'</p>'+
+    '<p class="sub-meta">'+esc(o.email||"—")+' · '+esc(o.industry||"—")+' · offboarded '+esc(fmtDate(o.offboardedAt))+' by '+esc(o.offboardedBy||"—")+'</p>'+
+    '<div class="badges">'+retentionChip(o)+'</div>'+
+    '<p class="goal-preview"><b>Reason:</b> '+esc(o.reason||"—")+(o.finalNotes?' · '+esc(o.finalNotes):'')+'</p>'+
+    '<p class="sub-figures">recovered <b>'+esc(fmtMoneyShort(o.recoveredTotal))+'</b> · outstanding at exit '+esc(fmtMoneyShort(o.approxOutstanding))+'</p>'+
+    '</div><div class="sub-side">'+
+    '<button type="button" class="btn btn-ghost btn-sm" onclick="toggleDetail(this)">Expand ▾</button></div></div>'+
+    '<div class="sub-detail">'+
+      '<div class="detail-section"><h4>Retention</h4><div class="kv-grid">'+
+        kv("Offboarded at",fmtDate(o.offboardedAt))+kv("Offboarded by",o.offboardedBy)+
+        kv("Auto-delete on",fmtDate(o.retainUntil))+kv("Days remaining",String(retentionStatus(o.retainUntil).daysLeft))+
+        kv("Reason",o.reason)+kv("Recovered total",fmtMoneyShort(o.recoveredTotal))+
+      '</div>'+(o.finalNotes?'<p class="longtext" style="margin-top:8px;"><b>Closing notes:</b> '+esc(o.finalNotes)+'</p>':'')+'</div>'+
+      (o.record?renderDetail(o.record):'<p class="longtext">Snapshot has no detail.</p>')+
+    '</div></div>';
+}
+
+async function deleteSnapshotDocs(o){
+  var paths=((o.snapshot&&o.snapshot.documents)||[]).map(function(d){return d&&d.path;}).filter(Boolean);
+  if(!paths.length||!sb)return 0;
+  try{await sb.storage.from(BUCKET).remove(paths);}catch(e){console.error("doc cleanup warning",e);}
+  return paths.length;
+}
+function purgeExpired(){
+  var expired=OFF_STORE.filter(function(o){return retentionStatus(o.retainUntil).expired;});
+  if(!expired.length)return;
+  var btn=document.getElementById("purge-btn");
+  if(!PURGE_ARMED){
+    PURGE_ARMED=true;btn.textContent="⚠ Click again to delete "+expired.length+" record"+(expired.length===1?"":"s");
+    PURGE_TIMER=setTimeout(function(){PURGE_ARMED=false;btn.textContent="🗑 Purge expired";},4000);return;
+  }
+  clearTimeout(PURGE_TIMER);PURGE_ARMED=false;btn.disabled=true;btn.textContent="Purging…";
+  (async function(){
+    try{
+      for(var i=0;i<expired.length;i++){await deleteSnapshotDocs(expired[i]);}
+      var {error}=await sb.rpc("purge_expired_offboarded");if(error)throw error;
+      await loadOffboarded();
+    }catch(e){alert("Purge failed: "+(e&&e.message||e));}
+    finally{btn.textContent="🗑 Purge expired";renderOffboarded();}
+  })();
+}
+
+function offboardedCSV(){
+  var headers=["ID","Company","Email","Industry","OffboardedAt","OffboardedBy","Reason","RecoveredTotal","OutstandingAtExit","RetainUntil","DaysRemaining","FinalNotes"];
+  var lines=[headers.map(csvCell).join(",")];
+  OFF_STORE.forEach(function(o){
+    lines.push([o.id,o.company,o.email,o.industry,o.offboardedAt,o.offboardedBy,o.reason,o.recoveredTotal,o.approxOutstanding,o.retainUntil,retentionStatus(o.retainUntil).daysLeft,o.finalNotes].map(csvCell).join(","));
+  });
+  return lines.join("\r\n");
+}
+function exportOffboardedCSV(){
+  if(OFF_STORE.length===0){return;}
+  var blob=new Blob(["﻿"+offboardedCSV()],{type:"text/csv;charset=utf-8;"});
+  var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="offboarded-clients.csv";document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},1000);
+}
+
+/* ============================================================ RRD harness ============================================================ */
+var RRD={
+  version:RRD_VERSION,
+  schema:function(){return {record:{id:"uuid",submittedAt:"ISO",company:"string",contactName:"string",email:"string",phone:"string",industry:"enum",size:"string",website:"string",businessProfile:"object",paymentStack:"object",crmData:"object",recoveryProcess:"object",outreach:"object",guardrails:"object",goals:"object",documents:"array<{name,path,type,size}>",contacts:"array<{name,role,email,phone,tag}>",primaryContact:"string",catalyst:"string",urgency:"enum",consent:"bool"},computed:{paymentPlatforms:"string[]",crm:"string",hasSop:"bool",integrationReady:"bool",approxOutstanding:"number",priority:"enum"}};},
+  list:function(filter){return sortRecords(STORE.filter(function(s){return matchWhere(s,filter);}),"-submittedAt");},
+  get:function(id){return STORE.filter(function(r){return r.id===id;})[0]||null;},
+  query:function(spec){spec=spec||{};var rows=STORE.filter(function(s){return matchWhere(s,spec.where);});if(spec.search){var q=String(spec.search).toLowerCase();rows=rows.filter(function(s){return recordText(s).indexOf(q)!==-1;});}rows=sortRecords(rows,spec.sort||"-submittedAt");var total=rows.length;if(spec.offset)rows=rows.slice(spec.offset);if(spec.limit!=null)rows=rows.slice(0,spec.limit);return {count:rows.length,total:total,records:rows.map(function(s){return projectRecord(s,spec.fields);})};},
+  search:function(text){var q=String(text||"").toLowerCase();return STORE.filter(function(s){return recordText(s).indexOf(q)!==-1;});},
+  count:function(filter){return STORE.filter(function(s){return matchWhere(s,filter);}).length;},
+  stats:function(){
+    var totalOverdue=STORE.reduce(function(a,s){return a+(s.approxOutstanding||0);},0);
+    function tally(f){var m={};STORE.forEach(function(s){var k=f(s)||"—";m[k]=(m[k]||0)+1;});return m;}
+    return {totalSubmissions:STORE.length,totalApproxOverdue:totalOverdue,integrationReady:STORE.filter(function(s){return s.integrationReady;}).length,withSop:STORE.filter(function(s){return s.hasSop;}).length,criticalOrHigh:STORE.filter(function(s){return s.priority==="Critical"||s.priority==="High";}).length,byPriority:tally(function(s){return s.priority;}),byIndustry:tally(function(s){return s.industry;}),byCrm:tally(function(s){return s.crm;}),byPaymentPlatform:(function(){var m={};STORE.forEach(function(s){(s.paymentPlatforms||[]).forEach(function(p){m[p]=(m[p]||0)+1;});});return m;})()};
+  },
+  aggregate:function(spec){spec=spec||{};var gby=spec.groupBy||"priority",op=spec.op||"count";function key(s){if(gby==="paymentPlatform")return (s.paymentPlatforms||["—"])[0]||"—";return s[gby]||"—";}var groups={};STORE.forEach(function(s){var k=key(s);if(!groups[k])groups[k]={items:0,overdue:0};groups[k].items++;groups[k].overdue+=s.approxOutstanding||0;});return Object.keys(groups).map(function(k){var x=groups[k];var value=op==="sumOutstanding"?x.overdue:op==="avgOutstanding"?(x.overdue/x.items):x.items;return {key:k,value:value,count:x.items};}).sort(function(a,b){return b.value-a.value;});},
+  hermesPack:function(id){var rec=RRD.get(id);if(!rec)throw new Error("no record with id "+id);return buildHermesPack(rec);},
+  add:async function(record){if(!sb)throw new Error("not connected");var {data,error}=await sb.from("submissions").insert(recordToRow(record||{})).select().single();if(error)throw error;return rowToRecord(data);},
+  upsert:async function(record){if(!sb)throw new Error("not connected");if(!record||!record.id)return RRD.add(record);var {data,error}=await sb.from("submissions").update(recordToRow(record)).eq("id",record.id).select().single();if(error)throw error;return rowToRecord(data);},
+  remove:async function(id){if(!sb)throw new Error("not connected");var {error}=await sb.from("submissions").delete().eq("id",id);if(error)throw error;return true;},
+  clear:async function(){if(!sb)throw new Error("not connected");var n=STORE.length;var {error}=await sb.from("submissions").delete().neq("id","00000000-0000-0000-0000-000000000000");if(error)throw error;return n;},
+  offboard:async function(spec){
+    if(!sb)throw new Error("not connected");
+    if(typeof spec==="string")spec={id:spec};spec=spec||{};
+    if(!spec.id)throw new Error("offboard expects {id, reason?, notes?, recovered?}");
+    var {data,error}=await sb.rpc("offboard_submission",{p_id:spec.id,p_reason:spec.reason||null,p_notes:spec.notes||spec.finalNotes||null,p_recovered:Number(spec.recovered||spec.recoveredTotal)||0});
+    if(error)throw error;
+    await Promise.all([loadAll(),loadOffboarded()]);
+    var row=Array.isArray(data)?data[0]:data;return row?rowToOffboarded(row):null;
+  },
+  offboarded:function(){return OFF_STORE.map(function(o){return Object.assign({},o,{retention:retentionStatus(o.retainUntil)});});},
+  getOffboarded:function(id){var o=OFF_STORE.filter(function(r){return r.id===id;})[0];return o?Object.assign({},o,{retention:retentionStatus(o.retainUntil)}):null;},
+  retention:function(){
+    var all=OFF_STORE.map(function(o){var s=retentionStatus(o.retainUntil);return {id:o.id,company:o.company,offboardedAt:o.offboardedAt,retainUntil:o.retainUntil,daysLeft:s.daysLeft,expired:s.expired};});
+    var expired=all.filter(function(o){return o.expired;}),soon=all.filter(function(o){return !o.expired&&o.daysLeft<=90;});
+    return {retentionYears:RETENTION_YEARS,archived:all.length,expired:expired.length,expiringWithin90Days:soon.length,expiredRecords:expired,expiringSoon:soon,all:all};
+  },
+  purge:async function(){
+    if(!sb)throw new Error("not connected");
+    var expired=OFF_STORE.filter(function(o){return retentionStatus(o.retainUntil).expired;});
+    var docs=0;for(var i=0;i<expired.length;i++){docs+=await deleteSnapshotDocs(expired[i]);}
+    var {data,error}=await sb.rpc("purge_expired_offboarded");if(error)throw error;
+    await loadOffboarded();
+    var rows=Array.isArray(data)?data:(data?[data]:[]);return {purged:rows.length,docsDeleted:docs,records:rows};
+  },
+  refresh:function(){return Promise.all([loadAll(),loadOffboarded()]);},
+  export:function(format){if(format==="csv")return buildCSV(STORE);if(format==="ndjson")return STORE.map(function(s){return JSON.stringify(s);}).join("\n");return JSON.stringify(STORE,null,2);},
+  download:function(format){format=format||"json";var content=RRD.export(format);var types={json:"application/json",ndjson:"application/x-ndjson",csv:"text/csv;charset=utf-8;"};var blob=new Blob([format==="csv"?"﻿"+content:content],{type:types[format]||"text/plain"});var url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="recovery-onboarding."+format;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(url);},1000);return {downloaded:format,records:STORE.length};},
+  subscribe:function(cb){if(typeof cb!=="function")throw new Error("subscribe expects a function");CHANGE_LISTENERS.push(cb);return function(){CHANGE_LISTENERS=CHANGE_LISTENERS.filter(function(f){return f!==cb;});};},
+  describe:function(){return RRD_MANIFEST;},
+  get manifest(){return RRD_MANIFEST;},
+  help:function(){console.table(RRD_MANIFEST.methods.map(function(m){return {method:m.signature,returns:m.returns};}));return RRD_MANIFEST;}
+};
+var RRD_MANIFEST={
+  name:"revenue-recovery-desk",version:RRD_VERSION,
+  description:"Business-reconnaissance onboarding backed by Supabase. Query the book, pull full recon, and emit Hermes profile packs.",
+  handle:"window.RRD",backend:"Supabase public.submissions (RLS-protected)",
+  transports:[{kind:"in-page",detail:"window.RRD.* (reads sync over the live mirror; writes return Promises)."},{kind:"postMessage",detail:"post { __rrd_rpc:true, id, method, args }; reply { __rrd_rpc_result:true, id, ok, result|error }."},{kind:"realtime",detail:"Supabase Realtime keeps the mirror live; subscribe(cb)."},{kind:"rest",detail:"Out-of-process: Supabase REST + service role — rrd-agent.mjs / hermes-provision.mjs."}],
+  methods:[
+    {signature:"schema()",returns:"object",description:"Field-level data schema."},
+    {signature:"list(filter?)",returns:"record[]",description:"All businesses, newest first, optional where-filter."},
+    {signature:"get(id)",returns:"record|null",description:"One business by id."},
+    {signature:"query(spec)",returns:"{count,total,records}",description:"Filter/search/sort/paginate/project."},
+    {signature:"search(text)",returns:"record[]",description:"Full-text across all sections."},
+    {signature:"count(filter?)",returns:"number",description:"Count matching businesses."},
+    {signature:"stats()",returns:"object",description:"Totals, readiness, breakdowns by priority/industry/CRM/platform."},
+    {signature:"aggregate(spec)",returns:"{key,value,count}[]",description:"Group-by count/sumOutstanding/avgOutstanding."},
+    {signature:"hermesPack(id)",returns:"{soul,memory,user,manifest}",description:"Generate a Hermes profile pack for a business."},
+    {signature:"add(record)",returns:"Promise<record>",description:"Ingest a business record."},
+    {signature:"upsert(record)",returns:"Promise<record>",description:"Insert or update by id."},
+    {signature:"remove(id)",returns:"Promise<boolean>",description:"Delete by id."},
+    {signature:"clear()",returns:"Promise<number>",description:"Delete all."},
+    {signature:"offboard(spec)",returns:"Promise<offboarded>",description:"Move a client to the archive ({id,reason,notes,recovered}); snapshots + retains 6 years."},
+    {signature:"offboarded()",returns:"offboarded[]",description:"Archived clients with retention status."},
+    {signature:"getOffboarded(id)",returns:"offboarded|null",description:"One archived client (full snapshot)."},
+    {signature:"retention()",returns:"object",description:"Retention report: expired + expiring-within-90-days."},
+    {signature:"purge()",returns:"Promise<{purged,docsDeleted}>",description:"Hard-delete archive rows past their 6-year retention + their storage docs."},
+    {signature:"refresh()",returns:"Promise",description:"Re-pull from Supabase."},
+    {signature:"export(format)",returns:"string",description:"'json' | 'ndjson' | 'csv'."},
+    {signature:"subscribe(cb)",returns:"unsubscribe()",description:"Notify on every change."},
+    {signature:"describe()",returns:"manifest",description:"This manifest."}
+  ],
+  whereFields:["id","priority","urgency","industry","size","crm","paymentPlatform","hasSop","needsSop","wantsSopBuilt","fullAutomation","integrationReady","consent","minOutstanding","maxOutstanding","since","until","text"],
+  sortKeys:["submittedAt","outstanding","priority","company","(prefix - for desc)"]
+};
+
+function setupRpcBridge(){
+  window.addEventListener("message",function(ev){
+    var msg=ev.data;if(!msg||msg.__rrd_rpc!==true)return;
+    var reply={__rrd_rpc_result:true,id:msg.id};
+    Promise.resolve().then(function(){var fn=RRD[msg.method];if(typeof fn!=="function")throw new Error("Unknown method: "+msg.method);return fn.apply(RRD,msg.args||[]);}).then(function(result){reply.ok=true;reply.result=result;send();},function(e){reply.ok=false;reply.error=String(e&&e.message||e);send();});
+    function send(){var t=ev.source||window.parent;if(t&&t.postMessage)t.postMessage(reply,ev.origin==="null"?"*":ev.origin);}
+  });
+}
+
+/* ---------- agent view ---------- */
+function renderAgentView(){
+  document.getElementById("agent-count").textContent=String(STORE.length);
+  var box=document.getElementById("agent-methods");
+  if(box&&!box.dataset.built){box.innerHTML=RRD_MANIFEST.methods.map(function(m){return '<div class="method-item"><div class="sig">RRD.'+esc(m.signature)+'</div><div class="desc">'+esc(m.description)+'</div></div>';}).join("");box.dataset.built="1";}
+  var arg=document.getElementById("repl-arg");if(arg&&!arg.dataset.touched)agentPreset();
+}
+var REPL_PRESETS={stats:"",schema:"",manifest:"",offboarded:"",retention:"",query:'{\n  "where": { "integrationReady": true },\n  "sort": "-outstanding",\n  "fields": ["company","crm","approxOutstanding","priority"]\n}',search:'"stripe"',aggregate:'{ "groupBy": "industry", "op": "sumOutstanding" }',list:'{ "priority": "Critical" }',get:'"paste-an-id"',count:'{ "integrationReady": true }',hermesPack:'"paste-an-id"',getOffboarded:'"paste-an-id"',export:'"json"'};
+function agentPreset(){document.getElementById("repl-arg").value=REPL_PRESETS[document.getElementById("repl-method").value]||"";}
+async function agentRun(){
+  var method=document.getElementById("repl-method").value,raw=document.getElementById("repl-arg").value.trim(),out=document.getElementById("repl-out");
+  document.getElementById("repl-arg").dataset.touched="1";
+  var fn=method==="manifest"?RRD.describe:RRD[method];
+  try{var args=raw?[JSON.parse(raw)]:[];var result=fn.apply(RRD,args);if(result&&typeof result.then==="function")result=await result;out.classList.remove("err");out.textContent=typeof result==="string"?result:JSON.stringify(result,null,2);}
+  catch(e){out.classList.add("err");out.textContent="Error: "+(e&&e.message||e);}
+}
+function agentCopyManifest(){var text=JSON.stringify(RRD_MANIFEST,null,2);if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(text).then(function(){flashStatus("Manifest copied ✓");},function(){});}
+function flashStatus(msg){var el=document.getElementById("agent-status");var prev=el.textContent;el.textContent=msg;setTimeout(function(){el.textContent=prev;},1600);}
+
+/* ---------- init ---------- */
+function init(){
+  window.RRD=RRD;setupRpcBridge();
+  document.getElementById("login-form").addEventListener("submit",handleLogin);
+  document.getElementById("pack-modal").addEventListener("click",function(e){if(e.target===this)closePack();});
+  document.getElementById("offboard-modal").addEventListener("click",function(e){if(e.target===this)closeOffboard();});
+  if(!CONFIGURED){document.getElementById("login-err").textContent="Setup needed: add your Supabase URL + anon key to the CONFIG block in this file.";return;}
+  if(!sb){document.getElementById("login-err").textContent="Could not load the Supabase client library.";return;}
+  sb.auth.onAuthStateChange(function(_e,session){if(session&&session.user)showApp(session);else showLogin();});
+  sb.auth.getSession().then(function(res){var s=res.data.session;if(s&&s.user)showApp(s);else showLogin();});
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init);else init();
+</script>
+</body>
+</html>

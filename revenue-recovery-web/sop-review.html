@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Revenue Recovery Desk — SOP Review</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+  <style>
+    :root{--navy:#0F172A;--amber:#F59E0B;--amber-dark:#D97706;--bg:#F8FAFC;--white:#fff;--text:#0F172A;--muted:#64748B;--line:#E2E8F0;--green:#16A34A;--danger:#DC2626;--radius:14px;--shadow:0 1px 3px rgba(15,23,42,.08),0 12px 30px rgba(15,23,42,.08);--font:'DM Sans',system-ui,sans-serif}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.55}header{background:var(--navy);color:white;padding:18px 28px}.brand{display:flex;align-items:center;gap:12px}.fa-wordmark{font-family:Georgia,serif;font-size:22px}.brand-divider{height:24px;width:1px;background:#475569}.title{font-weight:700}.sub{font-size:12px;color:#94A3B8}main{max-width:920px;margin:0 auto;padding:32px 20px 80px}.lead{color:var(--muted);margin:0 0 24px}.card{background:white;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;margin-bottom:18px}h1{font-size:28px;margin:0 0 6px}h2{font-size:20px;margin:24px 0 8px}.pill{display:inline-flex;padding:5px 10px;border-radius:999px;background:#FFFBEB;border:1px solid #FCD34D;color:#92400E;font-size:12px;font-weight:700}.sop{display:grid;gap:12px}.step{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#F8FAFC}.step b{color:#334155}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}.btn{border:1px solid transparent;border-radius:10px;padding:12px 18px;font-weight:700;cursor:pointer;font-family:var(--font)}.btn-primary{background:var(--amber);color:var(--navy)}.btn-primary:hover{background:var(--amber-dark);color:white}.btn-secondary{background:white;border-color:#CBD5E1;color:#334155}.field{margin-top:14px}label{display:block;font-weight:700;font-size:13px;margin-bottom:6px}textarea{width:100%;min-height:120px;border:1px solid var(--line);border-radius:10px;padding:12px;font:14px var(--font);resize:vertical}.msg{display:none;border-radius:10px;padding:12px 14px;margin-top:14px}.msg.show{display:block}.ok{background:#F0FDF4;border:1px solid #86EFAC;color:#166534}.err{background:#FEF2F2;border:1px solid #FCA5A5;color:#991B1B}.warn{background:#FFFBEB;border:1px solid #FDE68A;color:#92400E}@media(max-width:700px){main{padding:24px 14px}.card{padding:20px}.actions{flex-direction:column}.btn{width:100%}}
+  </style>
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<header><div class="brand"><span class="fa-wordmark">FlowAudit</span><span class="brand-divider"></span><div><div class="title">Revenue Recovery Desk</div><div class="sub">SOP Review</div></div></div></header>
+<main>
+  <h1>Review your recovery SOP</h1>
+  <p class="lead" id="lead">Loading your client details…</p>
+  <div class="card">
+    <span class="pill">Default FlowAudit SOP</span>
+    <h2>What this process allows us to do</h2>
+    <p>Use the staged recovery cadence below for overdue accounts, while stopping immediately for disputes, hardship signals, stop requests, or anything needing a human decision.</p>
+    <div class="sop">
+      <div class="step"><b>Pre-flight:</b> verify customer, invoice/reference, balance, due date, payment route, recent replies, disputes, partial payments, and do-not-contact flags before any outreach.</div>
+      <div class="step"><b>Stage 1 — Friendly reminder:</b> helpful first reminder with amount, due date, and secure payment route where available.</div>
+      <div class="step"><b>Stage 2 — Follow-up:</b> clear follow-up asking for payment or a confirmed payment date.</div>
+      <div class="step"><b>Stage 3 — Firm notice:</b> professional, direct notice that the account remains overdue.</div>
+      <div class="step"><b>Stage 4 — Pre-escalation:</b> firm warning that the account may be escalated internally. Human approval required unless pre-authorized.</div>
+      <div class="step"><b>Stage 5 — Final notice / formal demand:</b> formal factual notice. Always human-approved; physical/certified letters are approval-gated and cost-gated.</div>
+      <div class="step"><b>Stage 6 — Handback:</b> stop automated recovery and package audit trail for client decision if legal/collections/write-off is needed.</div>
+    </div>
+    <h2>Non-negotiable guardrails</h2>
+    <ul>
+      <li>No customer contact without your authorized channels and guardrails.</li>
+      <li>Every message must reference a real overdue invoice or balance from the connected source of truth.</li>
+      <li>We stop and escalate when a customer replies, disputes, asks to stop, says they paid, or needs a human.</li>
+      <li>No threats, legal claims, discounts, fees, or term changes unless explicitly authorized.</li>
+      <li>Every draft/send/reply/dispute/payment signal is logged.</li>
+    </ul>
+    <div id="changeBox" class="field" style="display:none">
+      <label for="changes">What would you like changed?</label>
+      <textarea id="changes" placeholder="Tell us what to adjust: tone, timing, escalation, approval points, payment plans, discounts, channels, or anything else."></textarea>
+      <p class="lead" style="font-size:13px;margin-top:8px">You can also book a setup call here: <a href="https://calendly.com/flowaudit-info/30min">https://calendly.com/flowaudit-info/30min</a></p>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" id="acceptBtn">Accept SOP</button>
+      <button class="btn btn-secondary" id="declineBtn">Request changes</button>
+      <button class="btn btn-primary" id="sendChangesBtn" style="display:none">Send requested changes</button>
+    </div>
+    <div class="msg" id="msg"></div>
+  </div>
+</main>
+<script>
+const q=new URLSearchParams(location.search);
+const token=q.get('token')||'';
+const $=id=>document.getElementById(id);
+const intakeUrl=()=>location.hostname==='flowaudit.co.uk'?'https://revenue-recovery-web-ivory.vercel.app/api/intake':new URL('api/intake', location.href).toString();
+function show(kind,text){const m=$('msg');m.className='msg show '+kind;m.textContent=text;}
+function valid(){return !!token&&token.includes('.')}
+$('lead').textContent=valid()?'Please accept this SOP or request changes before recovery goes live.':'This SOP review link is invalid. Please ask support for a fresh link.';
+async function postIntake(payload){
+  const r=await fetch(intakeUrl(),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:payload.requestType,payload})});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok||!data.ok)throw new Error(data.error||`HTTP ${r.status}`);
+  return data;
+}
+async function submit(status){
+  if(!valid())return show('err','Invalid review link.');
+  const notes=$('changes').value.trim();
+  if(status==='changes_requested'&&!notes)return show('err','Please tell us what you would like changed.');
+  $('acceptBtn').disabled=$('declineBtn').disabled=$('sendChangesBtn').disabled=true;
+  const payload={requestType:'sop_review',token,status,changeRequest:notes,sopVersion:'flowaudit-default-v1',submittedVia:'sop-review-page'};
+  try{
+    await postIntake(payload);
+    show('ok',status==='accepted'?'SOP accepted. We will use this as your approved recovery process.':'Changes received. We will review and follow up before anything goes live.');
+  }catch(e){
+    show('err','Could not submit review: '+(e.message||e));
+    $('acceptBtn').disabled=$('declineBtn').disabled=$('sendChangesBtn').disabled=false;
+  }
+}
+$('acceptBtn').onclick=()=>submit('accepted');
+$('declineBtn').onclick=()=>{$('changeBox').style.display='block';$('sendChangesBtn').style.display='inline-block';$('declineBtn').style.display='none';};
+$('sendChangesBtn').onclick=()=>submit('changes_requested');
+</script>
+
+</body>
+</html>
