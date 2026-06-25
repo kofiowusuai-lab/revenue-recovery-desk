@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# rrd-ready — minimum go-live threshold + safe provider/gateway smoke test.
+set -euo pipefail
+cd /Users/AIAgenterminal
+set -a
+[ -f ./.env.local ] && . ./.env.local
+[ -f /Users/AIAgenterminal/.openclaw/.env ] && . /Users/AIAgenterminal/.openclaw/.env
+set +a
+exec node /Users/AIAgenterminal/rrd-ready.mjs "$@"

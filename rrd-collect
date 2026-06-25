@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+# rrd-collect — one-command Stripe recovery loop. Sources central operator env and
+# the per-client profile .env (the client's own STRIPE_API_KEY + email-provider key
+# live there), then runs the loop. Profile .env is sourced LAST so a client key wins.
+set -euo pipefail
+OPERATOR_HOME="${RRD_OPERATOR_HOME:-/Users/AIAgenterminal}"
+[ -f "$OPERATOR_HOME/.openclaw/.env" ] && { set -a; . "$OPERATOR_HOME/.openclaw/.env"; set +a; }
+safe_rr_profile() {
+  case "$1" in
+    rr-[A-Za-z0-9_-]*) ;;
+    *) return 1 ;;
+  esac
+  case "$1" in
+    *..*|*/*|*\\*|*':'*) return 1 ;;
+  esac
+  return 0
+}
+
+# `rrd-collect recover <profile> ...` -> profile is the 2nd positional arg
+PROFILE="${2:-}"
+if [ -n "$PROFILE" ]; then
+  if ! safe_rr_profile "$PROFILE"; then
+    echo "Invalid recovery profile name" >&2
+    exit 2
+  fi
+  PENV="${HERMES_PROFILES_DIR:-$OPERATOR_HOME/.hermes/profiles}/$PROFILE/.env"
+  if [ -f "$PENV" ]; then set -a; . "$PENV"; set +a; fi
+fi
+exec node "$OPERATOR_HOME/rrd-collect.mjs" "$@"

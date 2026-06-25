@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Revenue Recovery Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+<div id="root">Loading...</div>
+<script type="module">
+import { h, render } from 'https://cdn.skypack.dev/preact';
+import { useState, useEffect } from 'https://cdn.skypack.dev/preact/hooks';
+
+const styles = `
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0F172A; --amber: #F59E0B; --white: #FFFFFF;
+    --gray-50: #F8FAFC; --gray-100: #F1F5F9; --gray-200: #E2E8F0;
+    --gray-400: #94A3B8; --gray-600: #475569; --gray-800: #1E293B;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', system-ui, sans-serif; color: var(--navy); background: var(--white); line-height: 1.6; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+  a { color: inherit; text-decoration: none; }
+
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--gray-200); }
+  nav .container { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .nav-logo { font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; }
+  .nav-logo span { color: var(--amber); }
+  .nav-links { display: flex; gap: 32px; align-items: center; list-style: none; }
+  .nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--gray-600); }
+  .nav-cta { background: var(--navy); color: var(--white) !important; padding: 8px 20px; border-radius: 6px; font-weight: 600 !important; }
+
+  .hero { background: var(--navy); color: var(--white); padding: 100px 0 80px; }
+  .hero-label { display: inline-block; background: rgba(245,158,11,0.15); color: var(--amber); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 6px 14px; border-radius: 100px; margin-bottom: 28px; }
+  .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700; line-height: 1.15; letter-spacing: -0.03em; max-width: 760px; margin-bottom: 24px; }
+  .hero h1 span { color: var(--amber); }
+  .hero-sub { font-size: 1.1rem; color: var(--gray-400); max-width: 600px; margin-bottom: 40px; line-height: 1.7; }
+  .hero-actions { display: flex; gap: 16px; flex-wrap: wrap; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--amber); color: var(--navy); font-weight: 700; font-size: 1rem; padding: 14px 28px; border-radius: 8px; border: none; cursor: pointer; }
+  .btn-secondary { display: inline-flex; align-items: center; gap: 6px; color: var(--gray-400); font-weight: 500; font-size: 0.95rem; background: none; border: none; cursor: pointer; }
+
+  .proof-bar { background: var(--gray-50); border-bottom: 1px solid var(--gray-200); padding: 32px 0; }
+  .proof-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; text-align: center; }
+  .proof-item h3 { font-size: 2rem; font-weight: 700; color: var(--amber); letter-spacing: -0.03em; margin-bottom: 4px; }
+  .proof-item p { font-size: 0.85rem; color: var(--gray-600); font-weight: 500; }
+
+  section { padding: 80px 0; }
+  section.alt { background: var(--gray-50); }
+  section.dark { background: var(--navy); color: var(--white); }
+  .section-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--amber); margin-bottom: 12px; }
+  .section-title { font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 700; letter-spacing: -0.03em; line-height: 1.2; margin-bottom: 20px; }
+  .section-body { font-size: 1.05rem; color: var(--gray-600); max-width: 640px; line-height: 1.8; }
+
+  .problem-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; margin-top: 48px; }
+  .problem-points { list-style: none; display: flex; flex-direction: column; gap: 16px; }
+  .problem-points li { display: flex; gap: 14px; align-items: flex-start; }
+  .problem-points li::before { content: '✗'; color: #DC2626; font-weight: 700; flex-shrink: 0; margin-top: 2px; font-size: 0.9rem; }
+  .problem-points li span { color: var(--gray-600); font-size: 1rem; }
+  .bridge { margin-top: 32px; padding: 20px 24px; background: rgba(245,158,11,0.1); border-left: 3px solid var(--amber); border-radius: 0 8px 8px 0; font-weight: 600; color: var(--navy); }
+
+  .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; margin-top: 48px; }
+  .step { padding: 28px 20px; background: var(--white); border: 1px solid var(--gray-200); border-radius: 12px; }
+  .step-num { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: var(--amber); color: var(--navy); font-weight: 700; font-size: 0.95rem; border-radius: 8px; margin-bottom: 16px; }
+  .step h4 { font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: var(--navy); }
+  .step p { font-size: 0.88rem; color: var(--gray-600); line-height: 1.6; }
+
+  .niche-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 48px; }
+  .niche-card { padding: 24px; background: var(--navy); border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); }
+  .niche-card h4 { font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+  .niche-card p { font-size: 0.88rem; color: var(--gray-400); line-height: 1.5; }
+
+  .pricing-card { background: var(--white); border: 2px solid var(--amber); border-radius: 16px; padding: 48px; max-width: 600px; margin: 48px auto 0; }
+  .pricing-row { display: flex; justify-content: space-between; align-items: baseline; padding: 16px 0; border-bottom: 1px solid var(--gray-200); }
+  .pricing-row:last-of-type { border-bottom: none; }
+  .pricing-row .label { font-size: 1rem; color: var(--gray-600); }
+  .pricing-row .value { font-size: 1.1rem; font-weight: 700; color: var(--navy); }
+  .pricing-row .value.highlight { color: var(--amber); font-size: 1.3rem; }
+  .pricing-note { margin-top: 24px; padding: 16px; background: var(--gray-50); border-radius: 8px; font-size: 0.9rem; color: var(--gray-600); }
+  .pricing-note strong { color: var(--navy); }
+  .pricing-compare { margin-top: 16px; padding: 16px; background: rgba(245,158,11,0.08); border-radius: 8px; font-size: 0.9rem; color: var(--gray-600); text-align: center; }
+
+  .faq-list { max-width: 680px; margin: 48px auto 0; display: flex; flex-direction: column; gap: 12px; }
+  .faq-item { border: 1px solid var(--gray-200); border-radius: 10px; overflow: hidden; }
+  .faq-q { width: 100%; text-align: left; padding: 20px 24px; background: none; border: none; cursor: pointer; font-family: inherit; font-size: 1rem; font-weight: 600; color: var(--navy); display: flex; justify-content: space-between; align-items: center; }
+  .faq-q::after { content: '+'; font-size: 1.4rem; color: var(--amber); font-weight: 700; transition: transform 0.2s; }
+  .faq-item.open .faq-q::after { transform: rotate(45deg); }
+  .faq-a { padding: 0 24px 20px; font-size: 0.95rem; color: var(--gray-600); line-height: 1.7; display: none; }
+  .faq-item.open .faq-a { display: block; }
+  .faq-item.open { border-color: var(--amber); background: var(--gray-50); }
+
+  .cta-section { padding: 80px 0; }
+  .cta-inner { max-width: 560px; margin: 0 auto; text-align: center; }
+  .cta-inner h2 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 700; letter-spacing: -0.03em; margin-bottom: 12px; }
+  .cta-inner > p { color: var(--gray-600); margin-bottom: 36px; font-size: 1rem; }
+  form { display: flex; flex-direction: column; gap: 16px; text-align: left; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label { font-size: 0.85rem; font-weight: 600; color: var(--gray-800); }
+  .form-group input, .form-group select, .form-group textarea { padding: 12px 16px; border: 1.5px solid var(--gray-200); border-radius: 8px; font-family: inherit; font-size: 0.95rem; color: var(--navy); background: var(--white); outline: none; transition: border-color 0.2s; }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--amber); }
+  .form-group textarea { resize: vertical; min-height: 90px; }
+  .form-submit { background: var(--amber); color: var(--navy); font-family: inherit; font-size: 1.05rem; font-weight: 700; padding: 16px; border: none; border-radius: 8px; cursor: pointer; margin-top: 8px; }
+  .form-disclaimer { text-align: center; font-size: 0.82rem; color: var(--gray-400); margin-top: 12px; }
+
+  footer { background: var(--navy); color: var(--gray-400); padding: 32px 0; text-align: center; font-size: 0.85rem; }
+  footer span { color: var(--amber); font-weight: 600; }
+
+  @media (max-width: 900px) {
+    .proof-grid { grid-template-columns: 1fr; gap: 20px; }
+    .problem-grid { grid-template-columns: 1fr; }
+    .steps-grid { grid-template-columns: repeat(2, 1fr); }
+    .niche-grid { grid-template-columns: 1fr 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .nav-links { display: none; }
+  }
+  @media (max-width: 600px) {
+    .steps-grid { grid-template-columns: 1fr; }
+    .niche-grid { grid-template-columns: 1fr; }
+    .pricing-card { padding: 28px 20px; }
+    .hero { padding: 60px 0 50px; }
+  }
+`;
+
+const faqData = [
+  { q: "How is this different from a collections agency?", a: "Collections agencies charge 25–50% and use aggressive tactics that burn customer relationships. We automate polite, professional follow-up that preserves your client relationships — because in B2B service, those relationships are recurring revenue." },
+  { q: "What if a client gets upset at the follow-up?", a: "Every escalation goes through human review before anything is sent. You are always in control — we are an extension of your finance team, not a separate entity sending letters on your behalf." },
+  { q: "How quickly will I see results?", a: "Most clients see first recovered payments within 2–4 weeks. Full accounts receivable cleanup happens over 30–90 days depending on volume and invoice age." },
+  { q: "What software or tools do I need?", a: "None required. We work with your existing invoicing system, CRM, accounting software, or PSA tools. We adapt to your stack." },
+  { q: "What if you do not recover anything?", a: "You pay the setup fee and monthly retainer — but the success fee is entirely upside. We only earn that piece when money actually hits your account." },
+];
+
+const nicheData = [
+  { title: "Staffing Agencies", desc: "Payroll does not wait. Your clients pay net-60. We close the gap without you chasing." },
+  { title: "Cleaning Companies", desc: "Recurring contracts, recurring late payers. Your team cleans — we collect." },
+  { title: "MSPs / IT Firms", desc: "Monthly retainers, aging invoices. We work with your existing PSA and CRM." },
+  { title: "Security Companies", desc: "Admin-heavy, messy payment cycles. Professional follow-up without the awkwardness." },
+  { title: "Logistics Firms", desc: "Invoice chaos you do not have time to fix. Recover what is already owed." },
+  { title: "Maintenance Companies", desc: "Old unpaid balances piling up. Systematic recovery, relationship intact." },
+];
+
+function App() {
+  const [openFaq, setOpenFaq] = useState(null);
+  const [formData, setFormData] = useState({ name: '', company: '', volume: '', email: '', phone: '', notes: '' });
+  const [formSent, setFormSent] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setFormSent(true);
+  };
+
+  return h('div', null,
+    h('style', null, styles),
+
+    // NAV
+    h('nav', null,
+      h('div', { class: 'container' },
+        h('div', { class: 'nav-logo' }, 'Revenue', h('span', null, 'Recovery'), 'Desk'),
+        h('ul', { class: 'nav-links' },
+          h('li', null, h('a', { href: '#how' }, 'How It Works')),
+          h('li', null, h('a', { href: '#niches' }, 'Who It\'s For')),
+          h('li', null, h('a', { href: '#pricing' }, 'Pricing')),
+          h('li', null, h('a', { href: '#faq' }, 'FAQ')),
+          h('li', null, h('a', { href: '#book', class: 'nav-cta' }, 'Book Free Audit'))
+        )
+      )
+    ),
+
+    // HERO
+    h('section', { class: 'hero' },
+      h('div', { class: 'container' },
+        h('span', { class: 'hero-label' }, 'AI-Powered Revenue Recovery'),
+        h('h1', null, 'Your Clients Owe You.', h('br'), h('span', null, 'We\'re Collecting — Without You Lifting a Finger.')),
+        h('p', { class: 'hero-sub' }, 'We install a Revenue Recovery Desk inside your business. It finds overdue invoices, follows up automatically, escalates disputes, and sends you a weekly cash-recovered report. No collections agency aggression. No new hires.'),
+        h('div', { class: 'hero-actions' },
+          h('a', { href: '#book', class: 'btn-primary' }, 'Book Your Free Revenue Audit →'),
+          h('a', { href: '#how', class: 'btn-secondary' }, 'See how it works')
+        )
+      )
+    ),
+
+    // PROOF BAR
+    h('div', { class: 'proof-bar' },
+      h('div', { class: 'container' },
+        h('div', { class: 'proof-grid' },
+          h('div', { class: 'proof-item' }, h('h3', null, '[PLACEHOLDER]%'), h('p', null, 'Invoices recovered in pilot programs')),
+          h('div', { class: 'proof-item' }, h('h3', null, '30–90 Days'), h('p', null, 'Full AR clean-up timeline')),
+          h('div', { class: 'proof-item' }, h('h3', null, 'Zero'), h('p', null, 'Additional headcount required'))
+        )
+      )
+    ),
+
+    // PROBLEM
+    h('section', { class: 'alt', id: 'problem' },
+      h('div', { class: 'container' },
+        h('span', { class: 'section-label' }, 'The Problem'),
+        h('h2', { class: 'section-title' }, 'You\'re Leaving Money on the Table.', h('br'), 'Every Week.'),
+        h('div', { class: 'problem-grid' },
+          h('div', null,
+            h('p', { class: 'section-body' }, 'Unpaid invoices pile up. Your team is too busy doing actual work to chase payments. You cannot afford to hire more admin just to send follow-up emails. And a collections agency? Too aggressive — it burns the customer relationships you spent years building.'),
+            h('ul', { class: 'problem-points' },
+              h('li', null, h('span', null, 'Your cash flow is strained by money you have already earned')),
+              h('li', null, h('span', null, 'Your team hates sending awkward follow-up emails')),
+              h('li', null, h('span', null, 'Collections agencies damage relationships and charge 25–50%')),
+              h('li', null, h('span', null, 'Every week an invoice ages, the odds of collection drop'))
+            ),
+            h('div', { class: 'bridge' }, "There's a better way. We're it.")
+          ),
+          h('div', { style: { background: '#FFFFFF', border: '1px solid #E7E2DD', boxShadow: '0 1px 2px rgba(55,50,47,.06), 0 12px 32px rgba(55,50,47,.05)', borderRadius: '16px', padding: '40px 32px', display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '280px', textAlign: 'center' } },
+            h('div', { style: { color: '#37322F' } },
+              h('div', { style: { fontSize: '4rem', fontWeight: '700', fontFamily: 'DM Sans, monospace' } }, '60→90'),
+              h('div', { style: { fontSize: '1rem', color: '#94A3B8', marginTop: '8px' } }, 'days = under 50%', h('br'), 'chance of collection')
+            )
+          )
+        )
+      )
+    ),
+
+    // HOW IT WORKS
+    h('section', { id: 'how' },
+      h('div', { class: 'container' },
+        h('span', { class: 'section-label' }, 'How It Works'),
+        h('h2', { class: 'section-title' }, 'Four Steps to Cash in the Bank'),
+        h('p', { class: 'section-body' }, 'Done-for-you. AI-assisted. Human-reviewed before anything goes out under your name.'),
+        h('div', { class: 'steps-grid' },
+          [{ n: '1', t: 'Audit', p: 'We review all your overdue invoices and build a custom recovery roadmap.' },
+           { n: '2', t: 'Follow-Up', p: 'AI sends polite, professional reminders on your behalf — nothing without your approval.' },
+           { n: '3', t: 'Escalate', p: 'Disputes and non-responses are flagged for human review, handled carefully.' },
+           { n: '4', t: 'Report', p: 'You receive a weekly cash-recovered summary. No chasing. No surprises.' }
+          ].map(s =>
+            h('div', { class: 'step', key: s.n },
+              h('div', { class: 'step-num' }, s.n),
+              h('h4', null, s.t),
+              h('p', null, s.p)
+            )
+          )
+        )
+      )
+    ),
+
+    // NICHES
+    h('section', { class: 'dark', id: 'niches' },
+      h('div', { class: 'container', style: { textAlign: 'center' } },
+        h('span', { class: 'section-label' }, 'Who It\'s For'),
+        h('h2', { class: 'section-title' }, 'Built for B2B Service Businesses'),
+        h('p', { style: { color: '#94A3B8', maxWidth: '520px', margin: '0 auto', fontSize: '1rem' } }, 'Niches where late payments hurt cash flow most — and where relationship preservation matters.'),
+        h('div', { class: 'niche-grid' },
+          nicheData.map(n =>
+            h('div', { class: 'niche-card', key: n.title },
+              h('h4', null, n.title),
+              h('p', null, n.desc)
+            )
+          )
+        )
+      )
+    ),
+
+    // PRICING
+    h('section', { class: 'alt', id: 'pricing' },
+      h('div', { class: 'container', style: { textAlign: 'center' } },
+        h('span', { class: 'section-label' }, 'Pricing'),
+        h('h2', { class: 'section-title' }, 'Simple. Aligned. No Surprises.'),
+        h('p', { class: 'section-body', style: { margin: '0 auto' } }, 'You pay for the service. We earn when you get paid. That is the only incentive structure that works.'),
+        h('div', { class: 'pricing-card' },
+          h('span', { style: { display: 'inline-block', background: 'rgba(55,50,47,0.06)', color: '#605A57', fontSize: '0.75rem', fontWeight: '600', letterSpacing: '0.08em', textTransform: 'uppercase', padding: '4px 12px', borderRadius: '100px', marginBottom: '20px' } }, 'AI Revenue Recovery Pilot'),
+          h('div', { class: 'pricing-row' }, h('span', { class: 'label' }, 'Setup Fee (one-time)'), h('span', { class: 'value' }, '$2,500')),
+          h('div', { class: 'pricing-row' }, h('span', { class: 'label' }, 'Monthly Management'), h('span', { class: 'value' }, '$2,500 / month')),
+          h('div', { class: 'pricing-row' }, h('span', { class: 'label' }, 'Success Fee (only on recovery)'), h('span', { class: 'value highlight' }, '5%')),
+          h('div', { class: 'pricing-note' },
+            h('strong', null, 'The success fee is only earned when cash hits your account. '),
+            'If we do not recover anything, you do not pay that piece. Setup and monthly cover operations — the success fee aligns our incentives with yours.'
+          ),
+          h('div', { class: 'pricing-compare' }, 'Collections agencies charge ', h('strong', null, '25–50%'), '. We charge ', h('strong', null, '5%'), '. No threatening letters. No relationship damage.')
+        )
+      )
+    ),
+
+    // FAQ
+    h('section', { id: 'faq' },
+      h('div', { class: 'container', style: { textAlign: 'center' } },
+        h('span', { class: 'section-label' }, 'FAQ'),
+        h('h2', { class: 'section-title' }, 'Questions Before You Book'),
+        h('div', { class: 'faq-list' },
+          faqData.map((item, i) =>
+            h('div', {
+              class: 'faq-item' + (openFaq === i ? ' open' : ''),
+              key: i,
+              onClick: () => setOpenFaq(openFaq === i ? null : i)
+            },
+              h('div', { class: 'faq-q' }, item.q),
+              h('div', { class: 'faq-a' }, item.a)
+            )
+          )
+        )
+      )
+    ),
+
+    // CTA / FORM
+    h('section', { class: 'cta-section', id: 'book' },
+      h('div', { class: 'container' },
+        h('div', { class: 'cta-inner' },
+          formSent
+            ? [
+                h('h2', { key: 't' }, 'Thanks! We will be in touch.'),
+                h('p', { key: 'p', style: { marginTop: '12px', color: '#475569' } }, 'Check your email — we sent a confirmation to ' + formData.email),
+              ]
+            : [
+                h('h2', { key: 't' }, "Let's Recover What's Yours."),
+                h('p', { key: 'p' }, 'Free 30-minute Revenue Recovery Audit. No commitment. No contract. Just answers.'),
+                h('form', { key: 'f', onSubmit: handleSubmit },
+                  h('div', { class: 'form-row' },
+                    h('div', { class: 'form-group' },
+                      h('label', { for: 'name' }, 'Full Name'),
+                      h('input', { type: 'text', id: 'name', name: 'name', placeholder: 'John Smith', required: true, value: formData.name, onInput: (e) => setFormData({...formData, name: e.target.value}) })
+                    ),
+                    h('div', { class: 'form-group' },
+                      h('label', { for: 'company' }, 'Company'),
+                      h('input', { type: 'text', id: 'company', name: 'company', placeholder: 'Acme Services', required: true, value: formData.company, onInput: (e) => setFormData({...formData, company: e.target.value}) })
+                    )
+                  ),
+                  h('div', { class: 'form-group' },
+                    h('label', { for: 'volume' }, 'Monthly Overdue Invoice Volume'),
+                    h('select', { id: 'volume', name: 'volume', required: true, value: formData.volume, onChange: (e) => setFormData({...formData, volume: e.target.value}) },
+                      h('option', { value: '', disabled: true, selected: true }, 'Select range...'),
+                      h('option', { value: 'under-10k' }, 'Under $10,000'),
+                      h('option', { value: '10k-50k' }, '$10,000 – $50,000'),
+                      h('option', { value: '50k-plus' }, '$50,000+')
+                    )
+                  ),
+                  h('div', { class: 'form-row' },
+                    h('div', { class: 'form-group' },
+                      h('label', { for: 'email' }, 'Email'),
+                      h('input', { type: 'email', id: 'email', name: 'email', placeholder: 'john@acme.com', required: true, value: formData.email, onInput: (e) => setFormData({...formData, email: e.target.value}) })
+                    ),
+                    h('div', { class: 'form-group' },
+                      h('label', { for: 'phone' }, 'Phone (optional)'),
+                      h('input', { type: 'tel', id: 'phone', name: 'phone', placeholder: '+1 (555) 000-0000', value: formData.phone, onInput: (e) => setFormData({...formData, phone: e.target.value}) })
+                    )
+                  ),
+                  h('div', { class: 'form-group' },
+                    h('label', { for: 'notes' }, 'Tell us about your situation'),
+                    h('textarea', { id: 'notes', name: 'notes', placeholder: 'How many overdue invoices do you have roughly? What industries are your clients in? Any specific pain points...', value: formData.notes, onInput: (e) => setFormData({...formData, notes: e.target.value}) })
+                  ),
+                  h('button', { type: 'submit', class: 'form-submit' }, 'Book My Free Revenue Audit →'),
+                  h('p', { class: 'form-disclaimer' }, "No commitment. 30-minute call. We will show you exactly what's recoverable.")
+                )
+              ]
+        )
+      )
+    ),
+
+    // FOOTER
+    h('footer', null,
+      h('div', { class: 'container' },
+        h('p', null, 'Revenue Recovery Desk — Built for B2B service companies that want their cash back. ', h('span', null, 'No collections agency aggression.')),
+        h('p', { style: { marginTop: '10px', fontSize: '0.9rem' } },
+          h('a', { href: '/terms' }, 'Terms of Service'),
+          ' · ',
+          h('a', { href: '/privacy' }, 'Privacy Policy')
+        )
+      )
+    )
+  );
+}
+
+render(h(App), document.getElementById('root'));
+</script>
+</body>
+</html>

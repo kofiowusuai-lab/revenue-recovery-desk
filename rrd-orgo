@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# rrd-orgo — per-client Orgo cloud-desktop fleet for the Recovery Desk.
+# Sources the central secrets file (ORGO_API_KEY lives there — the single switch
+# point for test -> production) and runs orgo-fleet.py in its isolated venv.
+set -euo pipefail
+
+# Central operator home. Gateway/profile shells may rewrite $HOME to a profile
+# sandbox; Orgo fleet state and API key intentionally live under the real
+# operator home so every profile sees the same fleet.
+OPERATOR_HOME="${RRD_OPERATOR_HOME:-/Users/AIAgenterminal}"
+
+# Central secrets (ORGO_API_KEY, ANTHROPIC_API_KEY). Swap the key here at go-live.
+if [ -f "$OPERATOR_HOME/.openclaw/.env" ]; then set -a; . "$OPERATOR_HOME/.openclaw/.env"; set +a; fi
+
+VENV_PY="$OPERATOR_HOME/.openclaw/orgo-venv/bin/python"
+[ -x "$VENV_PY" ] || { echo "orgo venv missing at $VENV_PY (python3.12 -m venv + pip install orgo)"; exit 2; }
+
+export ORGO_FLEET_FILE="${ORGO_FLEET_FILE:-$OPERATOR_HOME/.openclaw/orgo-fleet.json}"
+export HERMES_PROFILES_DIR="${HERMES_PROFILES_DIR:-$OPERATOR_HOME/.hermes/profiles}"
+exec "$VENV_PY" "$OPERATOR_HOME/orgo-fleet.py" "$@"

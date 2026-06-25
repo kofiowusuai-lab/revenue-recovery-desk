@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+OPERATOR_HOME="${RRD_OPERATOR_HOME:-/Users/AIAgenterminal}"
+exec node "$OPERATOR_HOME/rrd-recovery-scheduler.mjs" "$@"

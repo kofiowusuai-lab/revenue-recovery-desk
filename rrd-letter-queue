@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+OPERATOR_HOME="${RRD_OPERATOR_HOME:-/Users/AIAgenterminal}"
+[ -f "$OPERATOR_HOME/.env.local" ] && { set -a; . "$OPERATOR_HOME/.env.local"; set +a; }
+[ -f "$OPERATOR_HOME/.openclaw/.env" ] && { set -a; . "$OPERATOR_HOME/.openclaw/.env"; set +a; }
+exec node "$OPERATOR_HOME/rrd-letter-queue.mjs" "$@"

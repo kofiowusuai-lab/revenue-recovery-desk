@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# rrd-brain — orchestrate per-company Hermes brains on their Orgo VMs (control plane).
+set -euo pipefail
+OPERATOR_HOME="${RRD_OPERATOR_HOME:-/Users/AIAgenterminal}"
+[ -f "$OPERATOR_HOME/.openclaw/.env" ] && { set -a; . "$OPERATOR_HOME/.openclaw/.env"; set +a; }
+VENV_PY="$OPERATOR_HOME/.openclaw/orgo-venv/bin/python"
+[ -x "$VENV_PY" ] || { echo "orgo venv missing at $VENV_PY"; exit 2; }
+exec "$VENV_PY" "$OPERATOR_HOME/orgo-brain.py" "$@"

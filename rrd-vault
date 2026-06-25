@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Wrapper for the Hermes Secrets Vault operator CLI.
+# Sources the locked Supabase service-role creds, then runs rrd-vault.mjs.
+set -euo pipefail
+cd /Users/AIAgenterminal
+# The vault is a machine-level secret store. Pin its home to the operator home
+# so claims resolve the same keys/profiles regardless of the caller's $HOME
+# (sandboxed Hermes agents run with $HOME inside their profile dir).
+export RRD_VAULT_HOME="${RRD_VAULT_HOME:-/Users/AIAgenterminal}"
+# OAuth app credentials ({GOOGLE,HUBSPOT,SALESFORCE,ZOHO}_OAUTH_CLIENT_ID/_SECRET) live
+# in ~/.openclaw/.env with the other machine-level keys. Source it first so the
+# vault-specific .env.local (Supabase service role) still wins on any overlap.
+set -a
+[ -f "$RRD_VAULT_HOME/.openclaw/.env" ] && . "$RRD_VAULT_HOME/.openclaw/.env"
+. ./.env.local
+set +a
+exec node /Users/AIAgenterminal/rrd-vault.mjs "$@"

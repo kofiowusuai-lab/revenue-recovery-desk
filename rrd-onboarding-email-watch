@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Wrapper for RRD onboarding → AgentMail automation.
+# Sources Supabase service env and AgentMail env; never prints secrets.
+set -euo pipefail
+export PATH="/Users/AIAgenterminal/.local/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+cd /Users/AIAgenterminal
+# Do not shell-source .env files here: values may contain spaces (e.g. voice names)
+# and the Node watcher has its own safe dotenv parser that never prints secrets.
+exec node /Users/AIAgenterminal/rrd-onboarding-email-watch.mjs "$@"

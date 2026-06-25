@@ -1,0 +1,35 @@
+#!/usr/bin/env node
+/** rrd-runtime — choose local-sandbox vs Orgo for RRD client profiles. */
+import fs from 'node:fs';
+import path from 'node:path';
+const OPERATOR_HOME = process.env.RRD_OPERATOR_HOME || '/Users/AIAgenterminal';
+const POLICY = process.env.RRD_RUNTIME_POLICY || path.join(OPERATOR_HOME, '.openclaw', 'rrd-runtime-policy.json');
+const DEFAULT = {
+  defaultMode: 'orgo',
+  localSandboxAllowlist: ['rr-test'],
+  profileModes: { 'rr-test': 'local-sandbox' },
+  note: 'Real RRD client instances must not run locally. Local sandbox is for rr-test/demo only. Default real-client runtime is Orgo/cloud.'
+};
+function load() { try { return { ...DEFAULT, ...JSON.parse(fs.readFileSync(POLICY, 'utf8')) }; } catch { return DEFAULT; } }
+function save(p) { fs.mkdirSync(path.dirname(POLICY), { recursive: true }); fs.writeFileSync(POLICY, JSON.stringify(p, null, 2) + '\n'); }
+function usage() { console.error(`rrd-runtime\n\nUsage:\n  rrd-runtime status [profile]\n  rrd-runtime set <profile> orgo|local-sandbox\n  rrd-runtime clear <profile>\n\nRules:\n  - default is orgo for real clients\n  - local-sandbox should only be used for rr-test/demo unless K explicitly says otherwise`); process.exit(1); }
+const [, , cmd, profile, mode] = process.argv;
+const p = load();
+if (!cmd || ['-h','--help','help'].includes(cmd)) usage();
+if (cmd === 'status') {
+  const resolved = profile ? (p.profileModes?.[profile] || (p.localSandboxAllowlist || []).includes(profile) && 'local-sandbox' || p.defaultMode || 'orgo') : null;
+  console.log(JSON.stringify({ policyPath: POLICY, ...p, profile: profile || null, resolvedMode: resolved }, null, 2));
+} else if (cmd === 'set') {
+  if (!profile || !['orgo', 'local-sandbox'].includes(mode)) usage();
+  p.profileModes = p.profileModes || {};
+  p.profileModes[profile] = mode;
+  p.localSandboxAllowlist = [...new Set((p.localSandboxAllowlist || []).filter((x) => x !== profile).concat(mode === 'local-sandbox' ? [profile] : []))];
+  save(p);
+  console.log(JSON.stringify({ ok: true, profile, mode }, null, 2));
+} else if (cmd === 'clear') {
+  if (!profile) usage();
+  if (p.profileModes) delete p.profileModes[profile];
+  p.localSandboxAllowlist = (p.localSandboxAllowlist || []).filter((x) => x !== profile);
+  save(p);
+  console.log(JSON.stringify({ ok: true, profile, mode: p.defaultMode || 'orgo' }, null, 2));
+} else usage();

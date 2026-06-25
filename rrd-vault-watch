@@ -1,0 +1,9 @@
+#!/bin/sh
+# Wrapper for the vault deposit watcher. Sets a launchd-safe PATH (so `node` and
+# the recoverydesk sender resolve), sources the locked Supabase creds, then runs
+# the poller.
+export PATH="/Users/AIAgenterminal/.local/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+cd /Users/AIAgenterminal
+export RRD_VAULT_AUTO_APPROVE="${RRD_VAULT_AUTO_APPROVE:-1}"
+set -a; . ./.env.local; set +a
+exec /usr/local/bin/node /Users/AIAgenterminal/rrd-vault-watch.mjs "$@"

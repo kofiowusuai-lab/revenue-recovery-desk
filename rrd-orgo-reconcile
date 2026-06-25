@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# rrd-orgo-reconcile — destroy Orgo cloud desktops for clients no longer in the
+# active book (covers browser-initiated offboards + any orphans). Keeps a desktop
+# for every active submission; tears down the rest.
+#
+# Safe by construction: if the harness query fails, we abort BEFORE reconciling
+# (set -e), so a transient error can never wipe the fleet.
+set -euo pipefail
+cd /Users/AIAgenterminal
+
+# Supabase (active book) + Orgo key
+set -a
+[ -f ./.env.local ] && . ./.env.local
+[ -f "$HOME/.openclaw/.env" ] && . "$HOME/.openclaw/.env"
+set +a
+
+# Compute the keep-set: rr-<slug(company)> for every active submission.
+KEEP="$(node /Users/AIAgenterminal/rrd-agent.mjs activeProfiles \
+  | node --input-type=module -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const a=JSON.parse(s);process.stdout.write(a.join(" "));})')"
+
+echo "[$(date -u +%FT%TZ)] active profiles to keep: ${KEEP:-<none>}"
+# Pass the keep-set; orgo-fleet destroys every rr-* project NOT in it.
+exec /Users/AIAgenterminal/rrd-orgo reconcile $KEEP

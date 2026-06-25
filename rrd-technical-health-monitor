@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+export RRD_OPERATOR_HOME=/Users/AIAgenterminal
+exec /Users/AIAgenterminal/rrd-technical-health-monitor.py "$@"
