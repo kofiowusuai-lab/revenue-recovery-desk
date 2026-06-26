@@ -75,7 +75,7 @@ function simplifyApproval(approval, context = {}) {
     amountCents: cents(action.amount_cents != null || action.amount != null ? action : invoice),
     currency: action.currency ?? invoice.currency ?? null,
     subject: action.subject ?? approval.subject ?? null,
-    draftText: action.draft_text ?? action.draftText ?? action.message ?? action.text ?? null,
+    draftText: action.draft_text ?? action.draftText ?? action.body ?? action.message ?? action.text ?? null,
   };
 }
 

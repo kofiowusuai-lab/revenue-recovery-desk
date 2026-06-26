@@ -82,7 +82,7 @@ function actionPatchFor({ mode, body, now, user }) {
     updated_at: now,
   };
   if (Object.prototype.hasOwnProperty.call(body, 'subject')) patch.subject = clean(body.subject, 500);
-  if (Object.prototype.hasOwnProperty.call(body, 'draftText')) patch.draft_text = clean(body.draftText, 10000);
+  if (Object.prototype.hasOwnProperty.call(body, 'draftText')) patch.body = clean(body.draftText, 10000);
   return patch;
 }
 
