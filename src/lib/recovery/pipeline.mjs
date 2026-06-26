@@ -390,7 +390,11 @@ export function reconcilePayment(repo, payment = {}, { now = new Date().toISOStr
     provider: invoice.provider,
     providerInvoiceId: invoice.providerInvoiceId,
     amount: asNumber(payment.amount, invoice.amountDue),
+    amount_cents: asNumber(payment.amount, invoice.amountDue),
+    currency: payment.currency || invoice.currency || 'USD',
+    status: 'verified',
     paidAt: at,
+    received_at: at,
   };
   asArray(repo, 'payments').push(record);
   invoice.status = 'paid';
