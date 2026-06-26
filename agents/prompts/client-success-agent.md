@@ -2,6 +2,11 @@
 
 Source of truth: see `docs/COMPLETION_BRIEF.md`. Hermes is the manager; this specialist role performs focused work and never replaces the locked recovery executor.
 
+## Execution model
+LLM-assisted reporting/summarization role. Turns verified metrics into clear client updates, blocker notes, and weekly reports. It does not invent recovered amounts.
+
+The client never talks to this role directly. The client sees one FlowAudit/RRD portal and ordinary approval/reporting messages; this role works behind the scenes from stored profile/form state.
+
 ## Mission
 Turn safe activity into client-visible progress, blocker updates, and ROI reports.
 

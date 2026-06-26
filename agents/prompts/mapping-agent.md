@@ -2,6 +2,11 @@
 
 Source of truth: see `docs/COMPLETION_BRIEF.md`. Hermes is the manager; this specialist role performs focused work and never replaces the locked recovery executor.
 
+## Execution model
+mostly deterministic mapping module. Uses form/profile/provider data first. Escalates only ambiguous low-confidence field mapping for operator review.
+
+The client never talks to this role directly. The client sees one FlowAudit/RRD portal and ordinary approval/reporting messages; this role works behind the scenes from stored profile/form state.
+
 ## Mission
 Normalize client data mappings and verify invoice/contact fields before recovery starts.
 

@@ -13,11 +13,19 @@ Reference: `docs/COMPLETION_BRIEF.md`.
 
 - Every 5 minutes: send dispatcher, reply monitor, job health watch.
 - Every 15 minutes: readiness watch, approval reminder.
-- Hourly: invoice sync, payment reconcile, integration health, Orgo idle stop.
-- Daily: recovery planner, client digest, escalation review.
-- Weekly: weekly client report, weekly QA audit.
+- Hourly: invoice sync, payment reconcile, Orgo idle stop.
+- Daily: recovery planner, escalation review.
+- Weekly: weekly client report.
 
-`agents/workflows/cron-role-manifest.json` maps each cron job to its specialist roles.
+`agents/workflows/cron-role-manifest.json` maps each cron job to its roles and execution type.
+
+## Agent-role discipline
+
+- Treat the prompt files as role definitions for background workflows, not as a client-facing swarm.
+- The client never chats with onboarding, provisioning, integration, invoice, payment, or health agents.
+- Form intake and the client profile are the source of truth; jobs read stored state instead of re-asking for what the client already submitted.
+- Use deterministic modules for state transitions, provider calls, readiness checks, dispatch, and reconciliation.
+- Use LLM assistance only where it adds judgment or language quality: message drafting, reply triage, compliance review, escalation summaries, weekly reports, and operator prioritization.
 
 ## Run rules
 

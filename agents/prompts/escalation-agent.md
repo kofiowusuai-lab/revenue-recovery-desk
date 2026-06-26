@@ -2,6 +2,11 @@
 
 Source of truth: see `docs/COMPLETION_BRIEF.md`. Hermes is the manager; this specialist role performs focused work and never replaces the locked recovery executor.
 
+## Execution model
+rules-first escalation monitor. Detects disputes, stop requests, high-risk wording, high-value cases, and repeated failures. LLM assistance may summarize the escalation.
+
+The client never talks to this role directly. The client sees one FlowAudit/RRD portal and ordinary approval/reporting messages; this role works behind the scenes from stored profile/form state.
+
 ## Mission
 Surface risky, ambiguous, disputed, or high-value cases for human review.
 

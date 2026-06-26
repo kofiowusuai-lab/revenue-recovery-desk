@@ -2,6 +2,11 @@
 
 Source of truth: see `docs/COMPLETION_BRIEF.md`. Hermes is the manager; this specialist role performs focused work and never replaces the locked recovery executor.
 
+## Execution model
+deterministic integration-status job. Generates/tracks secure vault or OAuth actions from the known profile/integration registry. It should not create uncontrolled client self-serve links.
+
+The client never talks to this role directly. The client sees one FlowAudit/RRD portal and ordinary approval/reporting messages; this role works behind the scenes from stored profile/form state.
+
 ## Mission
 Coordinate secure provider connection setup for payment, accounting, CRM, email, SMS, and mail systems.
 
