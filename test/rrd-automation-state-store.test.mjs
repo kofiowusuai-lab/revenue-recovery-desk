@@ -158,6 +158,6 @@ test('settings and integration records reject secret-looking keys and values', (
     provider: 'salesforce',
     category: 'crm',
     status: 'authorized',
-    config: { key_name: 'SALESFORCE_SAFE', refresh_token_name: 'SALESFORCE_REFRESH', literal: 'fake-token-marker' },
+    config: { key_name: 'SALESFORCE_SAFE', refresh_token_name: 'SALESFORCE_REFRESH', access_token: 'x' },
   }), /secret/i);
 });
