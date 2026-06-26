@@ -39,7 +39,7 @@ function sampleState() {
       { id: 'pay_1', invoice_id: 'inv_paid', amount_cents: 100000, currency: 'GBP', status: 'verified', received_at: '2026-06-18T10:00:00.000Z' },
     ],
     actions: [
-      { id: 'act_1', invoice_id: 'inv_recovery', status: 'scheduled', channel: 'email', scheduled_at: '2026-06-21T09:00:00.000Z', body: 'customer-facing draft should not be exposed' },
+      { id: 'act_1', invoice_id: 'inv_recovery', status: 'scheduled', channel: 'email', scheduled_at: '2026-06-21T09:00:00.000Z', body: 'Readable approval draft' },
       { id: 'act_blocked', invoice_id: 'inv_blocked', status: 'blocked', blocked_reason: 'dispute' },
     ],
     approvals: [{ id: 'apr_1', action_id: 'act_1', status: 'pending', requested_at: '2026-06-19T09:00:00.000Z' }],
@@ -171,7 +171,7 @@ test('client approval action lets dashboard approve edited draft without sending
   const patchedBody = JSON.parse(patchedAction.init.body);
   assert.equal(patchedBody.status, 'scheduled');
   assert.equal(patchedBody.subject, 'Edited subject');
-  assert.equal(patchedBody.draft_text, 'Edited body');
+  assert.equal(patchedBody.body, 'Edited body');
   const patchedApproval = calls.find((call) => call.path.startsWith('approval_requests?id=eq.apr_1') && call.init.method === 'PATCH');
   assert.ok(patchedApproval, 'expected approval PATCH');
   assert.equal(JSON.parse(patchedApproval.init.body).status, 'approved');
