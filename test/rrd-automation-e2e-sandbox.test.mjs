@@ -26,7 +26,7 @@ test('cliOptions captures approval destination without treating it as a secret',
   assert.equal(out.dryRun, true);
 });
 
-test('approval reminder routes approval batches to Kofi@traqd.io by default', async () => {
+test('approval reminder routes approval batches to Kofi@traqd.io only when explicitly configured', async () => {
   const runtime = createAutomationRuntime({
     state: {
       actions: [{ id: 'act_1', status: 'queued_for_approval', invoiceId: 'inv_1' }],
@@ -44,6 +44,21 @@ test('approval reminder routes approval batches to Kofi@traqd.io by default', as
     actionIds: ['act_1'],
     status: 'pending',
   });
+});
+
+test('approval reminder does not globally default real clients to Kofi@traqd.io', async () => {
+  const runtime = createAutomationRuntime({
+    state: {
+      actions: [{ id: 'act_2', status: 'queued_for_approval', invoiceId: 'inv_2' }],
+    },
+  });
+
+  const out = await runApprovalReminder(opts(runtime));
+
+  assert.equal(out.ok, true);
+  assert.equal(out.result.approvalTo, null);
+  assert.equal(runtime.repo.approvalBatches[0].reviewerId, null);
+  assert.doesNotMatch(JSON.stringify(out), /Kofi@traqd\.io/i);
 });
 
 test('automation sandbox proves invoice to approval to dry-run dispatch to payment report', async () => {
