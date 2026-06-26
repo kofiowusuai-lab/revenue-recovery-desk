@@ -7,7 +7,19 @@ function list(value) {
 }
 
 function cents(row) {
-  const value = row?.amount_cents ?? row?.amountCents ?? row?.amount ?? 0;
+  if (row?.amount_cents != null) {
+    const parsed = Number(row.amount_cents);
+    return Number.isFinite(parsed) ? Math.round(parsed) : 0;
+  }
+  if (row?.amountCents != null) {
+    const parsed = Number(row.amountCents);
+    return Number.isFinite(parsed) ? Math.round(parsed) : 0;
+  }
+  if (row?.amount_due != null) {
+    const parsed = Number(row.amount_due);
+    return Number.isFinite(parsed) ? Math.round(parsed * 100) : 0;
+  }
+  const value = row?.amount ?? 0;
   if (Number.isFinite(value)) return Math.round(value);
   const parsed = Number(value);
   return Number.isFinite(parsed) ? Math.round(parsed) : 0;
