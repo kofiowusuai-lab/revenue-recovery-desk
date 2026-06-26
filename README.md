@@ -8,6 +8,12 @@ Private source repository for the Revenue Recovery Desk control plane, client we
 - Use `.env.example` for placeholders only.
 - Client secrets must be entered through secure vault/OAuth flows or deployment secret managers.
 
+## Completion roadmap
+
+See [`docs/COMPLETION_BRIEF.md`](docs/COMPLETION_BRIEF.md) for the full build-out brief.
+
+The most important rule: every outbound recovery action must go through the gated `rrd-recover` executor. No agent, cron job, route, or adapter may send directly.
+
 ## Test
 
 ```bash
