@@ -10,6 +10,7 @@ export function cliOptions(argv = process.argv.slice(2), env = process.env) {
     else if (a === '--secret') opts.secret = argv[++i];
     else if (a === '--dry-run') opts.dryRun = true;
     else if (a === '--live') opts.dryRun = false;
+    else if (a === '--approval-to') opts.approvalTo = argv[++i];
   }
   opts.secret ||= env.RRD_CRON_SECRET_PROVIDED;
   opts.profile ||= env.RRD_PROFILE || null;
