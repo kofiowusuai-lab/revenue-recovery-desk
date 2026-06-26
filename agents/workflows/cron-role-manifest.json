@@ -1,0 +1,168 @@
+{
+  "sourceOfTruth": "docs/COMPLETION_BRIEF.md",
+  "invariant": "Hermes is manager; specialist agents plan/draft/triage; outbound customer-facing sends are locked behind rrd-recover gate/send.",
+  "schedules": {
+    "every5Minutes": [
+      "cron:send-dispatcher",
+      "cron:reply-monitor",
+      "cron:health-watch"
+    ],
+    "every15Minutes": [
+      "cron:readiness-watch",
+      "cron:approval-reminder"
+    ],
+    "hourly": [
+      "cron:invoice-sync",
+      "cron:payment-reconcile",
+      "cron:orgo-idle-stop"
+    ],
+    "daily": [
+      "cron:recovery-planner",
+      "cron:escalation-review"
+    ],
+    "weekly": [
+      "cron:weekly-report"
+    ]
+  },
+  "jobs": [
+    {
+      "job": "cron:send-dispatcher",
+      "route": "/api/internal/jobs/send-dispatcher",
+      "roles": [
+        "dispatch-agent",
+        "compliance-qa-agent"
+      ],
+      "gate": "required: rrd-recover then rrd-recover send only"
+    },
+    {
+      "job": "cron:reply-monitor",
+      "route": "/api/internal/jobs/reply-monitor",
+      "roles": [
+        "reply-triage-agent",
+        "escalation-agent"
+      ],
+      "gate": "no direct send; pause/cancel unsafe actions"
+    },
+    {
+      "job": "cron:health-watch",
+      "route": "/api/internal/jobs/health-watch",
+      "roles": [
+        "health-watch-agent"
+      ],
+      "gate": "no customer-facing send"
+    },
+    {
+      "job": "cron:readiness-watch",
+      "route": "/api/internal/jobs/readiness-watch",
+      "roles": [
+        "onboarding-agent",
+        "provisioning-agent",
+        "integration-agent",
+        "mapping-agent",
+        "health-watch-agent"
+      ],
+      "gate": "no direct send; client notices must become gated action records if customer-facing"
+    },
+    {
+      "job": "cron:approval-reminder",
+      "route": "/api/internal/jobs/approval-reminders",
+      "roles": [
+        "approval-agent",
+        "client-success-agent"
+      ],
+      "gate": "no direct send; reminders use gated executor when customer-facing"
+    },
+    {
+      "job": "cron:invoice-sync",
+      "route": "/api/internal/jobs/invoice-sync",
+      "roles": [
+        "invoice-sync-agent",
+        "contact-match-agent"
+      ],
+      "gate": "no send"
+    },
+    {
+      "job": "cron:payment-reconcile",
+      "route": "/api/internal/jobs/payment-reconcile",
+      "roles": [
+        "payment-reconciliation-agent",
+        "client-success-agent"
+      ],
+      "gate": "no direct send; win notices use gated executor when customer-facing"
+    },
+    {
+      "job": "cron:orgo-idle-stop",
+      "route": "/api/internal/jobs/health-watch",
+      "roles": [
+        "health-watch-agent"
+      ],
+      "gate": "no send"
+    },
+    {
+      "job": "cron:recovery-planner",
+      "route": "/api/internal/jobs/recovery-planner",
+      "roles": [
+        "recovery-planner-agent",
+        "message-drafting-agent",
+        "compliance-qa-agent",
+        "approval-agent"
+      ],
+      "gate": "draft/queue only; dispatch separate and gated"
+    },
+    {
+      "job": "cron:escalation-review",
+      "route": "/api/internal/jobs/escalation-review",
+      "roles": [
+        "escalation-agent",
+        "compliance-qa-agent",
+        "recoverydesk-manager"
+      ],
+      "gate": "do not send more until reviewed"
+    },
+    {
+      "job": "cron:weekly-report",
+      "route": "/api/internal/jobs/weekly-report",
+      "roles": [
+        "client-success-agent",
+        "compliance-qa-agent"
+      ],
+      "gate": "no direct send; report send must use rrd-recover gate/send"
+    }
+  ],
+  "workflowRoleMap": {
+    "newClient": [
+      "onboarding-agent",
+      "provisioning-agent",
+      "integration-agent",
+      "mapping-agent",
+      "health-watch-agent",
+      "recoverydesk-manager"
+    ],
+    "dailyRecovery": [
+      "invoice-sync-agent",
+      "contact-match-agent",
+      "recovery-planner-agent",
+      "message-drafting-agent",
+      "compliance-qa-agent",
+      "approval-agent",
+      "dispatch-agent",
+      "reply-triage-agent",
+      "payment-reconciliation-agent",
+      "client-success-agent"
+    ],
+    "reply": [
+      "reply-triage-agent",
+      "escalation-agent",
+      "recovery-planner-agent"
+    ],
+    "payment": [
+      "payment-reconciliation-agent",
+      "client-success-agent"
+    ],
+    "escalation": [
+      "escalation-agent",
+      "compliance-qa-agent",
+      "recoverydesk-manager"
+    ]
+  }
+}
