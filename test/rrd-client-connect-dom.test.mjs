@@ -31,11 +31,16 @@ test('dashboard self-serve connect posts provider=google to client-vault-link', 
   // Capture the API call the connect button makes (the page uses global fetch).
   let captured = null;
   window.fetch = async (url, opts = {}) => {
-    captured = { url: String(url), opts };
+    const u = String(url);
+    if (u.endsWith('/api/client-config')) {
+      return { ok: true, status: 200, text: async () => JSON.stringify({ supabaseUrl: 'https://stboueshyjvooiftfuxm.supabase.co', supabaseAnonKey: 'anon_test_key' }) };
+    }
+    captured = { url: u, opts };
     return { ok: true, status: 200, text: async () => JSON.stringify({ ok: true, url: 'https://revenue-recovery-web-ivory.vercel.app/oauth-start?token=test', provider: 'google' }) };
   };
 
   await tick(); await tick();
+  await window.initSupabaseClient();
 
   window.show('app');
   ev("state.page='Settings'");
