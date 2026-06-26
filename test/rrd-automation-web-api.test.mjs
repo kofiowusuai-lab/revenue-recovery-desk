@@ -112,6 +112,112 @@ test('client automation dashboard ignores public body state overrides and fetche
   assert.notEqual(res.body.dashboard.moneyRecoveredCents, 100000);
 });
 
+test('client automation dashboard includes readable pending approval drafts for the client portal', async () => {
+  const handler = loadHandler('revenue-recovery-web/api/automation-dashboard.js', {
+    cors() {},
+    bad(res, status, error) { return res.status(status).json({ ok: false, error }); },
+    requireClient: async () => ({ submissionId: 'sub_1', user: { id: 'user_1', email: 'client@example.test' } }),
+    rest: async () => { throw new Error('state should be injected in this test'); },
+  });
+
+  const state = sampleState();
+  state.invoices[1] = { ...state.invoices[1], number: 'INV-101', customer_name: 'Beta Ltd', amount_cents: 250000 };
+  state.actions[0] = { ...state.actions[0], id: 'act_1', channel: 'Email', subject: 'Overdue invoice INV-101', draft_text: 'Please pay invoice INV-101 today.', status: 'queued_for_approval' };
+
+  const res = response();
+  await handler({ method: 'GET', headers: {}, automationState: state, query: week }, res);
+
+  assert.equal(res.statusCode, 200, JSON.stringify(res.body));
+  const item = res.body.dashboard.pendingApprovals.items[0];
+  assert.equal(item.id, 'apr_1');
+  assert.equal(item.actionId, 'act_1');
+  assert.equal(item.channel, 'Email');
+  assert.equal(item.customerName, 'Beta Ltd');
+  assert.equal(item.invoiceNumber, 'INV-101');
+  assert.equal(item.amountCents, 250000);
+  assert.equal(item.subject, 'Overdue invoice INV-101');
+  assert.equal(item.draftText, 'Please pay invoice INV-101 today.');
+  assert.doesNotMatch(JSON.stringify(res.body), /customer-facing draft should not be exposed|access_token|secret/i);
+});
+
+test('client approval action lets dashboard approve edited draft without sending', async () => {
+  const calls = [];
+  const handler = loadHandler('revenue-recovery-web/api/client-approval-action.js', {
+    cors() {},
+    bad(res, status, error) { return res.status(status).json({ ok: false, error }); },
+    requireClient: async () => ({ submissionId: 'sub_1', user: { id: 'user_1', email: 'client@example.test' } }),
+    rest: async (path, init = {}) => {
+      calls.push({ path, init });
+      if (path.startsWith('submissions?')) return [{ id: 'sub_1', client_id: 'client_1' }];
+      if (path.startsWith('approval_requests?id=eq.apr_1')) return [{ id: 'apr_1', action_id: 'act_1', client_id: 'client_1', status: 'pending' }];
+      if (path.startsWith('recovery_actions?id=eq.act_1')) return [{ id: 'act_1', client_id: 'client_1', status: 'queued_for_approval', channel: 'Email', draft_text: 'Old draft' }];
+      if (path.startsWith('approval_requests?id=eq.apr_1') && init.method === 'PATCH') return [{ id: 'apr_1', status: 'approved' }];
+      if (path.startsWith('recovery_actions?id=eq.act_1') && init.method === 'PATCH') return [{ id: 'act_1', status: 'scheduled' }];
+      return [{ ok: true }];
+    },
+    sendEmail: async () => { throw new Error('must not send'); },
+  });
+
+  const res = response();
+  await handler({ method: 'POST', body: { action: 'edit_approve', approvalId: 'apr_1', subject: 'Edited subject', draftText: 'Edited body' }, headers: {} }, res);
+
+  assert.equal(res.statusCode, 200, JSON.stringify(res.body));
+  assert.equal(res.body.ok, true);
+  assert.equal(res.body.status, 'approved');
+  assert.equal(res.body.sendQueued, true);
+  assert.equal(res.body.sent, false);
+  const patchedAction = calls.find((call) => call.path.startsWith('recovery_actions?id=eq.act_1') && call.init.method === 'PATCH');
+  assert.ok(patchedAction, 'expected recovery action PATCH');
+  const patchedBody = JSON.parse(patchedAction.init.body);
+  assert.equal(patchedBody.status, 'scheduled');
+  assert.equal(patchedBody.subject, 'Edited subject');
+  assert.equal(patchedBody.draft_text, 'Edited body');
+  const patchedApproval = calls.find((call) => call.path.startsWith('approval_requests?id=eq.apr_1') && call.init.method === 'PATCH');
+  assert.ok(patchedApproval, 'expected approval PATCH');
+  assert.equal(JSON.parse(patchedApproval.init.body).status, 'approved');
+});
+
+test('client approval action can reject an approval without scheduling a send', async () => {
+  const calls = [];
+  const handler = loadHandler('revenue-recovery-web/api/client-approval-action.js', {
+    cors() {},
+    bad(res, status, error) { return res.status(status).json({ ok: false, error }); },
+    requireClient: async () => ({ submissionId: 'sub_1', user: { id: 'user_1', email: 'client@example.test' } }),
+    rest: async (path, init = {}) => {
+      calls.push({ path, init });
+      if (path.startsWith('submissions?')) return [{ id: 'sub_1', client_id: 'client_1' }];
+      if (path.startsWith('approval_requests?id=eq.apr_2')) return [{ id: 'apr_2', action_id: 'act_2', client_id: 'client_1', status: 'pending' }];
+      if (path.startsWith('recovery_actions?id=eq.act_2')) return [{ id: 'act_2', client_id: 'client_1', status: 'queued_for_approval', channel: 'SMS' }];
+      return [{ ok: true }];
+    },
+  });
+
+  const res = response();
+  await handler({ method: 'POST', body: { action: 'reject', approvalId: 'apr_2', reason: 'Wrong tone' }, headers: {} }, res);
+
+  assert.equal(res.statusCode, 200, JSON.stringify(res.body));
+  assert.equal(res.body.status, 'rejected');
+  assert.equal(res.body.sendQueued, false);
+  const actionPatch = calls.find((call) => call.path.startsWith('recovery_actions?id=eq.act_2') && call.init.method === 'PATCH');
+  assert.equal(JSON.parse(actionPatch.init.body).status, 'rejected');
+});
+
+test('client approval action rejects cross-client approval access', async () => {
+  const handler = loadHandler('revenue-recovery-web/api/client-approval-action.js', {
+    cors() {},
+    bad(res, status, error) { return res.status(status).json({ ok: false, error }); },
+    requireClient: async () => ({ submissionId: 'sub_1', user: { id: 'user_1', email: 'client@example.test' } }),
+    rest: async (path) => {
+      if (path.startsWith('submissions?')) return [{ id: 'sub_1', client_id: 'client_1' }];
+      if (path.startsWith('approval_requests?id=eq.apr_bad')) return [{ id: 'apr_bad', action_id: 'act_bad', client_id: 'other_client', status: 'pending' }];
+      return [];
+    },
+  });
+  const res = response();
+  await handler({ method: 'POST', body: { action: 'approve', approvalId: 'apr_bad' }, headers: {} }, res);
+  assert.equal(res.statusCode, 403);
+});
+
 test('admin automation summary authenticates staff and aggregates client/live/blocker/approval/job-health data safely', async () => {
   const handler = loadHandler('revenue-recovery-web/api/admin-automation-summary.js', {
     cors(res) { res.setHeader('Access-Control-Allow-Origin', 'https://app.example'); },
