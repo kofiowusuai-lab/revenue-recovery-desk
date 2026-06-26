@@ -67,21 +67,24 @@ Build/complete a client-facing portal where the client can:
 - Download weekly reports.
 - Request offboarding.
 
-Required portal pages:
+Required client-facing portal pages:
 
 - `/onboarding`
 - `/dashboard`
 - `/readiness`
-- `/integrations`
-- `/vault`
-- `/oauth-start`
-- `/oauth-callback`
 - `/approvals`
 - `/invoices`
 - `/threads`
 - `/reports`
 - `/settings`
 - `/offboarding`
+
+Connection UX rule:
+
+- Integrations, vault links, OAuth re-connects, API-key status, and provider health should live inside `/settings` as a clear **Connections & Integrations** section/tab.
+- `/vault`, `/oauth-start`, and `/oauth-callback` are allowed to remain as technical one-time secure flow routes because OAuth providers and secure vault drops need redirect/landing URLs.
+- Do not present `/oauth-start` or `/oauth-callback` as normal navigation pages. A client should reach them only by clicking a connect/reconnect button from Settings or by using a secure emailed link.
+- If a standalone `/integrations` route exists, it should redirect to or mirror `/settings#integrations`, not become another place where connection state can drift.
 
 Main dashboard cards should show:
 
@@ -173,9 +176,9 @@ Each table must support client isolation, auditability, and idempotent jobs.
 - `POST /api/onboarding`
 - `GET /api/client/me`
 - `GET /api/client/readiness`
-- `GET /api/client/integrations`
-- `POST /api/client/vault-link`
-- `POST /api/client/oauth-link`
+- `GET /api/client/integrations` — consumed by the Settings → Connections & Integrations UI; not a separate required top-level page.
+- `POST /api/client/vault-link` — creates one-time secure vault links from Settings or onboarding reminders.
+- `POST /api/client/oauth-link` — creates one-time OAuth connect/reconnect links from Settings or onboarding reminders.
 - `GET /api/client/approvals`
 - `POST /api/client/approvals/:id/approve`
 - `POST /api/client/approvals/:id/reject`
@@ -575,6 +578,7 @@ src/lib/notifications/
 src/lib/security/
 src/lib/client-state/
 src/app/client/
+src/app/client/settings/connections/
 src/app/admin/
 src/app/api/client/
 src/app/api/admin/
