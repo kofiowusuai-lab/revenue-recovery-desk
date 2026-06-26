@@ -85,6 +85,13 @@ test('client dashboard has login, forced reset, realtime, approvals, settings, v
   assert.match(h, /account-tools/);
   assert.match(h, /letter-templates/);
   assert.match(h, /Preview \/ edit letter/);
+  assert.match(h, /\/api\/automation-dashboard/);
+  assert.match(h, /automationApprovals/);
+  assert.match(h, /data-approval-id/);
+  assert.match(h, /\/api\/client-approval-action/);
+  assert.match(h, /Approve edited draft/);
+  assert.match(h, /Reject \/ request changes/);
+  assert.match(h, /draftText/);
 });
 
 test('client dashboard settings exposes business information and faux demo data', () => {

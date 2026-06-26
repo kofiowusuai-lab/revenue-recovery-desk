@@ -56,12 +56,26 @@ function simplifyAction(action) {
   };
 }
 
-function simplifyApproval(approval) {
+function simplifyApproval(approval, context = {}) {
+  const actionId = approval.action_id ?? approval.actionId ?? null;
+  const action = context.actionById?.get(actionId) || {};
+  const invoiceId = action.invoice_id ?? action.invoiceId ?? approval.invoice_id ?? approval.invoiceId ?? null;
+  const invoice = context.invoiceById?.get(invoiceId) || {};
   return {
     id: idOf(approval),
-    actionId: approval.action_id ?? approval.actionId ?? null,
+    actionId,
+    invoiceId,
     status: approval.status,
     requestedAt: approval.requested_at ?? approval.requestedAt ?? null,
+    channel: action.channel ?? approval.channel ?? null,
+    kind: action.kind ?? action.type ?? approval.kind ?? approval.type ?? null,
+    customerName: action.customer_name ?? action.customerName ?? invoice.customer_name ?? invoice.customerName ?? null,
+    customerEmail: action.customer_email ?? action.customerEmail ?? invoice.customer_email ?? invoice.customerEmail ?? null,
+    invoiceNumber: action.invoice_number ?? action.invoiceNumber ?? invoice.number ?? invoice.invoice_number ?? invoice.invoiceNumber ?? invoiceId,
+    amountCents: cents(action.amount_cents != null || action.amount != null ? action : invoice),
+    currency: action.currency ?? invoice.currency ?? null,
+    subject: action.subject ?? approval.subject ?? null,
+    draftText: action.draft_text ?? action.draftText ?? action.message ?? action.text ?? null,
   };
 }
 
@@ -83,6 +97,7 @@ export function buildDashboardProjection(state = {}, options = {}) {
   const replies = list(state.replies ?? state.customer_replies);
   const integrations = list(state.integrations ?? state.client_integrations);
   const invoiceById = new Map(invoices.map((invoice) => [invoiceIdOf(invoice), invoice]));
+  const actionById = new Map(actions.map((action) => [idOf(action), action]));
   const paidInvoiceIds = new Set(payments.map((payment) => invoiceIdOf(payment)).filter(Boolean));
 
   const moneyRecoveredCents = payments.reduce((sum, payment) => sum + cents(payment), 0);
@@ -95,7 +110,7 @@ export function buildDashboardProjection(state = {}, options = {}) {
 
   const pendingApprovalItems = approvals
     .filter((approval) => approval.status === 'pending')
-    .map(simplifyApproval)
+    .map((approval) => simplifyApproval(approval, { actionById, invoiceById }))
     .sort((a, b) => String(a.requestedAt || '').localeCompare(String(b.requestedAt || '')));
 
   const attentionReplies = replies
