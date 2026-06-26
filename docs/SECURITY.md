@@ -8,6 +8,14 @@ Reference: `docs/COMPLETION_BRIEF.md` safety and compliance requirements.
 - Every customer-facing send must go through `rrd-recover` gate and `rrd-recover send` / gated executor.
 - Do not print secrets. Do not log secret values. Do not expose OAuth tokens, API keys, vault payloads, or raw credentials.
 - Do not bypass client approval or consent rules.
+- Do not use an LLM where deterministic code is safer for state transitions, provider calls, dispatch decisions, credential handling, or payment reconciliation.
+
+## Agent minimization
+
+- Most roles are background jobs/modules, not independent autonomous agents.
+- The onboarding form and provisioned profile are authoritative for client-submitted information.
+- LLM-assisted roles may draft, classify, summarize, and review, but deterministic handlers must own writes to sensitive state.
+- Any LLM output that could affect customer contact must become a draft/recommendation and pass approval plus `rrd-recover` gate/send.
 
 ## Secrets and credentials
 
