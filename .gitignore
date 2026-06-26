@@ -31,3 +31,6 @@ hosts.yml
 .DS_Store
 .vscode/
 .idea/
+.vercel/
+supabase/.temp/
+**/supabase/.temp/
