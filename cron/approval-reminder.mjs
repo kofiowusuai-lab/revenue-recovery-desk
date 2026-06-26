@@ -11,7 +11,7 @@ export async function runApprovalReminder(opts = {}) {
       const runtime = automationRuntimeFrom(opts);
       const repo = runtime.loadState();
       const pending = repo.actions.filter((action) => action.status === 'queued_for_approval' && !action.approvalBatchId);
-      const approvalTo = opts.approvalTo || opts.env?.RRD_APPROVAL_TO_EMAIL || opts.reviewerId || 'Kofi@traqd.io';
+      const approvalTo = opts.approvalTo || opts.env?.RRD_APPROVAL_TO_EMAIL || opts.reviewerId || null;
       const batch = pending.length ? createApprovalBatch(repo, { now, reviewerId: approvalTo }) : null;
       return {
         dryRun,

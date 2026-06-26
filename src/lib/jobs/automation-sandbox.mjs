@@ -9,7 +9,6 @@ import {
 } from '../recovery/pipeline.mjs';
 import { buildWeeklyRecoveryReport } from '../reports/weekly-report.mjs';
 
-const DEFAULT_APPROVAL_TO = 'Kofi@traqd.io';
 const DEFAULT_NOW = '2026-06-26T12:00:00.000Z';
 
 function emptyState() {
@@ -54,7 +53,7 @@ function summarizeBatch(batch) {
   };
 }
 
-export async function runAutomationSandbox({ approvalTo = DEFAULT_APPROVAL_TO, now = DEFAULT_NOW } = {}) {
+export async function runAutomationSandbox({ approvalTo = null, now = DEFAULT_NOW } = {}) {
   const state = emptyState();
   const syncResult = await syncProviderInvoices(state, [fakeOverdueInvoice()], { now });
   const invoice = syncResult.invoices[0];
@@ -121,7 +120,7 @@ export async function runAutomationSandbox({ approvalTo = DEFAULT_APPROVAL_TO, n
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   const approvalArgIndex = process.argv.indexOf('--approval-to');
-  const approvalTo = approvalArgIndex >= 0 ? process.argv[approvalArgIndex + 1] : process.env.RRD_APPROVAL_TO_EMAIL || DEFAULT_APPROVAL_TO;
+  const approvalTo = approvalArgIndex >= 0 ? process.argv[approvalArgIndex + 1] : process.env.RRD_APPROVAL_TO_EMAIL || null;
   const result = await runAutomationSandbox({ approvalTo });
   console.log(JSON.stringify(result, null, 2));
 }
