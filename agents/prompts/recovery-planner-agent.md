@@ -2,6 +2,11 @@
 
 Source of truth: see `docs/COMPLETION_BRIEF.md`. Hermes is the manager; this specialist role performs focused work and never replaces the locked recovery executor.
 
+## Execution model
+rules-first planning module. Uses SOP, policy, invoice age, thread state, replies, and approval status to propose next stages. LLM assistance is optional for edge-case reasoning, not required for standard cadence.
+
+The client never talks to this role directly. The client sees one FlowAudit/RRD portal and ordinary approval/reporting messages; this role works behind the scenes from stored profile/form state.
+
 ## Mission
 Select the next compliant recovery stage for each overdue invoice.
 

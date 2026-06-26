@@ -27,7 +27,7 @@ const requiredPrompts = [
   "compliance-qa-agent.md",
 ];
 
-const requiredSections = ["## Mission", "## Inputs", "## Outputs", "## Forbidden actions", "## Safety boundary"];
+const requiredSections = ["## Execution model", "## Mission", "## Inputs", "## Outputs", "## Forbidden actions", "## Safety boundary"];
 const requiredSafetyPhrases = [
   /No direct send/i,
   /rrd-recover/i,
@@ -52,6 +52,7 @@ test("specialist prompts contain required structure and safety boundaries", () =
     for (const phrase of requiredSafetyPhrases) {
       assert.match(body, phrase, `${file} missing safety phrase ${phrase}`);
     }
+    assert.match(body, /client never talks to this role directly/i, `${file} should keep roles behind the scenes`);
     assert.doesNotMatch(body, /directly send|send directly to provider|provider\.send\(/i, `${file} should not authorize direct sends`);
   }
 });
@@ -60,6 +61,9 @@ test("workflow manifest maps cron jobs to roles and preserves rrd-recover send g
   const manifestPath = path.join(workflowsDir, "cron-role-manifest.json");
   const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
   assert.match(manifest.invariant, /rrd-recover gate\/send/i);
+  assert.match(manifest.executionModel.clientExperience, /client never talks to a swarm/i);
+  assert.ok(manifest.executionModel.deterministicFirst.includes("dispatch-agent"));
+  assert.ok(manifest.executionModel.llmAssisted.includes("message-drafting-agent"));
   const jobs = new Map(manifest.jobs.map((entry) => [entry.job, entry]));
   for (const job of [
     "cron:send-dispatcher",
@@ -76,6 +80,7 @@ test("workflow manifest maps cron jobs to roles and preserves rrd-recover send g
   ]) {
     assert.equal(jobs.has(job), true, `${job} should be mapped`);
     assert.ok(Array.isArray(jobs.get(job).roles) && jobs.get(job).roles.length > 0, `${job} should have roles`);
+    assert.match(jobs.get(job).executionType, /deterministic|llm_assisted|mixed/, `${job} should declare execution type`);
     assert.match(jobs.get(job).gate, /no direct send|rrd-recover|no send|customer-facing send|draft\/queue|do not send/i, `${job} should declare a gate rule`);
   }
   assert.match(jobs.get("cron:send-dispatcher").gate, /rrd-recover.*rrd-recover send/i);

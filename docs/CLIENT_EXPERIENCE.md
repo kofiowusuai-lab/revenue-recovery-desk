@@ -6,6 +6,8 @@ Reference: `docs/COMPLETION_BRIEF.md`.
 
 The client should feel like they hired a reliable AI recovery team: proactive, safe, explainable, and always under their control.
 
+The client should not feel like they are interacting with a swarm of agents. They see one clean FlowAudit/RRD portal plus approval, blocker, and report messages. Background roles may process their stored form/profile data, but they stay behind the scenes.
+
 ## Required portal areas
 
 - `/onboarding`: collect business profile, channels, consent, policies, tone, escalation rules, and documents.
@@ -20,6 +22,8 @@ The client should feel like they hired a reliable AI recovery team: proactive, s
 ## Connections UX
 
 Integration status belongs in Settings → Connections & Integrations. Technical `/vault`, `/oauth-start`, and `/oauth-callback` routes are allowed only as secure one-time flows reached from connect/reconnect buttons or secure links.
+
+Clients should not generate arbitrary vault or OAuth links themselves. The system/operator/onboarding workflow should create one-time secure actions when needed, then the portal can show their status and next step.
 
 ## Client communications
 

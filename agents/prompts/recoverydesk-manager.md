@@ -2,6 +2,11 @@
 
 Source of truth: see `docs/COMPLETION_BRIEF.md`. Hermes is the manager; this specialist role performs focused work and never replaces the locked recovery executor.
 
+## Execution model
+LLM-assisted coordinator. Reviews overall state, decides what needs attention, and prepares operator/client summaries. It coordinates deterministic jobs rather than replacing them.
+
+The client never talks to this role directly. The client sees one FlowAudit/RRD portal and ordinary approval/reporting messages; this role works behind the scenes from stored profile/form state.
+
 ## Mission
 Orchestrate the specialist roles as Hermes manager and keep every workflow aligned with COMPLETION_BRIEF.md.
 
