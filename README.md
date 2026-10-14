@@ -191,3 +191,17 @@ Secrets belong in the credential vault or deployment secret manager. Keep real `
 - [Completion brief](docs/COMPLETION_BRIEF.md): product roadmap and remaining work. Treat its requested features as roadmap items, not proof that every item is already deployed.
 
 Built by [kofiowusuai-lab](https://github.com/kofiowusuai-lab) · [Kedolabs](https://kedolabs.com/).
+
+## Starter configuration and troubleshooting
+
+The checked-in [environment example](.env.example) names `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `AGENTMAIL_API_KEY`, `STRIPE_SECRET_KEY`, `POSTGRID_API_KEY`, `RRD_APPROVAL_TELEGRAM_BOT_TOKEN` and `RRD_APPROVAL_TELEGRAM_CHAT_ID`. These are names/placeholders only; configure real values in the appropriate local profile or deployment secret store. The offline sandbox needs none of them. Managed modules can additionally use `RRD_OPERATOR_HOME` and `HERMES_PROFILES_DIR`; consult each selected connector's setup guide for its full environment contract.
+
+The offline example prints its synthetic run, dispatch, payment and reporting results to stdout and uses in-memory state. Managed flows create per-client profiles/policies, state and audit records, approval data and channel artifacts according to their configured stores. Do not mistake sandbox stdout for a persisted client deployment.
+
+- Installation/test errors: check the Node version first; the `jsdom` test dependency needs the supported runtime noted above.
+- Missing profiles or commands on a new machine: inspect the selected wrapper for absolute paths, configure supported operator/profile variables, and adapt unsupported wrappers before executing them.
+- Readiness blocked: a stored credential alone is insufficient. Verify the client's scopes, mapped invoice/contact/payment fields, approved sender/channel and recovery policy.
+- An action does not dispatch: inspect approval state, contact restrictions, invoice/thread stop conditions, usage caps and job/audit records before attempting a retry.
+- Portal works but no jobs run: the web deployment and background scheduler are separate; verify the scheduler and persistent state/locking setup.
+
+The existing test commands and sandbox provide local verification. Live invoice synchronisation, message delivery, payment reconciliation and deployment acceptance require separately configured provider accounts; no provider sends or deployments are part of the quick-start example.
