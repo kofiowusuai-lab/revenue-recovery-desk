@@ -205,3 +205,16 @@ The offline example prints its synthetic run, dispatch, payment and reporting re
 - Portal works but no jobs run: the web deployment and background scheduler are separate; verify the scheduler and persistent state/locking setup.
 
 The existing test commands and sandbox provide local verification. Live invoice synchronisation, message delivery, payment reconciliation and deployment acceptance require separately configured provider accounts; no provider sends or deployments are part of the quick-start example.
+
+## Deployment configuration
+
+Set deployment-specific contact details before running live workflows:
+
+- `RRD_SUPPORT_INBOX_ID`: your real AgentMail support inbox.
+- `RRD_PUBLIC_SUPPORT_EMAIL`: your public support address.
+- `RRD_BOOKING_URL`: your booking page.
+- `RRD_WEB_BASE`: your deployed application base URL.
+- `RRD_STRIPE_SECRET_KEY`: the Stripe secret key for billing workflows.
+- `RRD_SHARED_POSTGRID_API_KEY` (preferred) or `RRD_POSTGRID_API_KEY`: the shared postal-service key.
+
+Contact defaults using `example.com` are placeholders. Update existing runtime configuration to the variable names above and update scheduler references to `rrd-due-reminders.mjs` before deploying this revision. Runtime account metadata now uses `rrd_managed_chatgpt` and `Revenue Recovery Desk`.

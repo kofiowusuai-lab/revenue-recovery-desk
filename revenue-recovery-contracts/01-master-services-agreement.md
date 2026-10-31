@@ -155,14 +155,14 @@ The interim contracting basis is founder/sole-trader style: `[FOUNDER LEGAL NAME
 
 ## Signing block
 
-**Provider:** `[FOUNDER LEGAL NAME] trading as Revenue Recovery Desk`  
-Signature: ____________________  
-Name: ____________________  
-Title/capacity: Founder / Sole Trader  
+**Provider:** `[FOUNDER LEGAL NAME] trading as Revenue Recovery Desk`
+Signature: ____________________
+Name: ____________________
+Title/capacity: Founder / Sole Trader
 Date: ____________________
 
-**Client:** `[CLIENT LEGAL ENTITY]`  
-Signature: ____________________  
-Name: ____________________  
-Title/capacity: ____________________  
+**Client:** `[CLIENT LEGAL ENTITY]`
+Signature: ____________________
+Name: ____________________
+Title/capacity: ____________________
 Date: ____________________

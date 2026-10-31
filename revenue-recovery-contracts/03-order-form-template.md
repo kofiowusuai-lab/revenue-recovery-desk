@@ -3,11 +3,11 @@
 **Solicitor-review/commercial template — complete per client**
 
 ## 1. Parties
-**Provider legal entity:** `[FOUNDER LEGAL NAME] trading as Revenue Recovery Desk`  
-**Provider company number:** `Not applicable unless/until incorporated`  
-**Client legal entity:** `[CLIENT LEGAL NAME]`  
-**Client company number:** `[if applicable]`  
-**Primary contact:** `[name, role, email]`  
+**Provider legal entity:** `[FOUNDER LEGAL NAME] trading as Revenue Recovery Desk`
+**Provider company number:** `Not applicable unless/until incorporated`
+**Client legal entity:** `[CLIENT LEGAL NAME]`
+**Client company number:** `[if applicable]`
+**Primary contact:** `[name, role, email]`
 **Billing contact:** `[name, role, email]`
 
 ## 2. Service package
@@ -44,13 +44,13 @@ Access method:
 - Manual upload: `[if applicable]`
 
 ## 4. Commercial terms
-Setup fee: `[£x + VAT]`  
-Retainer: `[£x + VAT every 4 weeks/month]`  
-Usage fees: `[if any]`  
-Physical letter pass-through: `[not enabled / client provides own PostGrid account / Revenue Recovery Desk-incurred postage, print, processing, certified-mail and related letter costs billed monthly in addition to the retainer if Client does not provide its own PostGrid API key, does not opt out, and later approves or authorises letters. Current estimate: $1.219 per letter + 20p per page, plus certified-mail/provider extras]`  
-Success fee: `[if any]`  
-Minimum term: `[e.g. 1 month / 3 months]`  
-Payment method: `[Stripe card / invoice / direct debit]`  
+Setup fee: `[£x + VAT]`
+Retainer: `[£x + VAT every 4 weeks/month]`
+Usage fees: `[if any]`
+Physical letter pass-through: `[not enabled / client provides own PostGrid account / Revenue Recovery Desk-incurred postage, print, processing, certified-mail and related letter costs billed monthly in addition to the retainer if Client does not provide its own PostGrid API key, does not opt out, and later approves or authorises letters. Current estimate: $1.219 per letter + 20p per page, plus certified-mail/provider extras]`
+Success fee: `[if any]`
+Minimum term: `[e.g. 1 month / 3 months]`
+Payment method: `[Stripe card / invoice / direct debit]`
 Payment due: `[on receipt / 7 days / other]`
 
 If success fees apply, define Recovered Revenue:
@@ -64,14 +64,14 @@ Default authority: `[draft only / approval required before every send / pre-appr
 Recommended launch default: **approval required before every outbound recovery send**, then relax only after first successful monitored cycle.
 
 ## 6. Client reporting
-Report recipient: `[email]`  
-Report frequency: `[weekly / per cycle / monthly]`  
+Report recipient: `[email]`
+Report frequency: `[weekly / per cycle / monthly]`
 Report content: `[summary, amounts flagged, messages drafted/sent, approvals needed, resolved invoices]`
 
 ## 7. Cancellation/offboarding
-Notice period: `[e.g. 30 days]`  
-Final fees: `[pro-rata / through notice period / other]`  
-Credential destruction: on verified offboarding.  
+Notice period: `[e.g. 30 days]`
+Final fees: `[pro-rata / through notice period / other]`
+Credential destruction: on verified offboarding.
 Record retention: up to six years for legal/accounting/audit/dispute purposes unless otherwise required.
 
 ## 8. Special terms
@@ -82,5 +82,5 @@ If Letters are selected as an approved channel, record one of the following befo
 ## Signing
 This Order Form incorporates the Master Services Agreement, Data Processing Agreement, and Recovery Authority and Guardrails Schedule.
 
-Provider signature: ____________________ Date: __________  
+Provider signature: ____________________ Date: __________
 Client signature: ____________________ Date: __________
